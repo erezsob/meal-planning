@@ -90,15 +90,17 @@ interface MealSlotHeaderProps {
 }
 
 /**
- * Header for a meal type row/column
+ * Header for a meal type row/column (desktop calendar stub)
  */
 export function MealSlotHeader({ mealType }: MealSlotHeaderProps) {
 	const config = MEAL_TYPE_CONFIG[mealType];
 
 	return (
-		<div className="flex items-center gap-2 py-2">
-			<span className="text-lg">{config.emoji}</span>
-			<span className="font-medium text-gray-300">{config.label}</span>
+		<div className="flex items-center gap-2 w-full justify-between">
+			<span className="text-sm font-medium text-gray-300">{config.label}</span>
+			<span className="text-base leading-none opacity-90" aria-hidden>
+				{config.emoji}
+			</span>
 		</div>
 	);
 }

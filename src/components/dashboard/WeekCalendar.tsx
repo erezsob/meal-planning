@@ -90,10 +90,10 @@ function DesktopCalendar({
 }: CalendarViewProps) {
 	return (
 		<div className="hidden lg:block overflow-x-auto">
-			<div className="min-w-[900px]">
+			<div className="min-w-[920px]">
 				{/* Day headers */}
-				<div className="grid grid-cols-[80px_repeat(7,1fr)] gap-2 mb-2">
-					<div /> {/* Empty corner cell */}
+				<div className="grid grid-cols-[7.5rem_repeat(7,1fr)] gap-2 mb-2">
+					<div className="rounded-lg bg-gray-800/80 border border-gray-700" />
 					{weekDates.map((date, i) => {
 						const dateKey = formatDateKey(date);
 						const isToday = dateKey === today;
@@ -101,7 +101,9 @@ function DesktopCalendar({
 							<div
 								key={dateKey}
 								className={`text-center py-2 rounded-lg ${
-									isToday ? "bg-emerald-600/20 border border-emerald-600" : ""
+									isToday
+										? "bg-emerald-600/20 border border-emerald-600"
+										: "bg-gray-800/50 border border-gray-700"
 								}`}
 							>
 								<div className="font-medium text-gray-300">
@@ -121,9 +123,9 @@ function DesktopCalendar({
 				{MEAL_TYPES.map((mealType) => (
 					<div
 						key={mealType}
-						className="grid grid-cols-[80px_repeat(7,1fr)] gap-2 mb-2"
+						className="grid grid-cols-[7.5rem_repeat(7,1fr)] gap-2 mb-2"
 					>
-						<div className="flex items-center">
+						<div className="flex items-center justify-end shrink-0 min-w-0 rounded-lg bg-gray-800/80 border border-gray-700 px-3 py-2">
 							<MealSlotHeader mealType={mealType} />
 						</div>
 						{weekDates.map((date) => {
