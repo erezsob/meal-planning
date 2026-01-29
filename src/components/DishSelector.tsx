@@ -2,10 +2,16 @@ import { convexQuery } from "@convex-dev/react-query";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { api } from "convex/_generated/api";
 import type { Doc, Id } from "convex/_generated/dataModel";
+import type { FunctionReturnType } from "convex/server";
 import { RefreshCw, Search, UtensilsCrossed, X } from "lucide-react";
 import { Suspense, useEffect, useId, useRef, useState } from "react";
 import { HOUSEHOLD_ID } from "../../lib/constants";
 import { TagList } from "./TagBadge";
+
+/** Leftover source - inferred from Convex query return type */
+type LeftoverSource = FunctionReturnType<
+	typeof api.mealPlans.getLeftoverSources
+>[number];
 
 interface DishSelectorProps {
 	/** Whether the selector modal is open */
@@ -17,11 +23,7 @@ interface DishSelectorProps {
 	/** Called when a custom meal name is entered */
 	onSelectCustom: (name: string) => void;
 	/** Available leftover sources to show */
-	leftoverSources?: Array<{
-		meal: Doc<"mealPlans">;
-		dish: Doc<"dishes">;
-		available: number;
-	}>;
+	leftoverSources?: LeftoverSource[];
 	/** Called when selecting a leftover */
 	onSelectLeftover?: (
 		sourceMealId: Id<"mealPlans">,
