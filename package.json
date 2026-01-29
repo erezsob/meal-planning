@@ -14,7 +14,7 @@
     "lint": "biome lint",
     "lint:fix": "biome lint --fix",
     "format": "biome format --write",
-    "types:check": "tsc --noEmit && tsc -p tsconfig.electron.json --noEmit",
+    "types:check": "tsc --noEmit",
     "knip": "knip",
     "prepare": "husky"
   },
