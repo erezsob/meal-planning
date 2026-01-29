@@ -3,6 +3,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import {
 	createRootRouteWithContext,
 	HeadContent,
+	Link,
 	Outlet,
 	Scripts,
 } from "@tanstack/react-router";
@@ -12,9 +13,23 @@ import { Header } from "../components/Header";
 
 import appCss from "../styles.css?url";
 
+function NotFound() {
+	return (
+		<div className="text-center py-12">
+			<h1 className="text-xl font-semibold text-gray-100">Page not found</h1>
+			<p className="mt-2 text-gray-400">
+				<Link to="/" className="text-emerald-400 hover:underline">
+					Back to planner
+				</Link>
+			</p>
+		</div>
+	);
+}
+
 export const Route = createRootRouteWithContext<{
 	queryClient: QueryClient;
 }>()({
+	notFoundComponent: NotFound,
 	head: () => ({
 		meta: [
 			{
