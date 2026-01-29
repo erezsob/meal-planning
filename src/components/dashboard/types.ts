@@ -21,7 +21,7 @@ export interface SelectedSlot {
 }
 
 /** Selected meal for action menu */
-export interface SelectedMeal extends MealWithDish {
+export interface SelectedMeal extends Pick<MealWithDish, "day" | "mealType"> {
 	/** The meal plan with dish data */
 	meal: MealWithDish;
 }
