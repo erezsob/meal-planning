@@ -293,9 +293,9 @@ function DishList({ searchQuery, onSelect }: DishListProps) {
 							{dish.description}
 						</span>
 					)}
-					{dish.tags.length > 0 && (
+					{(dish.tags?.length ?? 0) > 0 && (
 						<div className="mt-2">
-							<TagList tags={dish.tags} maxVisible={3} />
+							<TagList tags={dish.tags ?? []} maxVisible={3} />
 						</div>
 					)}
 				</button>

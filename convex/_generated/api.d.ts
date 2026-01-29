@@ -11,7 +11,6 @@
 import type * as dishes from "../dishes.js";
 import type * as mealPlans from "../mealPlans.js";
 import type * as shoppingList from "../shoppingList.js";
-import type * as tasks from "../tasks.js";
 
 import type {
   ApiFromModules,
@@ -23,7 +22,6 @@ declare const fullApi: ApiFromModules<{
   dishes: typeof dishes;
   mealPlans: typeof mealPlans;
   shoppingList: typeof shoppingList;
-  tasks: typeof tasks;
 }>;
 
 /**

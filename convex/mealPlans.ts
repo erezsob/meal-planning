@@ -87,7 +87,7 @@ export const getAvailableLeftovers = query({
 			.filter((m) => m.status === "eaten")
 			.reduce((sum, m) => sum + m.servingsUsed, 0);
 
-		return Math.max(0, dish.defaultServings - totalUsed);
+		return Math.max(0, (dish.defaultServings ?? 1) - totalUsed);
 	},
 });
 
@@ -125,7 +125,7 @@ export const getLeftoverSources = query({
 				.filter((m) => m.status === "eaten")
 				.reduce((sum, m) => sum + m.servingsUsed, 0);
 
-			const available = dish.defaultServings - totalUsed;
+			const available = (dish.defaultServings ?? 1) - totalUsed;
 			if (available > 0) {
 				results.push({ meal, dish, available });
 			}
@@ -234,7 +234,7 @@ export const voidLeftovers = mutation({
 			.filter((m) => m.status === "eaten")
 			.reduce((sum, m) => sum + m.servingsUsed, 0);
 
-		const remaining = dish.defaultServings - totalUsed;
+		const remaining = (dish.defaultServings ?? 1) - totalUsed;
 
 		if (remaining <= 0) return null;
 

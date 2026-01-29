@@ -32,7 +32,7 @@ export function AddMealModal({ day, mealType, onClose }: AddMealModalProps) {
 			day,
 			mealType,
 			dishId: dish._id,
-			servingsUsed: dish.defaultServings,
+			servingsUsed: dish.defaultServings ?? 1,
 			isLeftover: false,
 			householdId: HOUSEHOLD_ID,
 		});
@@ -60,7 +60,7 @@ export function AddMealModal({ day, mealType, onClose }: AddMealModalProps) {
 			day,
 			mealType,
 			dishId: dish._id,
-			servingsUsed: Math.min(available, dish.defaultServings),
+			servingsUsed: Math.min(available, dish.defaultServings ?? 1),
 			isLeftover: true,
 			sourceMealId,
 			householdId: HOUSEHOLD_ID,

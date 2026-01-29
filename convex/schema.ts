@@ -4,19 +4,19 @@ import { v } from "convex/values";
 export default defineSchema({
 	dishes: defineTable({
 		name: v.string(),
-		description: v.string(),
+		description: v.optional(v.string()),
 		ingredients: v.array(
 			v.object({
 				name: v.string(),
 				quantity: v.number(),
-				unit: v.string(),
-				category: v.string(),
+				unit: v.optional(v.string()),
+				category: v.optional(v.string()),
 			}),
 		),
-		tags: v.array(v.string()),
-		defaultServings: v.number(),
+		tags: v.optional(v.array(v.string())),
+		defaultServings: v.optional(v.number()),
 		sourceUrl: v.optional(v.string()),
-		householdId: v.string(),
+		householdId: v.optional(v.string()),
 	}).index("by_householdId", ["householdId"]),
 
 	mealPlans: defineTable({

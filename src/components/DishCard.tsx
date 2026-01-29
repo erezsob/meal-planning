@@ -31,14 +31,16 @@ export function DishCard({ dish, onClick }: DishCardProps) {
 				<div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
 					<span className="flex items-center gap-1">
 						<Users size={14} />
-						{dish.defaultServings} servings
+						{dish.defaultServings ?? 1} servings
 					</span>
 					{dish.ingredients.length > 0 && (
 						<span>{dish.ingredients.length} ingredients</span>
 					)}
 				</div>
 
-				{dish.tags.length > 0 && <TagList tags={dish.tags} maxVisible={3} />}
+				{(dish.tags?.length ?? 0) > 0 && (
+					<TagList tags={dish.tags ?? []} maxVisible={3} />
+				)}
 			</button>
 
 			{dish.sourceUrl && (

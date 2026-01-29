@@ -55,10 +55,11 @@ export const getWeekShoppingList = query({
 			const dish = dishMap.get(meal.dishId);
 			if (!dish) continue;
 
-			const servingRatio = meal.servingsUsed / dish.defaultServings;
+			const defaultServings = dish.defaultServings ?? 1;
+			const servingRatio = meal.servingsUsed / defaultServings;
 
 			for (const ing of dish.ingredients) {
-				const key = `${ing.name}|${ing.unit}|${ing.category}`;
+				const key = `${ing.name}|${ing.unit ?? ""}|${ing.category ?? ""}`;
 				const existing = ingredientMap.get(key);
 
 				if (existing) {
@@ -67,8 +68,8 @@ export const getWeekShoppingList = query({
 					ingredientMap.set(key, {
 						name: ing.name,
 						quantity: ing.quantity * servingRatio,
-						unit: ing.unit,
-						category: ing.category,
+						unit: ing.unit ?? "",
+						category: ing.category ?? "",
 					});
 				}
 			}

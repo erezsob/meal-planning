@@ -65,7 +65,7 @@ export const getByTags = query({
 		if (args.tags.length === 0) return dishes;
 
 		return dishes.filter((dish) =>
-			args.tags.some((tag) => dish.tags.includes(tag)),
+			args.tags.some((tag) => (dish.tags ?? []).includes(tag)),
 		);
 	},
 });
