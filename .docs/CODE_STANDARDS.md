@@ -41,7 +41,8 @@
 - Lazy loading for large datasets
 
 ## 7. Maintainability
-- DRY (Don't Repeat Yourself) principle
+- DRY (Don't Repeat Yourself) principle — reuse components, logic and markup.
+- When a pattern repeats (e.g. form fields, validation), extract to a reusable component or function.
 - Clear naming conventions
 - Logical file structure
 - Easy to test and modify
