@@ -4,7 +4,7 @@ This document describes the testing strategy, patterns, and practices for the me
 
 ## Overview
 
-The project WILL use (TBD: add testing library and coverage) **Vitest** as the test runner with **React Testing Library** for component testing. Tests are co-located with source files using the `.test.ts` or `.test.tsx` extension.
+The project uses **Vitest** as the test runner with **React Testing Library** for component testing. Tests are co-located with source files using the `.test.ts` or `.test.tsx` extension.
 
 ## Tech Stack
 
@@ -112,7 +112,7 @@ it("returns meal plans for the week", async () => {
 
 ### Setup Files
 
-- **`src/test/setup.ts`** - Global test setup, configures jest-dom
+- **`src/test/setup.ts`** - Global test setup (jest-dom matchers, RTL cleanup)
 - **`src/test/utils.tsx`** - Test utilities, wrapper components
 - **`src/test/mocks/convex.ts`** - Mock factories for Convex data
 
