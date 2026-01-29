@@ -1,5 +1,5 @@
 import { convexQuery } from "@convex-dev/react-query";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { api } from "convex/_generated/api";
 import type { Doc, Id } from "convex/_generated/dataModel";
 import { useMutation } from "convex/react";
@@ -21,7 +21,7 @@ interface AddMealModalProps {
  */
 export function AddMealModal({ day, mealType, onClose }: AddMealModalProps) {
 	const planMeal = useMutation(api.mealPlans.planMeal);
-	const { data: leftoverSources } = useSuspenseQuery(
+	const { data: leftoverSources = [] } = useQuery(
 		convexQuery(api.mealPlans.getLeftoverSources, {
 			householdId: HOUSEHOLD_ID,
 		}),
