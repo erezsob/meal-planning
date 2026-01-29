@@ -18,9 +18,3 @@ export interface DishFormValues {
 	tags: string[];
 	ingredients: IngredientRow[];
 }
-
-/** Dish being edited (for modal) */
-export type EditingDish = Doc<"dishes"> | null;
-
-/** Id for dishes table */
-export type DishId = Id<"dishes">;

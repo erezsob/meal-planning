@@ -7,11 +7,6 @@ export type MealWithDish = FunctionReturnType<
 	typeof api.mealPlans.getWeek
 >[number];
 
-/** Leftover source - inferred from getLeftoverSources query return type */
-export type LeftoverSource = FunctionReturnType<
-	typeof api.mealPlans.getLeftoverSources
->[number];
-
 /** Selected meal slot for adding/editing */
 export interface SelectedSlot {
 	/** Day in YYYY-MM-DD format */

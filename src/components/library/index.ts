@@ -1,4 +1,3 @@
-export { DishFormModal } from "./DishFormModal";
 export { LibraryView, LibraryViewSkeleton } from "./LibraryView";
 export type {
 	DishFormValues,

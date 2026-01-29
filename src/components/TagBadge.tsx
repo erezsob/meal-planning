@@ -36,7 +36,7 @@ interface TagBadgeProps {
 /**
  * Displays a colored badge for a dish nutrition/dietary tag
  */
-export function TagBadge({ tag, size = "sm" }: TagBadgeProps) {
+function TagBadge({ tag, size = "sm" }: TagBadgeProps) {
 	const colorClasses = TAG_COLORS[tag] ?? "bg-gray-600/20 text-gray-400";
 	const label = TAG_LABELS[tag] ?? tag;
 

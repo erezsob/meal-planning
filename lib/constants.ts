@@ -57,8 +57,6 @@ export const INGREDIENT_UNITS = [
 	"package",
 ] as const;
 
-export type IngredientUnit = (typeof INGREDIENT_UNITS)[number];
-
 /**
  * Meal types
  */
