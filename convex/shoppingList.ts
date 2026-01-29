@@ -20,12 +20,16 @@ export interface GroupedShoppingList {
 export const getWeekShoppingList = query({
 	args: { householdId: v.string(), startDate: v.string() },
 	handler: async (ctx, args) => {
-		const start = new Date(args.startDate);
+		const [y, m, d] = args.startDate.split("-").map(Number);
+		const start = new Date(y, m - 1, d);
 		const dates: string[] = [];
 		for (let i = 0; i < 7; i++) {
-			const d = new Date(start);
-			d.setDate(d.getDate() + i);
-			dates.push(d.toISOString().split("T")[0]);
+			const day = new Date(start);
+			day.setDate(start.getDate() + i);
+			const yy = day.getFullYear();
+			const mm = String(day.getMonth() + 1).padStart(2, "0");
+			const dd = String(day.getDate()).padStart(2, "0");
+			dates.push(`${yy}-${mm}-${dd}`);
 		}
 
 		const meals = await ctx.db

@@ -10,6 +10,8 @@ interface WeekHeaderProps {
 	onNext: () => void;
 	/** Called when jumping to current week */
 	onToday: () => void;
+	/** Optional page title (default: "Weekly Meal Plan") */
+	title?: string;
 }
 
 /**
@@ -20,6 +22,7 @@ export function WeekHeader({
 	onPrevious,
 	onNext,
 	onToday,
+	title = "Weekly Meal Plan",
 }: WeekHeaderProps) {
 	const weekEnd = new Date(weekStart);
 	weekEnd.setDate(weekEnd.getDate() + 6);
@@ -44,7 +47,7 @@ export function WeekHeader({
 
 	return (
 		<header className="flex flex-col sm:flex-row items-center justify-between gap-4">
-			<h1 className="text-2xl font-bold text-gray-100">Weekly Meal Plan</h1>
+			<h1 className="text-2xl font-bold text-gray-100">{title}</h1>
 
 			<div className="flex items-center gap-2">
 				<button

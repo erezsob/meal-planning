@@ -118,3 +118,19 @@ export const getWeekDates = (weekStart: Date): Date[] => {
 		return d;
 	});
 };
+
+/**
+ * localStorage key prefix for shopping list checked state (per week)
+ */
+export const SHOPPING_CHECKED_KEY_PREFIX = "shopping-checked";
+
+/**
+ * Stable key for a shopping list item (for checkbox persistence)
+ */
+export function getShoppingItemKey(item: {
+	name: string;
+	unit: string;
+	category: string;
+}): string {
+	return `${item.name}|${item.unit}|${item.category}`;
+}
