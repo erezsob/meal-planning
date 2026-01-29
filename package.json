@@ -3,7 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite dev --port 3000",
+    "dev": "concurrently \"vite dev --port 3000\" \"convex dev\"",
+    "dev:vite": "vite dev --port 3000",
+    "dev:convex": "convex dev",
     "build": "vite build",
     "preview": "vite preview",
     "deploy": "wrangler deploy",
@@ -51,6 +53,7 @@
     "jsdom": "^27.0.0",
     "typescript": "^5.7.2",
     "vite": "^7.1.7",
+    "concurrently": "^9.1.2",
     "vitest": "^3.0.5",
     "wrangler": "^4.40.3"
   }
