@@ -13,6 +13,8 @@ This is a meal planning app built with React, TypeScript, and Convex. The applic
 - Prefer handling effects on user interaction rather than relying on local state
 - Prioritize semantic HTML and accessible UI
 - When a function has more than 2 arguments, prefer passing an object
+- Split big components into smaller components.
+- `routes/index.tsx` should not have components, it should only have the route component.
 
 ## Architecture Patterns
 - **Backend**: Convex for real-time document store + serverless functions
@@ -30,6 +32,9 @@ This is a meal planning app built with React, TypeScript, and Convex. The applic
 - Update Convex schema → regenerate types with `npx convex dev`
 - New routes → auto-generated in `src/routeTree.gen.ts`
 - Test co-located with source (`.test.ts` / `.test.tsx`)
+- Run `pnpm types:check` and `pnpm lint` before finishing your work.
+- Run `pnpm test` to ensure all tests pass. (TBD: add test coverage)
+- Run `pnpm test:coverage` to ensure all tests are covered. (TBD: add test coverage)
 
 ## Tech Stack
 - TanStack Start (React 19, file-based routing)
