@@ -26,5 +26,12 @@ pnpm types:check || {
   exit 1
 }
 
+# Run Knip
+echo "Checking for unused code with Knip..."
+pnpm knip || {
+  echo "❌ Knip check failed. Please review unused code before pushing."
+  exit 1
+}
+
 echo "✅ All pre-push checks passed!"
 

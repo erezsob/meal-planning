@@ -18,7 +18,7 @@
     "format": "biome format --write",
     "types:check": "tsc --noEmit",
     "knip": "knip",
-    "check": "pnpm lint && pnpm types:check",
+    "check": "pnpm lint && pnpm types:check && pnpm knip",
     "prepare": "husky"
   },
   "dependencies": {
