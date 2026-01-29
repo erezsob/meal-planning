@@ -10,12 +10,14 @@ export type MealWithDish = FunctionReturnType<
 /** All components in a single slot (day + mealType). */
 export type SlotMeals = MealWithDish[];
 
-/** Selected meal slot for adding/editing */
+/** Selected meal slot for adding or editing a component */
 export interface SelectedSlot {
 	/** Day in YYYY-MM-DD format */
 	day: string;
 	/** Type of meal */
 	mealType: MealType;
+	/** When set, modal opens in edit mode for this component */
+	existingMeal?: MealWithDish;
 }
 
 /** Selected meal for action menu */

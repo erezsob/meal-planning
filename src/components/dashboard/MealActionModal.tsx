@@ -1,15 +1,18 @@
 import { api } from "convex/_generated/api";
 import { useMutation } from "convex/react";
-import { Edit, Trash2, X } from "lucide-react";
+import { Edit, Plus, Trash2, X } from "lucide-react";
+import { COMPONENT_ROLE_LABELS, DEFAULT_COMPONENT_ROLE } from "../../../lib/constants";
 import type { MealWithDish } from "./types";
 
 interface MealActionModalProps {
-	/** The meal to show actions for */
+	/** The meal (component) to show actions for */
 	meal: MealWithDish;
 	/** Called when closing the modal */
 	onClose: () => void;
 	/** Called when edit action is triggered */
 	onEdit: () => void;
+	/** Called when "Add another component" is clicked (same slot) */
+	onAddAnother: () => void;
 }
 
 /**
@@ -19,12 +22,15 @@ export function MealActionModal({
 	meal,
 	onClose,
 	onEdit,
+	onAddAnother,
 }: MealActionModalProps) {
 	const eatMeal = useMutation(api.mealPlans.eatMeal);
 	const skipMeal = useMutation(api.mealPlans.skipMeal);
 	const removeMeal = useMutation(api.mealPlans.remove);
 
+	const roleLabel = COMPONENT_ROLE_LABELS[meal.componentRole ?? DEFAULT_COMPONENT_ROLE];
 	const displayName = meal.dish?.name ?? meal.customName ?? "Unknown";
+	const title = `${roleLabel}: ${displayName}`;
 
 	const handleEat = () => {
 		eatMeal({ id: meal._id });
@@ -56,7 +62,7 @@ export function MealActionModal({
 				{/* Header */}
 				<div className="flex items-center justify-between p-4 border-b border-gray-700">
 					<h2 className="text-lg font-semibold text-gray-100 truncate pr-2">
-						{displayName}
+						{title}
 					</h2>
 					<button
 						type="button"
@@ -101,23 +107,33 @@ export function MealActionModal({
 						</div>
 					)}
 
-					<div className="pt-2 border-t border-gray-700 flex gap-2">
+					<div className="pt-2 border-t border-gray-700 space-y-2">
 						<button
 							type="button"
-							onClick={onEdit}
-							className="flex-1 py-2 px-4 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors flex items-center justify-center gap-2"
+							onClick={onAddAnother}
+							className="w-full py-2 px-4 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors flex items-center justify-center gap-2 text-gray-300"
 						>
-							<Edit size={16} />
-							Edit
+							<Plus size={16} />
+							Add another component
 						</button>
-						<button
-							type="button"
-							onClick={handleDelete}
-							className="flex-1 py-2 px-4 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg transition-colors flex items-center justify-center gap-2"
-						>
-							<Trash2 size={16} />
-							Delete
-						</button>
+						<div className="flex gap-2">
+							<button
+								type="button"
+								onClick={onEdit}
+								className="flex-1 py-2 px-4 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors flex items-center justify-center gap-2"
+							>
+								<Edit size={16} />
+								Edit
+							</button>
+							<button
+								type="button"
+								onClick={handleDelete}
+								className="flex-1 py-2 px-4 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg transition-colors flex items-center justify-center gap-2"
+							>
+								<Trash2 size={16} />
+								Delete
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>

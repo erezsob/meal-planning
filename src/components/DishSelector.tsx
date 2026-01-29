@@ -30,6 +30,8 @@ interface DishSelectorProps {
 		dish: Doc<"dishes">,
 		available: number,
 	) => void;
+	/** Optional content rendered below header (e.g. role picker) */
+	headerContent?: React.ReactNode;
 }
 
 /**
@@ -42,6 +44,7 @@ export function DishSelector({
 	onSelectCustom,
 	leftoverSources = [],
 	onSelectLeftover,
+	headerContent,
 }: DishSelectorProps) {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [customName, setCustomName] = useState("");
@@ -84,6 +87,12 @@ export function DishSelector({
 						<X size={20} />
 					</button>
 				</div>
+
+				{headerContent && (
+					<div className="px-4 pt-2 pb-3 border-b border-gray-700">
+						{headerContent}
+					</div>
+				)}
 
 				{/* Tabs */}
 				<div className="flex border-b border-gray-700">

@@ -53,8 +53,10 @@ export function Dashboard() {
 
 			{selectedSlot && (
 				<AddMealModal
+					key={selectedSlot.existingMeal?._id ?? "add"}
 					day={selectedSlot.day}
 					mealType={selectedSlot.mealType}
+					existingMeal={selectedSlot.existingMeal}
 					onClose={() => setSelectedSlot(null)}
 				/>
 			)}
@@ -64,6 +66,14 @@ export function Dashboard() {
 					meal={selectedMeal.meal}
 					onClose={() => setSelectedMeal(null)}
 					onEdit={() => {
+						setSelectedSlot({
+							day: selectedMeal.day,
+							mealType: selectedMeal.mealType,
+							existingMeal: selectedMeal.meal,
+						});
+						setSelectedMeal(null);
+					}}
+					onAddAnother={() => {
 						setSelectedSlot({
 							day: selectedMeal.day,
 							mealType: selectedMeal.mealType,
