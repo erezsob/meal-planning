@@ -50,6 +50,16 @@ export function WeekHeader({
 			<h1 className="text-2xl font-bold text-gray-100">{title}</h1>
 
 			<div className="flex items-center gap-2">
+				{!isCurrentWeek && (
+					<button
+						type="button"
+						onClick={onToday}
+						className="ml-2 px-3 py-1.5 text-sm bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors"
+					>
+						Today
+					</button>
+				)}
+
 				<button
 					type="button"
 					onClick={onPrevious}
@@ -71,16 +81,6 @@ export function WeekHeader({
 				>
 					<ChevronRight size={20} />
 				</button>
-
-				{!isCurrentWeek && (
-					<button
-						type="button"
-						onClick={onToday}
-						className="ml-2 px-3 py-1.5 text-sm bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors"
-					>
-						Today
-					</button>
-				)}
 			</div>
 		</header>
 	);
