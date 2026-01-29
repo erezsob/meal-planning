@@ -15,7 +15,8 @@
     "lint:fix": "biome lint --fix",
     "format": "biome format --write",
     "types:check": "tsc --noEmit && tsc -p tsconfig.electron.json --noEmit",
-    "knip": "knip"
+    "knip": "knip",
+    "prepare": "husky"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.13.8",
@@ -30,6 +31,7 @@
     "@tanstack/react-start": "^1.132.0",
     "@tanstack/router-plugin": "^1.132.0",
     "convex": "^1.31.0",
+    "husky": "^9.1.7",
     "knip": "^5.82.1",
     "lucide-react": "^0.544.0",
     "react": "^19.2.0",

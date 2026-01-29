@@ -1,0 +1,30 @@
+echo "Running pre-push checks..."
+
+# Format code and amend commit if changes were made
+echo "Formatting code with Biome..."
+pnpm format
+
+# Check if there are any formatting changes
+if ! git diff --quiet; then
+	echo "Formatting changes detected. Amending commit..."
+	git add -u
+	git commit --amend --no-edit --no-verify
+	echo "✅ Commit amended with formatting changes"
+fi
+
+# Run linting
+echo "Checking code with Biome..."
+pnpm biome check || {
+  echo "❌ Biome check failed. Please fix linting errors before pushing."
+  exit 1
+}
+
+# Run type checking
+echo "Checking TypeScript types..."
+pnpm types:check || {
+  echo "❌ TypeScript type check failed. Please fix type errors before pushing."
+  exit 1
+}
+
+echo "✅ All pre-push checks passed!"
+
