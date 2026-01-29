@@ -26,6 +26,15 @@ export default defineSchema({
 			v.literal("lunch"),
 			v.literal("dinner"),
 		),
+		componentRole: v.optional(
+			v.union(
+				v.literal("main"),
+				v.literal("side"),
+				v.literal("dessert"),
+				v.literal("drink"),
+				v.literal("other"),
+			),
+		),
 		dishId: v.optional(v.id("dishes")),
 		customName: v.optional(v.string()),
 		servingsUsed: v.number(),

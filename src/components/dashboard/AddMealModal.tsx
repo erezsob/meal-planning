@@ -3,7 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "convex/_generated/api";
 import type { Doc, Id } from "convex/_generated/dataModel";
 import { useMutation } from "convex/react";
-import { HOUSEHOLD_ID, type MealType } from "../../../lib/constants";
+import {
+	DEFAULT_COMPONENT_ROLE,
+	HOUSEHOLD_ID,
+	type MealType,
+} from "../../../lib/constants";
 import { DishSelector } from "../DishSelector";
 
 interface AddMealModalProps {
@@ -31,6 +35,7 @@ export function AddMealModal({ day, mealType, onClose }: AddMealModalProps) {
 		planMeal({
 			day,
 			mealType,
+			componentRole: DEFAULT_COMPONENT_ROLE,
 			dishId: dish._id,
 			servingsUsed: dish.defaultServings ?? 1,
 			isLeftover: false,
@@ -43,6 +48,7 @@ export function AddMealModal({ day, mealType, onClose }: AddMealModalProps) {
 		planMeal({
 			day,
 			mealType,
+			componentRole: DEFAULT_COMPONENT_ROLE,
 			customName: name,
 			servingsUsed: 1,
 			isLeftover: false,
@@ -59,6 +65,7 @@ export function AddMealModal({ day, mealType, onClose }: AddMealModalProps) {
 		planMeal({
 			day,
 			mealType,
+			componentRole: DEFAULT_COMPONENT_ROLE,
 			dishId: dish._id,
 			servingsUsed: Math.min(available, dish.defaultServings ?? 1),
 			isLeftover: true,

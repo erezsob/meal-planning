@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { DEFAULT_COMPONENT_ROLE } from "../lib/constants";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
 
@@ -6,6 +7,14 @@ const mealTypeValidator = v.union(
 	v.literal("breakfast"),
 	v.literal("lunch"),
 	v.literal("dinner"),
+);
+
+const componentRoleValidator = v.union(
+	v.literal("main"),
+	v.literal("side"),
+	v.literal("dessert"),
+	v.literal("drink"),
+	v.literal("other"),
 );
 
 /**
@@ -42,6 +51,7 @@ export const getWeek = query({
 
 		return weekMeals.map((meal) => ({
 			...meal,
+			componentRole: meal.componentRole ?? DEFAULT_COMPONENT_ROLE,
 			dish: meal.dishId ? dishMap.get(meal.dishId) : null,
 		}));
 	},
@@ -57,7 +67,11 @@ export const getOne = query({
 		if (!meal) return null;
 
 		const dish = meal.dishId ? await ctx.db.get(meal.dishId) : null;
-		return { ...meal, dish };
+		return {
+			...meal,
+			componentRole: meal.componentRole ?? DEFAULT_COMPONENT_ROLE,
+			dish,
+		};
 	},
 });
 
@@ -136,12 +150,13 @@ export const getLeftoverSources = query({
 });
 
 /**
- * Plan a new meal (status: planned)
+ * Plan a new meal component (status: planned)
  */
 export const planMeal = mutation({
 	args: {
 		day: v.string(),
 		mealType: mealTypeValidator,
+		componentRole: v.optional(componentRoleValidator),
 		dishId: v.optional(v.id("dishes")),
 		customName: v.optional(v.string()),
 		servingsUsed: v.number(),
@@ -150,9 +165,11 @@ export const planMeal = mutation({
 		householdId: v.string(),
 	},
 	handler: async (ctx, args) => {
+		const componentRole = args.componentRole ?? "main";
 		return await ctx.db.insert("mealPlans", {
 			day: args.day,
 			mealType: args.mealType,
+			componentRole,
 			dishId: args.dishId,
 			customName: args.customName,
 			servingsUsed: args.servingsUsed,
@@ -185,11 +202,12 @@ export const skipMeal = mutation({
 });
 
 /**
- * Update meal plan details
+ * Update meal plan component details
  */
 export const update = mutation({
 	args: {
 		id: v.id("mealPlans"),
+		componentRole: componentRoleValidator,
 		dishId: v.optional(v.id("dishes")),
 		customName: v.optional(v.string()),
 		servingsUsed: v.number(),
@@ -198,6 +216,7 @@ export const update = mutation({
 	},
 	handler: async (ctx, args) => {
 		return await ctx.db.patch(args.id, {
+			componentRole: args.componentRole,
 			dishId: args.dishId,
 			customName: args.customName,
 			servingsUsed: args.servingsUsed,
@@ -241,6 +260,7 @@ export const voidLeftovers = mutation({
 		return await ctx.db.insert("mealPlans", {
 			day: new Date().toISOString().split("T")[0],
 			mealType: "dinner",
+			componentRole: sourceMeal.componentRole ?? DEFAULT_COMPONENT_ROLE,
 			dishId: sourceMeal.dishId,
 			customName: `${dish.name} (voided)`,
 			servingsUsed: remaining,

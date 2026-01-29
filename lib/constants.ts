@@ -65,6 +65,23 @@ export const MEAL_TYPES = ["breakfast", "lunch", "dinner"] as const;
 export type MealType = (typeof MEAL_TYPES)[number];
 
 /**
+ * Meal component roles (main, side, dessert, drink, other).
+ * Multiple components per role per slot allowed (e.g. dinner party).
+ */
+export const MEAL_COMPONENT_ROLES = [
+	"main",
+	"side",
+	"dessert",
+	"drink",
+	"other",
+] as const;
+
+export type MealComponentRole = (typeof MEAL_COMPONENT_ROLES)[number];
+
+/** Default role when adding a component (e.g. for backfill / new plans). */
+export const DEFAULT_COMPONENT_ROLE: MealComponentRole = "main";
+
+/**
  * Meal plan statuses
  */
 export const MEAL_STATUSES = ["planned", "eaten", "skipped"] as const;
