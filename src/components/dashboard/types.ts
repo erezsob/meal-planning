@@ -7,6 +7,9 @@ export type MealWithDish = FunctionReturnType<
 	typeof api.mealPlans.getWeek
 >[number];
 
+/** All components in a single slot (day + mealType). */
+export type SlotMeals = MealWithDish[];
+
 /** Selected meal slot for adding/editing */
 export interface SelectedSlot {
 	/** Day in YYYY-MM-DD format */
