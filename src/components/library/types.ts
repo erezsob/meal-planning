@@ -1,5 +1,3 @@
-import type { Doc, Id } from "convex/_generated/dataModel";
-
 /** Ingredient row for dish form (id used for React key) */
 export interface IngredientRow {
 	id: string;
