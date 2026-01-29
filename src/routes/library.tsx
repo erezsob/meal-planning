@@ -1,17 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Suspense } from "react";
+import { LibraryView, LibraryViewSkeleton } from "../components/library";
 
 export const Route = createFileRoute("/library")({
 	component: LibraryPage,
 });
 
 /**
- * Recipe library page - displays searchable dish collection
+ * Dishes library page
  */
 function LibraryPage() {
 	return (
-		<div className="space-y-6">
-			<h1 className="text-2xl font-bold text-gray-100">Recipe Library</h1>
-			<p className="text-gray-400">Coming in Phase 4...</p>
-		</div>
+		<Suspense fallback={<LibraryViewSkeleton />}>
+			<LibraryView />
+		</Suspense>
 	);
 }
