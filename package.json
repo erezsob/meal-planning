@@ -19,6 +19,8 @@
     "types:check": "tsc --noEmit",
     "knip": "knip",
     "check": "pnpm lint && pnpm types:check && pnpm knip",
+    "seed": "convex run seed:seedDishes",
+    "seed:clear": "convex run seed:clearDishes",
     "prepare": "husky"
   },
   "dependencies": {

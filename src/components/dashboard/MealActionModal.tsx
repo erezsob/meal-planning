@@ -1,7 +1,10 @@
 import { api } from "convex/_generated/api";
 import { useMutation } from "convex/react";
 import { Edit, Plus, Trash2, X } from "lucide-react";
-import { COMPONENT_ROLE_LABELS, DEFAULT_COMPONENT_ROLE } from "../../../lib/constants";
+import {
+	COMPONENT_ROLE_LABELS,
+	DEFAULT_COMPONENT_ROLE,
+} from "../../../lib/constants";
 import type { MealWithDish } from "./types";
 
 interface MealActionModalProps {
@@ -28,7 +31,8 @@ export function MealActionModal({
 	const skipMeal = useMutation(api.mealPlans.skipMeal);
 	const removeMeal = useMutation(api.mealPlans.remove);
 
-	const roleLabel = COMPONENT_ROLE_LABELS[meal.componentRole ?? DEFAULT_COMPONENT_ROLE];
+	const roleLabel =
+		COMPONENT_ROLE_LABELS[meal.componentRole ?? DEFAULT_COMPONENT_ROLE];
 	const displayName = meal.dish?.name ?? meal.customName ?? "Unknown";
 	const title = `${roleLabel}: ${displayName}`;
 
