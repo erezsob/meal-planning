@@ -4,7 +4,7 @@ import { api } from "convex/_generated/api";
 import type { Doc, Id } from "convex/_generated/dataModel";
 import type { FunctionReturnType } from "convex/server";
 import { RefreshCw, Search, UtensilsCrossed } from "lucide-react";
-import { Suspense, useEffect, useId, useRef, useState } from "react";
+import { Suspense, useId, useState } from "react";
 import { HOUSEHOLD_ID } from "../../lib/constants";
 import { TagList } from "./TagBadge";
 import { Button } from "./ui/button";
@@ -214,11 +214,6 @@ function CustomMealForm({
 	onSubmit,
 }: CustomMealFormProps) {
 	const inputId = useId();
-	const inputRef = useRef<HTMLInputElement>(null);
-
-	useEffect(() => {
-		inputRef.current?.focus();
-	}, []);
 
 	return (
 		<form onSubmit={onSubmit} className="space-y-4">
@@ -227,12 +222,12 @@ function CustomMealForm({
 					Meal Name
 				</Label>
 				<Input
-					ref={inputRef}
 					id={inputId}
 					type="text"
 					value={customName}
 					onChange={(e) => setCustomName(e.target.value)}
 					placeholder="e.g., Takeout, Restaurant, etc."
+					autoFocus
 				/>
 			</div>
 			<Button type="submit" disabled={!customName.trim()} className="w-full">
