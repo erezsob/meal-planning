@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import type { DishTag } from "../../lib/constants";
+import { type DishTag, isDishTag } from "../../lib/constants";
 import { Badge } from "./ui/badge";
 
 /** Tag color mappings for visual distinction */
@@ -53,7 +53,7 @@ function TagBadge({ tag, size = "sm" }: TagBadgeProps) {
 }
 
 interface TagListProps {
-	/** Array of tags to display */
+	/** Array of tags to display - invalid tags are filtered out */
 	tags: string[];
 	/** Maximum number of tags to show before truncating */
 	maxVisible?: number;
@@ -65,13 +65,14 @@ interface TagListProps {
  * Displays a list of tag badges with optional truncation
  */
 export function TagList({ tags, maxVisible = 3, size = "sm" }: TagListProps) {
-	const visibleTags = tags.slice(0, maxVisible);
-	const remaining = tags.length - maxVisible;
+	const validTags = tags.filter(isDishTag);
+	const visibleTags = validTags.slice(0, maxVisible);
+	const remaining = validTags.length - maxVisible;
 
 	return (
 		<div className="flex flex-wrap gap-1">
 			{visibleTags.map((tag) => (
-				<TagBadge key={tag} tag={tag as DishTag} size={size} />
+				<TagBadge key={tag} tag={tag} size={size} />
 			))}
 			{remaining > 0 && (
 				<span className="text-xs text-muted-foreground self-center">

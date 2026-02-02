@@ -20,6 +20,11 @@ export const DISH_TAGS = [
 
 export type DishTag = (typeof DISH_TAGS)[number];
 
+/** Type guard for validating DishTag values */
+export function isDishTag(value: string): value is DishTag {
+	return DISH_TAGS.includes(value as DishTag);
+}
+
 /**
  * Ingredient categories for shopping list grouping
  */
