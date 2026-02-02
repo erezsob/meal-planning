@@ -281,3 +281,67 @@ export const remove = mutation({
 		return await ctx.db.delete(args.id);
 	},
 });
+
+/**
+ * Mark all planned meals in a slot as eaten.
+ * Slot = (householdId, day, mealType).
+ * Returns count of updated meals.
+ */
+export const eatSlot = mutation({
+	args: {
+		householdId: v.string(),
+		day: v.string(),
+		mealType: mealTypeValidator,
+	},
+	handler: async (ctx, args) => {
+		const meals = await ctx.db
+			.query("mealPlans")
+			.withIndex("by_householdId", (q) => q.eq("householdId", args.householdId))
+			.collect();
+
+		const slotMeals = meals.filter(
+			(m) =>
+				m.day === args.day &&
+				m.mealType === args.mealType &&
+				m.status === "planned",
+		);
+
+		await Promise.all(
+			slotMeals.map((m) => ctx.db.patch(m._id, { status: "eaten" })),
+		);
+
+		return slotMeals.length;
+	},
+});
+
+/**
+ * Mark all planned meals in a slot as skipped.
+ * Slot = (householdId, day, mealType).
+ * Returns count of updated meals.
+ */
+export const skipSlot = mutation({
+	args: {
+		householdId: v.string(),
+		day: v.string(),
+		mealType: mealTypeValidator,
+	},
+	handler: async (ctx, args) => {
+		const meals = await ctx.db
+			.query("mealPlans")
+			.withIndex("by_householdId", (q) => q.eq("householdId", args.householdId))
+			.collect();
+
+		const slotMeals = meals.filter(
+			(m) =>
+				m.day === args.day &&
+				m.mealType === args.mealType &&
+				m.status === "planned",
+		);
+
+		await Promise.all(
+			slotMeals.map((m) => ctx.db.patch(m._id, { status: "skipped" })),
+		);
+
+		return slotMeals.length;
+	},
+});

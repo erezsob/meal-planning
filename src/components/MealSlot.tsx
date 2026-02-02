@@ -1,6 +1,9 @@
-import { Plus } from "lucide-react";
+import { api } from "convex/_generated/api";
+import { useMutation } from "convex/react";
+import { Check, Plus, SkipForward } from "lucide-react";
 import {
 	COMPONENT_ROLE_LABELS,
+	HOUSEHOLD_ID,
 	MEAL_COMPONENT_ROLES,
 	type MealComponentRole,
 	type MealType,
@@ -51,17 +54,35 @@ interface MealSlotProps {
 	onSelectMeal: (meal: MealWithDish) => void;
 }
 
+/** Check if any meals in the slot are planned. */
+function hasPlannedMeals(meals: MealWithDish[]): boolean {
+	return meals.some((m) => m.status === "planned");
+}
+
 /**
  * A single meal slot in the weekly calendar.
  * Shows empty state with add button, or components grouped by role (main, side, etc.).
  */
 export function MealSlot({
+	day,
 	mealType,
 	meals,
 	onAdd,
 	onSelectMeal,
 }: MealSlotProps) {
 	const config = MEAL_TYPE_CONFIG[mealType];
+	const eatSlot = useMutation(api.mealPlans.eatSlot);
+	const skipSlot = useMutation(api.mealPlans.skipSlot);
+
+	const showSlotActions = hasPlannedMeals(meals);
+
+	const handleEatAll = () => {
+		eatSlot({ householdId: HOUSEHOLD_ID, day, mealType });
+	};
+
+	const handleSkipAll = () => {
+		skipSlot({ householdId: HOUSEHOLD_ID, day, mealType });
+	};
 
 	if (meals.length === 0) {
 		return (
@@ -131,6 +152,29 @@ export function MealSlot({
 					);
 				})}
 			</div>
+			{/* Slot-level actions: show when at least one component is planned */}
+			{showSlotActions && (
+				<div className="flex gap-1 mt-1">
+					<button
+						type="button"
+						onClick={handleEatAll}
+						className="flex-1 flex items-center justify-center gap-1 py-1 rounded bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 text-[10px] font-medium transition-colors"
+						aria-label={`Mark all ${config.label.toLowerCase()} as eaten`}
+					>
+						<Check size={10} />
+						Eat all
+					</button>
+					<button
+						type="button"
+						onClick={handleSkipAll}
+						className="flex-1 flex items-center justify-center gap-1 py-1 rounded bg-amber-600/20 hover:bg-amber-600/30 text-amber-400 text-[10px] font-medium transition-colors"
+						aria-label={`Skip all ${config.label.toLowerCase()}`}
+					>
+						<SkipForward size={10} />
+						Skip all
+					</button>
+				</div>
+			)}
 			<button
 				type="button"
 				onClick={onAdd}
