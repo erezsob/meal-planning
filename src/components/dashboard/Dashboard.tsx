@@ -6,6 +6,7 @@ import {
 } from "../../../lib/constants";
 import { AddMealModal } from "./AddMealModal";
 import { CalendarSkeleton } from "./CalendarSkeleton";
+import { LeftoverTracker } from "./LeftoverTracker";
 import { MealActionModal } from "./MealActionModal";
 import type { SelectedMeal, SelectedSlot } from "./types";
 import { WeekCalendar } from "./WeekCalendar";
@@ -50,6 +51,8 @@ export function Dashboard() {
 					}
 				/>
 			</Suspense>
+
+			<LeftoverTracker />
 
 			{selectedSlot && (
 				<AddMealModal

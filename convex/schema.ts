@@ -38,6 +38,7 @@ export default defineSchema({
 		dishId: v.optional(v.id("dishes")),
 		customName: v.optional(v.string()),
 		servingsUsed: v.number(),
+		servingsMade: v.optional(v.number()),
 		status: v.union(
 			v.literal("planned"),
 			v.literal("eaten"),

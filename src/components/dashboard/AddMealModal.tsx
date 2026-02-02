@@ -47,6 +47,9 @@ export function AddMealModal({
 	const [isLeftover, setIsLeftover] = useState(
 		existingMeal?.isLeftover ?? false,
 	);
+	// Pending fresh dish selection (for servingsMade override step)
+	const [pendingDish, setPendingDish] = useState<Doc<"dishes"> | null>(null);
+	const [servingsMade, setServingsMade] = useState<number>(1);
 
 	const planMeal = useMutation(api.mealPlans.planMeal);
 	const updateMeal = useMutation(api.mealPlans.update);
@@ -57,12 +60,20 @@ export function AddMealModal({
 	);
 
 	const handleSelectDish = (dish: Doc<"dishes">) => {
+		// Show confirmation step for fresh dish (to set servingsMade)
+		setPendingDish(dish);
+		setServingsMade(dish.defaultServings ?? 1);
+	};
+
+	const handleConfirmFreshDish = () => {
+		if (!pendingDish) return;
 		planMeal({
 			day,
 			mealType,
 			componentRole: selectedRole,
-			dishId: dish._id,
-			servingsUsed: dish.defaultServings ?? 1,
+			dishId: pendingDish._id,
+			servingsUsed: servingsMade,
+			servingsMade,
 			isLeftover: false,
 			householdId: HOUSEHOLD_ID,
 		});
@@ -101,6 +112,7 @@ export function AddMealModal({
 	};
 
 	const roleHeadingId = useId();
+	const servingsMadeId = useId();
 	const rolePickerContent = (
 		<fieldset className="border-0 p-0 m-0" aria-labelledby={roleHeadingId}>
 			<legend
@@ -127,6 +139,67 @@ export function AddMealModal({
 			</div>
 		</fieldset>
 	);
+
+	// Show servingsMade confirmation for fresh dishes
+	if (pendingDish) {
+		return (
+			<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+				<div
+					className="absolute inset-0 bg-black/60"
+					onClick={() => setPendingDish(null)}
+					onKeyDown={(e) => e.key === "Escape" && setPendingDish(null)}
+					aria-hidden="true"
+				/>
+				<div className="relative w-full max-w-sm bg-gray-900 rounded-xl border border-gray-700 shadow-2xl p-4">
+					<h2 className="text-lg font-semibold text-gray-100 mb-4">
+						Add {pendingDish.name}
+					</h2>
+
+					<div className="space-y-4">
+						<div>
+							<label
+								htmlFor={servingsMadeId}
+								className="block text-sm font-medium text-gray-300 mb-1"
+							>
+								Servings made
+							</label>
+							<input
+								id={servingsMadeId}
+								type="number"
+								min={1}
+								step={1}
+								value={servingsMade}
+								onChange={(e) =>
+									setServingsMade(Number.parseInt(e.target.value, 10) || 1)
+								}
+								className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:border-emerald-500"
+							/>
+							<p className="mt-1 text-xs text-gray-500">
+								How many servings will this batch yield?
+							</p>
+						</div>
+					</div>
+
+					<div className="flex gap-2 mt-6">
+						<button
+							type="button"
+							onClick={() => setPendingDish(null)}
+							className="flex-1 py-2 px-4 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors text-gray-300"
+						>
+							Back
+						</button>
+						<button
+							type="button"
+							onClick={handleConfirmFreshDish}
+							className="flex-1 py-2 px-4 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-medium transition-colors text-white"
+						>
+							Add
+						</button>
+					</div>
+				</div>
+			</div>
+		);
+	}
 
 	if (existingMeal) {
 		return (

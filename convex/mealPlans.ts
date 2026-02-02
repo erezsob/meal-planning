@@ -101,12 +101,16 @@ export const getAvailableLeftovers = query({
 			.filter((m) => m.status === "eaten")
 			.reduce((sum, m) => sum + m.servingsUsed, 0);
 
-		return Math.max(0, (dish.defaultServings ?? 1) - totalUsed);
+		// Use servingsMade if set, else fall back to dish.defaultServings
+		const totalServings = sourceMeal.servingsMade ?? dish.defaultServings ?? 1;
+
+		return Math.max(0, totalServings - totalUsed);
 	},
 });
 
 /**
  * Get all available leftover sources for a household
+ * Includes both eaten AND planned fresh meals as sources
  */
 export const getLeftoverSources = query({
 	args: { householdId: v.string() },
@@ -116,14 +120,22 @@ export const getLeftoverSources = query({
 			.withIndex("by_householdId", (q) => q.eq("householdId", args.householdId))
 			.collect();
 
+		const today = new Date().toISOString().split("T")[0];
+
+		// Source meals: non-leftover meals that are eaten OR planned (fresh cook events)
 		const sourceMeals = meals.filter(
-			(m) => m.status === "eaten" && !m.isLeftover && m.dishId,
+			(m) =>
+				!m.isLeftover &&
+				m.dishId &&
+				(m.status === "eaten" || m.status === "planned"),
 		);
 
 		const results: Array<{
 			meal: Doc<"mealPlans">;
 			dish: Doc<"dishes">;
 			available: number;
+			scheduledCount: number;
+			isUnscheduled: boolean;
 		}> = [];
 
 		for (const meal of sourceMeals) {
@@ -131,17 +143,34 @@ export const getLeftoverSources = query({
 			const dish = await ctx.db.get(meal.dishId);
 			if (!dish) continue;
 
+			// All meals linked to this source (the source itself + leftovers from it)
 			const relatedMeals = meals.filter(
 				(m) => m._id === meal._id || m.sourceMealId === meal._id,
 			);
 
-			const totalUsed = relatedMeals
+			// Total servings made (use servingsMade if set, else dish default)
+			const totalServings = meal.servingsMade ?? dish.defaultServings ?? 1;
+
+			// Eaten servings
+			const eatenServings = relatedMeals
 				.filter((m) => m.status === "eaten")
 				.reduce((sum, m) => sum + m.servingsUsed, 0);
 
-			const available = (dish.defaultServings ?? 1) - totalUsed;
+			// Planned future servings (leftovers scheduled but not eaten yet)
+			const plannedFutureServings = relatedMeals
+				.filter((m) => m.status === "planned" && m.isLeftover && m.day >= today)
+				.reduce((sum, m) => sum + m.servingsUsed, 0);
+
+			// Count of future scheduled leftover meals
+			const scheduledCount = relatedMeals.filter(
+				(m) => m.status === "planned" && m.isLeftover && m.day >= today,
+			).length;
+
+			const available = totalServings - eatenServings - plannedFutureServings;
+			const isUnscheduled = available > 0 && scheduledCount === 0;
+
 			if (available > 0) {
-				results.push({ meal, dish, available });
+				results.push({ meal, dish, available, scheduledCount, isUnscheduled });
 			}
 		}
 
@@ -160,6 +189,7 @@ export const planMeal = mutation({
 		dishId: v.optional(v.id("dishes")),
 		customName: v.optional(v.string()),
 		servingsUsed: v.number(),
+		servingsMade: v.optional(v.number()),
 		isLeftover: v.boolean(),
 		sourceMealId: v.optional(v.id("mealPlans")),
 		householdId: v.string(),
@@ -173,6 +203,7 @@ export const planMeal = mutation({
 			dishId: args.dishId,
 			customName: args.customName,
 			servingsUsed: args.servingsUsed,
+			servingsMade: args.servingsMade,
 			status: "planned",
 			isLeftover: args.isLeftover,
 			sourceMealId: args.sourceMealId,
@@ -253,7 +284,9 @@ export const voidLeftovers = mutation({
 			.filter((m) => m.status === "eaten")
 			.reduce((sum, m) => sum + m.servingsUsed, 0);
 
-		const remaining = (dish.defaultServings ?? 1) - totalUsed;
+		// Use servingsMade if set, else fall back to dish.defaultServings
+		const totalServings = sourceMeal.servingsMade ?? dish.defaultServings ?? 1;
+		const remaining = totalServings - totalUsed;
 
 		if (remaining <= 0) return null;
 

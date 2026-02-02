@@ -160,7 +160,6 @@ export function DishSelector({
 									searchQuery={searchQuery}
 									onSelect={(dish) => {
 										onSelectDish(dish);
-										onClose();
 									}}
 								/>
 							</Suspense>
