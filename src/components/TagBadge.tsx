@@ -1,4 +1,6 @@
+import { cn } from "@/lib/utils";
 import type { DishTag } from "../../lib/constants";
+import { Badge } from "./ui/badge";
 
 /** Tag color mappings for visual distinction */
 const TAG_COLORS: Record<DishTag, string> = {
@@ -40,15 +42,13 @@ function TagBadge({ tag, size = "sm" }: TagBadgeProps) {
 	const colorClasses = TAG_COLORS[tag] ?? "bg-gray-600/20 text-gray-400";
 	const label = TAG_LABELS[tag] ?? tag;
 
-	const sizeClasses =
-		size === "sm" ? "px-2 py-0.5 text-xs" : "px-3 py-1 text-sm";
-
 	return (
-		<span
-			className={`inline-flex items-center rounded-full border font-medium ${colorClasses} ${sizeClasses}`}
+		<Badge
+			variant="outline"
+			className={cn(colorClasses, size === "md" && "px-3 py-1 text-sm")}
 		>
 			{label}
-		</span>
+		</Badge>
 	);
 }
 
@@ -74,7 +74,7 @@ export function TagList({ tags, maxVisible = 3, size = "sm" }: TagListProps) {
 				<TagBadge key={tag} tag={tag as DishTag} size={size} />
 			))}
 			{remaining > 0 && (
-				<span className="text-xs text-gray-500 self-center">
+				<span className="text-xs text-muted-foreground self-center">
 					+{remaining} more
 				</span>
 			)}

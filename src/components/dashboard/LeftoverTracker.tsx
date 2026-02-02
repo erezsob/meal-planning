@@ -14,6 +14,18 @@ import {
 	MEAL_TYPES,
 	type MealType,
 } from "../../../lib/constants";
+import { Button } from "../ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "../ui/dialog";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Skeleton } from "../ui/skeleton";
 
 /** Leftover source from getLeftoverSources query */
 type LeftoverSource = FunctionReturnType<
@@ -43,8 +55,8 @@ export function LeftoverTracker() {
 
 	if (leftovers.length === 0) {
 		return (
-			<div className="p-4 bg-gray-900/50 rounded-xl border border-gray-800">
-				<p className="text-sm text-gray-500 text-center">
+			<div className="p-4 bg-card/50 rounded-xl border border-border">
+				<p className="text-sm text-muted-foreground text-center">
 					No leftovers available
 				</p>
 			</div>
@@ -53,8 +65,10 @@ export function LeftoverTracker() {
 
 	return (
 		<>
-			<div className="p-4 bg-gray-900/50 rounded-xl border border-gray-800">
-				<h3 className="text-sm font-medium text-gray-400 mb-3">Leftovers</h3>
+			<div className="p-4 bg-card/50 rounded-xl border border-border">
+				<h3 className="text-sm font-medium text-muted-foreground mb-3">
+					Leftovers
+				</h3>
 				<div className="flex gap-3 overflow-x-auto pb-1">
 					{leftovers.map((leftover) => (
 						<LeftoverCard
@@ -100,10 +114,10 @@ function LeftoverCard({ leftover, onSchedule }: LeftoverCardProps) {
 		<button
 			type="button"
 			onClick={onSchedule}
-			className="flex-shrink-0 w-40 p-3 bg-gray-800 hover:bg-gray-750 border border-gray-700 rounded-lg text-left transition-colors group"
+			className="flex-shrink-0 w-40 p-3 bg-card hover:bg-accent border rounded-lg text-left transition-colors group"
 		>
 			<div className="flex items-start justify-between mb-1">
-				<span className="font-medium text-gray-100 text-sm line-clamp-1 flex-1">
+				<span className="font-medium text-foreground text-sm line-clamp-1 flex-1">
 					{dish.name}
 				</span>
 				{isUnscheduled && (
@@ -116,14 +130,15 @@ function LeftoverCard({ leftover, onSchedule }: LeftoverCardProps) {
 			</div>
 			<p className="text-xs text-teal-400 mb-2">{available} left</p>
 			<div className="flex justify-end">
-				<button
-					type="button"
+				<Button
+					variant="ghost"
+					size="icon-xs"
 					onClick={handleVoid}
-					className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-gray-700 rounded transition-colors opacity-0 group-hover:opacity-100"
+					className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100"
 					aria-label="Void leftovers"
 				>
 					<Trash2 size={14} />
-				</button>
+				</Button>
 			</div>
 		</button>
 	);
@@ -182,32 +197,22 @@ function ScheduleLeftoverModal({
 	};
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-			<div
-				className="absolute inset-0 bg-black/60"
-				onClick={onClose}
-				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				aria-hidden="true"
-			/>
-			<div className="relative w-full max-w-sm bg-gray-900 rounded-xl border border-gray-700 shadow-2xl p-4">
-				<div className="flex items-center gap-2 mb-4">
-					<Calendar size={20} className="text-teal-400" />
-					<h2 className="text-lg font-semibold text-gray-100">
+		<Dialog open onOpenChange={(open) => !open && onClose()}>
+			<DialogContent className="sm:max-w-sm">
+				<DialogHeader>
+					<DialogTitle className="flex items-center gap-2">
+						<Calendar size={20} className="text-teal-400" />
 						Schedule {dish.name}
-					</h2>
-				</div>
-
-				<p className="text-sm text-gray-400 mb-4">{available} servings left</p>
+					</DialogTitle>
+					<DialogDescription>{available} servings left</DialogDescription>
+				</DialogHeader>
 
 				<div className="space-y-4">
 					{/* Day picker */}
 					<div>
-						<label
-							htmlFor={dayId}
-							className="block text-sm font-medium text-gray-300 mb-2"
-						>
+						<Label htmlFor={dayId} className="mb-2">
 							Day
-						</label>
+						</Label>
 						<div className="grid grid-cols-7 gap-1">
 							{weekDates.map((date) => {
 								const key = formatDateKey(date);
@@ -217,19 +222,17 @@ function ScheduleLeftoverModal({
 								});
 								const dayNum = date.getDate();
 								return (
-									<button
+									<Button
 										key={key}
 										type="button"
+										variant={isSelected ? "default" : "secondary"}
+										size="sm"
 										onClick={() => setSelectedDay(key)}
-										className={`p-2 rounded-lg text-center transition-colors ${
-											isSelected
-												? "bg-emerald-600 text-white"
-												: "bg-gray-800 text-gray-300 hover:bg-gray-700"
-										}`}
+										className="flex flex-col h-auto py-1"
 									>
 										<span className="block text-xs">{dayName}</span>
 										<span className="block text-sm font-medium">{dayNum}</span>
-									</button>
+									</Button>
 								);
 							})}
 						</div>
@@ -237,39 +240,30 @@ function ScheduleLeftoverModal({
 
 					{/* Meal type */}
 					<div>
-						<label
-							htmlFor={mealTypeId}
-							className="block text-sm font-medium text-gray-300 mb-2"
-						>
+						<Label htmlFor={mealTypeId} className="mb-2">
 							Meal
-						</label>
+						</Label>
 						<div className="flex gap-2">
 							{MEAL_TYPES.map((type) => (
-								<button
+								<Button
 									key={type}
 									type="button"
+									variant={selectedMealType === type ? "default" : "secondary"}
 									onClick={() => setSelectedMealType(type)}
-									className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${
-										selectedMealType === type
-											? "bg-emerald-600 text-white"
-											: "bg-gray-800 text-gray-300 hover:bg-gray-700"
-									}`}
+									className="flex-1 capitalize"
 								>
 									{type}
-								</button>
+								</Button>
 							))}
 						</div>
 					</div>
 
 					{/* Servings */}
 					<div>
-						<label
-							htmlFor={servingsId}
-							className="block text-sm font-medium text-gray-300 mb-1"
-						>
+						<Label htmlFor={servingsId} className="mb-1">
 							Servings
-						</label>
-						<input
+						</Label>
+						<Input
 							id={servingsId}
 							type="number"
 							min={1}
@@ -284,29 +278,18 @@ function ScheduleLeftoverModal({
 									),
 								)
 							}
-							className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:border-emerald-500"
 						/>
 					</div>
 				</div>
 
-				<div className="flex gap-2 mt-6">
-					<button
-						type="button"
-						onClick={onClose}
-						className="flex-1 py-2 px-4 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors text-gray-300"
-					>
+				<DialogFooter>
+					<Button variant="secondary" onClick={onClose}>
 						Cancel
-					</button>
-					<button
-						type="button"
-						onClick={handleSchedule}
-						className="flex-1 py-2 px-4 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-medium transition-colors text-white"
-					>
-						Schedule
-					</button>
-				</div>
-			</div>
-		</div>
+					</Button>
+					<Button onClick={handleSchedule}>Schedule</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
 	);
 }
 
@@ -315,13 +298,13 @@ function ScheduleLeftoverModal({
  */
 function LeftoverTrackerSkeleton() {
 	return (
-		<div className="p-4 bg-gray-900/50 rounded-xl border border-gray-800">
-			<div className="h-4 w-16 bg-gray-700 rounded mb-3 animate-pulse" />
+		<div className="p-4 bg-card/50 rounded-xl border border-border">
+			<Skeleton className="h-4 w-16 mb-3" />
 			<div className="flex gap-3">
 				{Array.from({ length: 3 }).map(() => (
-					<div
+					<Skeleton
 						key={crypto.randomUUID()}
-						className="flex-shrink-0 w-40 h-20 bg-gray-800 border border-gray-700 rounded-lg animate-pulse"
+						className="flex-shrink-0 w-40 h-20 rounded-lg"
 					/>
 				))}
 			</div>

@@ -1,7 +1,7 @@
 import { api } from "convex/_generated/api";
 import type { Doc } from "convex/_generated/dataModel";
 import { useMutation } from "convex/react";
-import { Plus, Trash2, X } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { useCallback, useId, useRef, useState } from "react";
 import {
 	DISH_TAGS,
@@ -11,6 +11,17 @@ import {
 	INGREDIENT_UNITS,
 	type IngredientCategory,
 } from "../../../lib/constants";
+import { Button } from "../ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "../ui/dialog";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Textarea } from "../ui/textarea";
 import type { DishFormValues, IngredientRow } from "./types";
 
 function newIngredient(overrides: Partial<IngredientRow> = {}): IngredientRow {
@@ -80,7 +91,6 @@ export function DishFormModal({
 	const updateDish = useMutation(api.dishes.update);
 	const removeDish = useMutation(api.dishes.remove);
 	const nameInputRef = useRef<HTMLInputElement>(null);
-	const titleId = useId();
 	const nameId = useId();
 	const descId = useId();
 	const urlId = useId();
@@ -173,97 +183,63 @@ export function DishFormModal({
 	};
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-			<div
-				className="absolute inset-0 bg-black/60"
-				onClick={onClose}
-				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				aria-hidden="true"
-			/>
-			<div
-				className="relative w-full max-w-2xl max-h-[90vh] flex flex-col bg-gray-900 rounded-xl border border-gray-700 shadow-2xl"
-				role="dialog"
-				aria-labelledby={titleId}
-			>
-				<div className="flex items-center justify-between p-4 border-b border-gray-700 shrink-0">
-					<h2 id={titleId} className="text-lg font-semibold text-gray-100">
-						{isEdit ? "Edit dish" : "Add dish"}
-					</h2>
-					<button
-						type="button"
-						onClick={onClose}
-						className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
-						aria-label="Close"
-					>
-						<X size={20} />
-					</button>
-				</div>
+		<Dialog open onOpenChange={(open) => !open && onClose()}>
+			<DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col gap-0 p-0">
+				<DialogHeader className="p-4 pb-0">
+					<DialogTitle>{isEdit ? "Edit dish" : "Add dish"}</DialogTitle>
+				</DialogHeader>
 
 				<form
 					onSubmit={handleSubmit}
 					className="flex-1 overflow-y-auto p-4 space-y-4"
 				>
 					<div>
-						<label
-							htmlFor={nameId}
-							className="block text-sm font-medium text-gray-300 mb-1"
-						>
+						<Label htmlFor={nameId} className="mb-1">
 							Name *
-						</label>
-						<input
+						</Label>
+						<Input
 							ref={nameInputRef}
 							id={nameId}
 							type="text"
 							value={values.name}
 							onChange={(e) => update("name", e.target.value)}
 							placeholder="e.g. Chicken stir-fry"
-							className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:border-emerald-500"
 							required
 						/>
 					</div>
 
 					<div>
-						<label
-							htmlFor={descId}
-							className="block text-sm font-medium text-gray-300 mb-1"
-						>
+						<Label htmlFor={descId} className="mb-1">
 							Description
-						</label>
-						<textarea
+						</Label>
+						<Textarea
 							id={descId}
 							value={values.description}
 							onChange={(e) => update("description", e.target.value)}
 							placeholder="Short description (optional)"
 							rows={2}
-							className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:border-emerald-500 resize-none"
+							className="resize-none"
 						/>
 					</div>
 
 					<div>
-						<label
-							htmlFor={urlId}
-							className="block text-sm font-medium text-gray-300 mb-1"
-						>
+						<Label htmlFor={urlId} className="mb-1">
 							Recipe URL
-						</label>
-						<input
+						</Label>
+						<Input
 							id={urlId}
 							type="url"
 							value={values.sourceUrl}
 							onChange={(e) => update("sourceUrl", e.target.value)}
 							placeholder="https://..."
-							className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:border-emerald-500"
 						/>
 					</div>
 
 					<div>
-						<label
-							htmlFor={servingsId}
-							className="block text-sm font-medium text-gray-300 mb-1"
-						>
+						<Label htmlFor={servingsId} className="mb-1">
 							Default servings *
-						</label>
-						<input
+						</Label>
+						<Input
 							id={servingsId}
 							type="number"
 							min={1}
@@ -274,47 +250,51 @@ export function DishFormModal({
 									Math.max(1, Number(e.target.value) || 1),
 								)
 							}
-							className="w-24 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:border-emerald-500"
+							className="w-24"
 						/>
 					</div>
 
 					<div>
-						<span className="block text-sm font-medium text-gray-300 mb-2">
+						<span className="block text-sm font-medium text-muted-foreground mb-2">
 							Tags
 						</span>
 						<div className="flex flex-wrap gap-2">
 							{(DISH_TAGS as readonly string[]).map((tag) => (
-								<button
+								<Button
 									key={tag}
 									type="button"
+									variant={values.tags.includes(tag) ? "default" : "outline"}
+									size="sm"
 									onClick={() => toggleTag(tag as DishTag)}
-									className={`px-3 py-1 rounded-full text-sm font-medium border transition-colors ${
+									className={
 										values.tags.includes(tag)
-											? "bg-emerald-600/30 text-emerald-400 border-emerald-500"
-											: "bg-gray-800 text-gray-400 border-gray-600 hover:border-gray-500"
-									}`}
+											? "bg-primary/30 text-primary border-primary"
+											: ""
+									}
 								>
 									{tag
 										.replace(/-/g, " ")
 										.replace(/\b\w/g, (c) => c.toUpperCase())}
-								</button>
+								</Button>
 							))}
 						</div>
 					</div>
 
 					<div>
 						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm font-medium text-gray-300">
+							<span className="text-sm font-medium text-muted-foreground">
 								Ingredients *
 							</span>
-							<button
+							<Button
 								type="button"
+								variant="link"
+								size="sm"
 								onClick={addIngredient}
-								className="flex items-center gap-1 text-sm text-emerald-400 hover:text-emerald-300"
+								className="text-primary"
 							>
 								<Plus size={14} />
 								Add row
-							</button>
+							</Button>
 						</div>
 						<div className="space-y-2">
 							{values.ingredients.map((row, index) => (
@@ -322,16 +302,16 @@ export function DishFormModal({
 									key={row.id}
 									className="grid grid-cols-[1fr_80px_100px_100px_auto] gap-2 items-center"
 								>
-									<input
+									<Input
 										type="text"
 										value={row.name}
 										onChange={(e) =>
 											setIngredient(index, { name: e.target.value })
 										}
 										placeholder="Ingredient"
-										className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:border-emerald-500 text-sm"
+										className="text-sm"
 									/>
-									<input
+									<Input
 										type="number"
 										min={0}
 										step="any"
@@ -341,14 +321,14 @@ export function DishFormModal({
 												quantity: Number(e.target.value) || 0,
 											})
 										}
-										className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:border-emerald-500 text-sm"
+										className="text-sm"
 									/>
 									<select
 										value={row.unit}
 										onChange={(e) =>
 											setIngredient(index, { unit: e.target.value })
 										}
-										className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:border-emerald-500 text-sm"
+										className="h-9 px-3 py-2 bg-input/30 border border-input rounded-md text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
 									>
 										{(INGREDIENT_UNITS as readonly string[]).map((u) => (
 											<option key={u} value={u}>
@@ -363,7 +343,7 @@ export function DishFormModal({
 												category: e.target.value as IngredientCategory,
 											})
 										}
-										className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:border-emerald-500 text-sm"
+										className="h-9 px-3 py-2 bg-input/30 border border-input rounded-md text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
 									>
 										{(INGREDIENT_CATEGORIES as readonly string[]).map((c) => (
 											<option key={c} value={c}>
@@ -371,51 +351,46 @@ export function DishFormModal({
 											</option>
 										))}
 									</select>
-									<button
+									<Button
 										type="button"
+										variant="ghost"
+										size="icon-sm"
 										onClick={() => removeIngredient(index)}
 										disabled={values.ingredients.length <= 1}
-										className="p-2 text-gray-400 hover:text-red-400 disabled:opacity-40 disabled:cursor-not-allowed"
+										className="text-muted-foreground hover:text-destructive"
 										aria-label="Remove ingredient"
 									>
 										<Trash2 size={16} />
-									</button>
+									</Button>
 								</div>
 							))}
 						</div>
 					</div>
 
-					<div className="flex items-center justify-between pt-4 border-t border-gray-700">
+					<DialogFooter className="flex-row justify-between pt-4 border-t">
 						<div>
 							{isEdit && (
-								<button
+								<Button
 									type="button"
+									variant="link"
 									onClick={handleDelete}
-									className="text-sm text-red-400 hover:text-red-300"
+									className="text-destructive hover:text-destructive/80 px-0"
 								>
 									Delete dish
-								</button>
+								</Button>
 							)}
 						</div>
 						<div className="flex gap-2">
-							<button
-								type="button"
-								onClick={onClose}
-								className="px-4 py-2 text-gray-300 hover:bg-gray-800 rounded-lg"
-							>
+							<Button type="button" variant="ghost" onClick={onClose}>
 								Cancel
-							</button>
-							<button
-								type="submit"
-								disabled={!canSubmit}
-								className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-700 disabled:text-gray-500 rounded-lg font-medium transition-colors"
-							>
+							</Button>
+							<Button type="submit" disabled={!canSubmit}>
 								{isEdit ? "Save" : "Add dish"}
-							</button>
+							</Button>
 						</div>
-					</div>
+					</DialogFooter>
 				</form>
-			</div>
-		</div>
+			</DialogContent>
+		</Dialog>
 	);
 }

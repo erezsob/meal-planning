@@ -1,3 +1,5 @@
+import { Skeleton } from "../ui/skeleton";
+
 /** Skeleton day IDs for stable keys */
 const SKELETON_DAYS = [
 	"skeleton-mon",
@@ -25,15 +27,12 @@ function MobileCalendarSkeleton() {
 			{SKELETON_DAYS.map((dayId) => (
 				<div
 					key={dayId}
-					className="rounded-xl p-4 bg-gray-900 border border-gray-800 animate-pulse"
+					className="rounded-xl p-4 bg-card border border-border"
 				>
-					<div className="h-6 bg-gray-800 rounded w-24 mb-3" />
+					<Skeleton className="h-6 w-24 mb-3" />
 					<div className="space-y-2">
 						{SKELETON_MEALS.map((mealId) => (
-							<div
-								key={`${dayId}-${mealId}`}
-								className="h-20 bg-gray-800 rounded"
-							/>
+							<Skeleton key={`${dayId}-${mealId}`} className="h-20" />
 						))}
 					</div>
 				</div>
@@ -50,17 +49,17 @@ function TabletCalendarSkeleton() {
 		<div className="hidden md:block lg:hidden">
 			<div className="grid grid-cols-7 gap-1">
 				{SKELETON_DAYS.map((dayId) => (
-					<div key={dayId} className="rounded-lg p-2 bg-gray-900 animate-pulse">
-						{/* Match TabletCalendar day header: text-center mb-2 pb-2 border-b */}
-						<div className="min-h-[52px] flex flex-col justify-center text-center mb-2 pb-2 border-b border-gray-800">
-							<div className="h-4 bg-gray-800 rounded w-8 mx-auto mb-1.5" />
-							<div className="h-3 bg-gray-800 rounded w-6 mx-auto" />
+					<div key={dayId} className="rounded-lg p-2 bg-card">
+						{/* Match TabletCalendar day header */}
+						<div className="min-h-[52px] flex flex-col justify-center text-center mb-2 pb-2 border-b border-border">
+							<Skeleton className="h-4 w-8 mx-auto mb-1.5" />
+							<Skeleton className="h-3 w-6 mx-auto" />
 						</div>
 						<div className="space-y-1">
 							{SKELETON_MEALS.map((mealId) => (
-								<div
+								<Skeleton
 									key={`${dayId}-${mealId}`}
-									className="min-h-[80px] bg-gray-800 rounded-lg border-2 border-dashed border-gray-700"
+									className="min-h-[80px] rounded-lg border-2 border-dashed border-border"
 								/>
 							))}
 						</div>
@@ -79,12 +78,9 @@ function DesktopCalendarSkeleton() {
 		<div className="hidden lg:block overflow-x-auto">
 			<div className="min-w-[920px]">
 				<div className="grid grid-cols-[7.5rem_repeat(7,1fr)] gap-2 mb-2">
-					<div className="rounded-lg bg-gray-800/80 border border-gray-700 animate-pulse h-14" />
+					<Skeleton className="h-14 rounded-lg" />
 					{SKELETON_DAYS.map((dayId) => (
-						<div
-							key={dayId}
-							className="rounded-lg bg-gray-800/50 border border-gray-700 animate-pulse h-14"
-						/>
+						<Skeleton key={dayId} className="h-14 rounded-lg" />
 					))}
 				</div>
 				{SKELETON_MEALS.map((mealId) => (
@@ -92,11 +88,11 @@ function DesktopCalendarSkeleton() {
 						key={mealId}
 						className="grid grid-cols-[7.5rem_repeat(7,1fr)] gap-2 mb-2"
 					>
-						<div className="rounded-lg bg-gray-800/80 border border-gray-700 animate-pulse min-h-[80px]" />
+						<Skeleton className="min-h-[80px] rounded-lg" />
 						{SKELETON_DAYS.map((dayId) => (
-							<div
+							<Skeleton
 								key={`${dayId}-${mealId}`}
-								className="rounded-lg bg-gray-800/60 border border-gray-700 animate-pulse min-h-[80px]"
+								className="min-h-[80px] rounded-lg"
 							/>
 						))}
 					</div>

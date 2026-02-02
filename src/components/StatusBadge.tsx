@@ -1,5 +1,6 @@
 import { Check, Clock, X } from "lucide-react";
 import type { MealStatus } from "../../lib/constants";
+import { Badge } from "./ui/badge";
 
 /** Status color and icon mappings */
 const STATUS_CONFIG: Record<
@@ -35,11 +36,9 @@ export function StatusBadge({ status }: StatusBadgeProps) {
 	const config = STATUS_CONFIG[status];
 
 	return (
-		<span
-			className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium border ${config.color}`}
-		>
+		<Badge variant="outline" className={config.color}>
 			{config.icon}
 			{config.label}
-		</span>
+		</Badge>
 	);
 }

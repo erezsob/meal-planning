@@ -13,6 +13,17 @@ import {
 	type MealType,
 } from "../../../lib/constants";
 import { DishSelector } from "../DishSelector";
+import { Button } from "../ui/button";
+import { Checkbox } from "../ui/checkbox";
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "../ui/dialog";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 import type { MealWithDish } from "./types";
 
 interface AddMealModalProps {
@@ -117,24 +128,21 @@ export function AddMealModal({
 		<fieldset className="border-0 p-0 m-0" aria-labelledby={roleHeadingId}>
 			<legend
 				id={roleHeadingId}
-				className="block text-sm font-medium text-gray-300 mb-2"
+				className="block text-sm font-medium text-muted-foreground mb-2"
 			>
 				Component type
 			</legend>
 			<div className="flex flex-wrap gap-2">
 				{MEAL_COMPONENT_ROLES.map((role) => (
-					<button
+					<Button
 						key={role}
 						type="button"
+						variant={selectedRole === role ? "default" : "secondary"}
+						size="sm"
 						onClick={() => setSelectedRole(role)}
-						className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-							selectedRole === role
-								? "bg-emerald-600 text-white"
-								: "bg-gray-700 text-gray-300 hover:bg-gray-600"
-						}`}
 					>
 						{COMPONENT_ROLE_LABELS[role]}
-					</button>
+					</Button>
 				))}
 			</div>
 		</fieldset>
@@ -143,27 +151,18 @@ export function AddMealModal({
 	// Show servingsMade confirmation for fresh dishes
 	if (pendingDish) {
 		return (
-			<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-				<div
-					className="absolute inset-0 bg-black/60"
-					onClick={() => setPendingDish(null)}
-					onKeyDown={(e) => e.key === "Escape" && setPendingDish(null)}
-					aria-hidden="true"
-				/>
-				<div className="relative w-full max-w-sm bg-gray-900 rounded-xl border border-gray-700 shadow-2xl p-4">
-					<h2 className="text-lg font-semibold text-gray-100 mb-4">
-						Add {pendingDish.name}
-					</h2>
+			<Dialog open onOpenChange={(open) => !open && setPendingDish(null)}>
+				<DialogContent className="sm:max-w-sm">
+					<DialogHeader>
+						<DialogTitle>Add {pendingDish.name}</DialogTitle>
+					</DialogHeader>
 
 					<div className="space-y-4">
 						<div>
-							<label
-								htmlFor={servingsMadeId}
-								className="block text-sm font-medium text-gray-300 mb-1"
-							>
+							<Label htmlFor={servingsMadeId} className="mb-1">
 								Servings made
-							</label>
-							<input
+							</Label>
+							<Input
 								id={servingsMadeId}
 								type="number"
 								min={1}
@@ -172,32 +171,21 @@ export function AddMealModal({
 								onChange={(e) =>
 									setServingsMade(Number.parseInt(e.target.value, 10) || 1)
 								}
-								className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:border-emerald-500"
 							/>
-							<p className="mt-1 text-xs text-gray-500">
+							<p className="mt-1 text-xs text-muted-foreground">
 								How many servings will this batch yield?
 							</p>
 						</div>
 					</div>
 
-					<div className="flex gap-2 mt-6">
-						<button
-							type="button"
-							onClick={() => setPendingDish(null)}
-							className="flex-1 py-2 px-4 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors text-gray-300"
-						>
+					<DialogFooter>
+						<Button variant="secondary" onClick={() => setPendingDish(null)}>
 							Back
-						</button>
-						<button
-							type="button"
-							onClick={handleConfirmFreshDish}
-							className="flex-1 py-2 px-4 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-medium transition-colors text-white"
-						>
-							Add
-						</button>
-					</div>
-				</div>
-			</div>
+						</Button>
+						<Button onClick={handleConfirmFreshDish}>Add</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 		);
 	}
 
@@ -273,40 +261,31 @@ function EditComponentForm({
 	const leftoverId = useId();
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-			<div
-				className="absolute inset-0 bg-black/60"
-				onClick={onClose}
-				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				aria-hidden="true"
-			/>
-			<div className="relative w-full max-w-sm bg-gray-900 rounded-xl border border-gray-700 shadow-2xl p-4">
-				<h2 className="text-lg font-semibold text-gray-100 mb-4">
-					Edit component
-				</h2>
+		<Dialog open onOpenChange={(open) => !open && onClose()}>
+			<DialogContent className="sm:max-w-sm">
+				<DialogHeader>
+					<DialogTitle>Edit component</DialogTitle>
+				</DialogHeader>
 
 				<div className="space-y-4">
 					<div>
-						<span className="block text-sm font-medium text-gray-300 mb-1">
+						<span className="block text-sm font-medium text-muted-foreground mb-1">
 							Dish
 						</span>
-						<p className="text-gray-100">{displayName}</p>
+						<p className="text-foreground">{displayName}</p>
 					</div>
 
 					<div>
-						<label
-							htmlFor={componentTypeId}
-							className="block text-sm font-medium text-gray-300 mb-2"
-						>
+						<Label htmlFor={componentTypeId} className="mb-2">
 							Component type
-						</label>
+						</Label>
 						<select
 							id={componentTypeId}
 							value={selectedRole}
 							onChange={(e) =>
 								setSelectedRole(e.target.value as MealComponentRole)
 							}
-							className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:border-emerald-500"
+							className="w-full h-9 px-3 py-2 bg-input/30 border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
 						>
 							{MEAL_COMPONENT_ROLES.map((role) => (
 								<option key={role} value={role}>
@@ -317,13 +296,10 @@ function EditComponentForm({
 					</div>
 
 					<div>
-						<label
-							htmlFor={servingsId}
-							className="block text-sm font-medium text-gray-300 mb-1"
-						>
+						<Label htmlFor={servingsId} className="mb-1">
 							Servings
-						</label>
-						<input
+						</Label>
+						<Input
 							id={servingsId}
 							type="number"
 							min={0.25}
@@ -332,42 +308,28 @@ function EditComponentForm({
 							onChange={(e) =>
 								setServingsUsed(Number.parseFloat(e.target.value) || 1)
 							}
-							className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:border-emerald-500"
 						/>
 					</div>
 
-					<label
-						htmlFor={leftoverId}
-						className="flex items-center gap-2 cursor-pointer"
-					>
-						<input
+					<div className="flex items-center gap-2">
+						<Checkbox
 							id={leftoverId}
-							type="checkbox"
 							checked={isLeftover}
-							onChange={(e) => setIsLeftover(e.target.checked)}
-							className="rounded border-gray-600 bg-gray-800 text-emerald-600 focus:ring-emerald-500"
+							onCheckedChange={(checked) => setIsLeftover(checked === true)}
 						/>
-						<span className="text-sm text-gray-300">Leftover</span>
-					</label>
+						<Label htmlFor={leftoverId} className="cursor-pointer">
+							Leftover
+						</Label>
+					</div>
 				</div>
 
-				<div className="flex gap-2 mt-6">
-					<button
-						type="button"
-						onClick={onClose}
-						className="flex-1 py-2 px-4 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors text-gray-300"
-					>
+				<DialogFooter>
+					<Button variant="secondary" onClick={onClose}>
 						Cancel
-					</button>
-					<button
-						type="button"
-						onClick={onSave}
-						className="flex-1 py-2 px-4 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-medium transition-colors text-white"
-					>
-						Save
-					</button>
-				</div>
-			</div>
-		</div>
+					</Button>
+					<Button onClick={onSave}>Save</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
 	);
 }
