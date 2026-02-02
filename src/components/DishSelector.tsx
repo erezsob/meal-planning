@@ -57,6 +57,11 @@ export function DishSelector({
 		"dishes",
 	);
 
+	// Compute effective tab - reset to "dishes" if leftovers tab selected but no leftovers available
+	const hasLeftovers = leftoverSources.length > 0;
+	const effectiveTab =
+		activeTab === "leftovers" && !hasLeftovers ? "dishes" : activeTab;
+
 	if (!isOpen) return null;
 
 	const handleCustomSubmit = (e: React.FormEvent) => {
@@ -85,7 +90,7 @@ export function DishSelector({
 						type="button"
 						onClick={() => setActiveTab("dishes")}
 						className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-							activeTab === "dishes"
+							effectiveTab === "dishes"
 								? "text-primary border-b-2 border-primary"
 								: "text-muted-foreground hover:text-foreground"
 						}`}
@@ -97,19 +102,19 @@ export function DishSelector({
 						type="button"
 						onClick={() => setActiveTab("custom")}
 						className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-							activeTab === "custom"
+							effectiveTab === "custom"
 								? "text-primary border-b-2 border-primary"
 								: "text-muted-foreground hover:text-foreground"
 						}`}
 					>
 						Custom Meal
 					</button>
-					{leftoverSources.length > 0 && (
+					{hasLeftovers && (
 						<button
 							type="button"
 							onClick={() => setActiveTab("leftovers")}
 							className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-								activeTab === "leftovers"
+								effectiveTab === "leftovers"
 									? "text-primary border-b-2 border-primary"
 									: "text-muted-foreground hover:text-foreground"
 							}`}
@@ -122,7 +127,7 @@ export function DishSelector({
 
 				{/* Content */}
 				<div className="flex-1 overflow-y-auto p-4">
-					{activeTab === "dishes" && (
+					{effectiveTab === "dishes" && (
 						<>
 							{/* Search */}
 							<div className="relative mb-4">
@@ -151,7 +156,7 @@ export function DishSelector({
 						</>
 					)}
 
-					{activeTab === "custom" && (
+					{effectiveTab === "custom" && (
 						<CustomMealForm
 							customName={customName}
 							setCustomName={setCustomName}
@@ -159,7 +164,7 @@ export function DishSelector({
 						/>
 					)}
 
-					{activeTab === "leftovers" && (
+					{effectiveTab === "leftovers" && (
 						<div className="space-y-2">
 							{leftoverSources.map(({ meal, dish, available }) => (
 								<button
