@@ -72,23 +72,30 @@ interface DishCardSkeletonProps {
 /**
  * Loading skeleton for dish cards
  */
+/** Stable keys for skeleton cards */
+const DISH_SKELETON_KEYS = [
+	"sk-1",
+	"sk-2",
+	"sk-3",
+	"sk-4",
+	"sk-5",
+	"sk-6",
+] as const;
+
 export function DishCardSkeleton({ count = 1 }: DishCardSkeletonProps) {
 	return (
 		<>
-			{Array.from({ length: count }).map(() => {
-				const key = `dish-skeleton-${crypto.randomUUID()}`;
-				return (
-					<Card key={key} className="gap-0 p-4 py-4">
-						<Skeleton className="h-5 w-3/4 mb-2" />
-						<Skeleton className="h-4 w-full mb-1" />
-						<Skeleton className="h-4 w-2/3 mb-3" />
-						<div className="flex gap-2">
-							<Skeleton className="h-4 w-16" />
-							<Skeleton className="h-4 w-20" />
-						</div>
-					</Card>
-				);
-			})}
+			{DISH_SKELETON_KEYS.slice(0, count).map((key) => (
+				<Card key={key} className="gap-0 p-4 py-4">
+					<Skeleton className="h-5 w-3/4 mb-2" />
+					<Skeleton className="h-4 w-full mb-1" />
+					<Skeleton className="h-4 w-2/3 mb-3" />
+					<div className="flex gap-2">
+						<Skeleton className="h-4 w-16" />
+						<Skeleton className="h-4 w-20" />
+					</div>
+				</Card>
+			))}
 		</>
 	);
 }

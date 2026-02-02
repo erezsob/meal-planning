@@ -289,21 +289,21 @@ function DishList({ searchQuery, onSelect }: DishListProps) {
 	);
 }
 
+/** Stable keys for dish list skeleton */
+const DISH_LIST_SKELETON_KEYS = ["dl-sk-1", "dl-sk-2", "dl-sk-3"] as const;
+
 /**
  * Loading skeleton for dish list
  */
 function DishListSkeleton() {
 	return (
 		<div className="space-y-2">
-			{Array.from({ length: 3 }).map(() => {
-				const key = `dish-list-skeleton-${crypto.randomUUID()}`;
-				return (
-					<div key={key} className="p-3 bg-card border rounded-lg">
-						<Skeleton className="h-5 w-1/2 mb-2" />
-						<Skeleton className="h-4 w-3/4" />
-					</div>
-				);
-			})}
+			{DISH_LIST_SKELETON_KEYS.map((key) => (
+				<div key={key} className="p-3 bg-card border rounded-lg">
+					<Skeleton className="h-5 w-1/2 mb-2" />
+					<Skeleton className="h-4 w-3/4" />
+				</div>
+			))}
 		</div>
 	);
 }

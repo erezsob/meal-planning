@@ -293,6 +293,9 @@ function ScheduleLeftoverModal({
 	);
 }
 
+/** Stable keys for leftover skeleton */
+const LEFTOVER_SKELETON_KEYS = ["lo-sk-1", "lo-sk-2", "lo-sk-3"] as const;
+
 /**
  * Loading skeleton for LeftoverTracker
  */
@@ -301,11 +304,8 @@ function LeftoverTrackerSkeleton() {
 		<div className="p-4 bg-card/50 rounded-xl border border-border">
 			<Skeleton className="h-4 w-16 mb-3" />
 			<div className="flex gap-3">
-				{Array.from({ length: 3 }).map(() => (
-					<Skeleton
-						key={crypto.randomUUID()}
-						className="flex-shrink-0 w-40 h-20 rounded-lg"
-					/>
+				{LEFTOVER_SKELETON_KEYS.map((key) => (
+					<Skeleton key={key} className="flex-shrink-0 w-40 h-20 rounded-lg" />
 				))}
 			</div>
 		</div>
