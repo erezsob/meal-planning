@@ -45,3 +45,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
       - run: pnpm test
+
+  ci-success:
+    name: CI Success
+    needs: [lint, typecheck, knip, test]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - run: |
+          if [[ "${{ contains(needs.*.result, 'failure') }}" == "true" ]]; then
+            exit 1
+          fi
