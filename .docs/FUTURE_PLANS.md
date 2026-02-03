@@ -66,3 +66,59 @@ Enhancements and features for future development.
 - Replace confirm dialog with toast notification
 - "Undo" action within toast (5 second window)
 - Soft delete pattern: mark as voiding, commit after timeout
+
+---
+
+## Plan Mode (Decoupled Meal Planning)
+
+**Context**: Calendar view is noisy/cluttered - mixing planning with viewing/actions.
+
+**Goal**: Separate planning workflow from calendar view for better UX.
+
+### Calendar View (Simplified)
+
+- Read-only summary of planned meals
+- Click meal → dialog with details
+- Actions: eat, skip only
+- Clean, scannable layout
+
+### Plan Mode (New UI)
+
+- Dedicated planning interface
+- Collect meal ideas/brainstorm
+- Select dishes from library
+- Drag/distribute to days and meal slots
+- Batch planning for entire week
+
+### Considerations
+
+- Toggle between calendar and plan mode
+- Draft state before committing plan?
+- Copy previous week's plan as template
+
+---
+
+## AI-Assisted Dish Creation
+
+**Context**: Entering recipes + ingredients manually is tedious.
+
+**Goal**: Paste recipe text → AI parses into structured data.
+
+### Requirements
+
+- New "AI Helper" tab in Add Dish modal
+- Text input for pasting recipe content (from websites, firewalled sources)
+- LLM processes raw text and extracts:
+  - Recipe instructions → recipe textarea
+  - Ingredients → structured list with:
+    - Name
+    - Quantity
+    - Unit/metric
+    - Supermarket department (produce, dairy, etc.)
+
+### Considerations
+
+- Handle various recipe formats (ingredient lists, inline mentions)
+- User review/edit before saving
+- Fallback for parsing failures
+- Rate limiting / cost management for LLM calls
