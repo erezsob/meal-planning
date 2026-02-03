@@ -3,6 +3,17 @@ import type { Doc } from "convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { Plus, Trash2 } from "lucide-react";
 import { useCallback, useId, useRef, useState } from "react";
+import { Button } from "@/lib/components/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/lib/components/dialog";
+import { Input } from "@/lib/components/input";
+import { Label } from "@/lib/components/label";
+import { Textarea } from "@/lib/components/textarea";
 import {
 	DISH_TAGS,
 	type DishTag,
@@ -10,18 +21,7 @@ import {
 	INGREDIENT_CATEGORIES,
 	INGREDIENT_UNITS,
 	type IngredientCategory,
-} from "../../../lib/constants";
-import { Button } from "../ui/button";
-import {
-	Dialog,
-	DialogContent,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "../ui/dialog";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { Textarea } from "../ui/textarea";
+} from "@/lib/constants";
 import type { DishFormValues, IngredientRow } from "./types";
 
 function newIngredient(overrides: Partial<IngredientRow> = {}): IngredientRow {

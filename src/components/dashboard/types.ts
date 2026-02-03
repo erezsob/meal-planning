@@ -1,14 +1,11 @@
 import type { api } from "convex/_generated/api";
 import type { FunctionReturnType } from "convex/server";
-import type { MealType } from "../../../lib/constants";
+import type { MealType } from "@/lib/constants";
 
 /** Meal plan with joined dish data - inferred from getWeek query return type */
 export type MealWithDish = FunctionReturnType<
 	typeof api.mealPlans.getWeek
 >[number];
-
-/** All components in a single slot (day + mealType). */
-export type SlotMeals = MealWithDish[];
 
 /** Selected meal slot for adding or editing a component */
 export interface SelectedSlot {

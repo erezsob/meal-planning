@@ -4,6 +4,17 @@ import { api } from "convex/_generated/api";
 import type { Doc, Id } from "convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { useId, useState } from "react";
+import { Button } from "@/lib/components/button";
+import { Checkbox } from "@/lib/components/checkbox";
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/lib/components/dialog";
+import { Input } from "@/lib/components/input";
+import { Label } from "@/lib/components/label";
 import {
 	COMPONENT_ROLE_LABELS,
 	DEFAULT_COMPONENT_ROLE,
@@ -11,19 +22,8 @@ import {
 	MEAL_COMPONENT_ROLES,
 	type MealComponentRole,
 	type MealType,
-} from "../../../lib/constants";
+} from "@/lib/constants";
 import { DishSelector } from "../DishSelector";
-import { Button } from "../ui/button";
-import { Checkbox } from "../ui/checkbox";
-import {
-	Dialog,
-	DialogContent,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "../ui/dialog";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
 import type { MealWithDish } from "./types";
 
 interface AddMealModalProps {

@@ -1,9 +1,9 @@
 import type { Doc } from "convex/_generated/dataModel";
 import { ExternalLink, Users } from "lucide-react";
+import { Button } from "@/lib/components/button";
+import { Card, CardFooter } from "@/lib/components/card";
+import { Skeleton } from "@/lib/components/skeleton";
 import { TagList } from "./TagBadge";
-import { Button } from "./ui/button";
-import { Card, CardFooter } from "./ui/card";
-import { Skeleton } from "./ui/skeleton";
 
 interface DishCardProps {
 	/** The dish data */

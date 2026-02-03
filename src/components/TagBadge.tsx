@@ -1,6 +1,6 @@
+import { Badge } from "@/lib/components/badge";
+import { type DishTag, isDishTag } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { type DishTag, isDishTag } from "../../lib/constants";
-import { Badge } from "./ui/badge";
 
 /** Tag color mappings for visual distinction */
 const TAG_COLORS: Record<DishTag, string> = {

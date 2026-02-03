@@ -7,7 +7,7 @@ import {
 	MEAL_COMPONENT_ROLES,
 	type MealComponentRole,
 	type MealType,
-} from "../../lib/constants";
+} from "@/lib/constants";
 import type { MealWithDish } from "./dashboard/types";
 import { LeftoverBadge } from "./LeftoverBadge";
 import { StatusBadge } from "./StatusBadge";

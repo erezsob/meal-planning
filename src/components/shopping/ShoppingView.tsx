@@ -3,6 +3,9 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { api } from "convex/_generated/api";
 import type { GroupedShoppingList, ShoppingItem } from "convex/shoppingList";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Checkbox } from "@/lib/components/checkbox";
+import { Label } from "@/lib/components/label";
+import { Skeleton } from "@/lib/components/skeleton";
 import {
 	formatDateKey,
 	getShoppingItemKey,
@@ -10,11 +13,8 @@ import {
 	HOUSEHOLD_ID,
 	INGREDIENT_CATEGORIES,
 	SHOPPING_CHECKED_KEY_PREFIX,
-} from "../../../lib/constants";
+} from "@/lib/constants";
 import { WeekHeader } from "../dashboard/WeekHeader";
-import { Checkbox } from "../ui/checkbox";
-import { Label } from "../ui/label";
-import { Skeleton } from "../ui/skeleton";
 
 /** Format quantity + unit for display (no conversion per spec) */
 function formatQuantity(item: ShoppingItem): string {

@@ -1,4 +1,4 @@
-import { Skeleton } from "../ui/skeleton";
+import { Skeleton } from "@/lib/components/skeleton";
 
 /** Skeleton day IDs for stable keys */
 const SKELETON_DAYS = [

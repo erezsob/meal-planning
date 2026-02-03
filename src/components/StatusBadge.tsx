@@ -1,6 +1,6 @@
 import { Check, Clock, X } from "lucide-react";
-import type { MealStatus } from "../../lib/constants";
-import { Badge } from "./ui/badge";
+import { Badge } from "@/lib/components/badge";
+import type { MealStatus } from "@/lib/constants";
 
 /** Status color and icon mappings */
 const STATUS_CONFIG: Record<

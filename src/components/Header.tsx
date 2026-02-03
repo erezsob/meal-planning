@@ -1,8 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { BookOpen, Calendar, Menu, ShoppingCart } from "lucide-react";
 import { useState } from "react";
-import { Button } from "./ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet";
+import { Button } from "@/lib/components/button";
+import {
+	Sheet,
+	SheetContent,
+	SheetHeader,
+	SheetTitle,
+} from "@/lib/components/sheet";
 
 const NAV_LINK_BASE =
 	"flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors";

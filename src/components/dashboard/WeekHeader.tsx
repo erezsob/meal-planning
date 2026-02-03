@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { formatDateKey, getWeekStart } from "../../../lib/constants";
-import { Button } from "../ui/button";
+import { Button } from "@/lib/components/button";
+import { formatDateKey, getWeekStart } from "@/lib/constants";
 
 interface WeekHeaderProps {
 	/** Start date of the current week */

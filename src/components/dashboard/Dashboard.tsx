@@ -1,9 +1,5 @@
 import { Suspense, useState } from "react";
-import {
-	formatDateKey,
-	getWeekDates,
-	getWeekStart,
-} from "../../../lib/constants";
+import { formatDateKey, getWeekDates, getWeekStart } from "@/lib/constants";
 import { AddMealModal } from "./AddMealModal";
 import { CalendarSkeleton } from "./CalendarSkeleton";
 import { LeftoverTracker } from "./LeftoverTracker";

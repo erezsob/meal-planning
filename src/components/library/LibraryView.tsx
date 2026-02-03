@@ -4,11 +4,11 @@ import { api } from "convex/_generated/api";
 import type { Doc } from "convex/_generated/dataModel";
 import { Search } from "lucide-react";
 import { useId, useMemo, useState } from "react";
-import { DISH_TAGS, type DishTag, HOUSEHOLD_ID } from "../../../lib/constants";
+import { Button } from "@/lib/components/button";
+import { Input } from "@/lib/components/input";
+import { Skeleton } from "@/lib/components/skeleton";
+import { DISH_TAGS, type DishTag, HOUSEHOLD_ID } from "@/lib/constants";
 import { DishCard, DishCardSkeleton } from "../DishCard";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Skeleton } from "../ui/skeleton";
 import { DishFormModal } from "./DishFormModal";
 
 /**

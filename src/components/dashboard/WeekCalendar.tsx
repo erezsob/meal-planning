@@ -7,7 +7,7 @@ import {
 	MEAL_TYPES,
 	type MealType,
 	WEEKDAYS,
-} from "../../../lib/constants";
+} from "@/lib/constants";
 import { MealSlot, MealSlotHeader } from "../MealSlot";
 import type { MealWithDish } from "./types";
 

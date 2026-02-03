@@ -1,12 +1,14 @@
 import { api } from "convex/_generated/api";
 import { useMutation } from "convex/react";
 import { Edit, Plus, Trash2 } from "lucide-react";
+import { Button } from "@/lib/components/button";
 import {
-	COMPONENT_ROLE_LABELS,
-	DEFAULT_COMPONENT_ROLE,
-} from "../../../lib/constants";
-import { Button } from "../ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from "@/lib/components/dialog";
+import { COMPONENT_ROLE_LABELS, DEFAULT_COMPONENT_ROLE } from "@/lib/constants";
 import type { MealWithDish } from "./types";
 
 interface MealActionModalProps {

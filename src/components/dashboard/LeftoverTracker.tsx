@@ -6,15 +6,7 @@ import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { AlertCircle, Calendar, Trash2 } from "lucide-react";
 import { useId, useState } from "react";
-import {
-	formatDateKey,
-	getWeekDates,
-	getWeekStart,
-	HOUSEHOLD_ID,
-	MEAL_TYPES,
-	type MealType,
-} from "../../../lib/constants";
-import { Button } from "../ui/button";
+import { Button } from "@/lib/components/button";
 import {
 	Dialog,
 	DialogContent,
@@ -22,10 +14,18 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from "../ui/dialog";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { Skeleton } from "../ui/skeleton";
+} from "@/lib/components/dialog";
+import { Input } from "@/lib/components/input";
+import { Label } from "@/lib/components/label";
+import { Skeleton } from "@/lib/components/skeleton";
+import {
+	formatDateKey,
+	getWeekDates,
+	getWeekStart,
+	HOUSEHOLD_ID,
+	MEAL_TYPES,
+	type MealType,
+} from "@/lib/constants";
 
 /** Leftover source from getLeftoverSources query */
 type LeftoverSource = FunctionReturnType<

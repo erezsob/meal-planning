@@ -5,13 +5,18 @@ import type { Doc, Id } from "convex/_generated/dataModel";
 import type { FunctionReturnType } from "convex/server";
 import { RefreshCw, Search, UtensilsCrossed } from "lucide-react";
 import { Suspense, useId, useState } from "react";
+import { Button } from "@/lib/components/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from "@/lib/components/dialog";
+import { Input } from "@/lib/components/input";
+import { Label } from "@/lib/components/label";
+import { Skeleton } from "@/lib/components/skeleton";
 import { HOUSEHOLD_ID } from "../../lib/constants";
 import { TagList } from "./TagBadge";
-import { Button } from "./ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Skeleton } from "./ui/skeleton";
 
 /** Leftover source - inferred from Convex query return type */
 type LeftoverSource = FunctionReturnType<
