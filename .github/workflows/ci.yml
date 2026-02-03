@@ -14,28 +14,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: Lint
+  checks:
+    name: Checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
       - run: pnpm biome check
-
-  typecheck:
-    name: Type Check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup
       - run: pnpm types:check
-
-  knip:
-    name: Unused Code Check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup
       - run: pnpm knip
 
   test:
@@ -48,7 +34,7 @@ jobs:
 
   ci-success:
     name: CI Success
-    needs: [lint, typecheck, knip, test]
+    needs: [checks, test]
     runs-on: ubuntu-latest
     if: always()
     steps:
