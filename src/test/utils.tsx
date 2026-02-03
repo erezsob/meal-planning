@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 /**
  * Create a fresh QueryClient for testing
  */
-export function createTestQueryClient() {
+function createTestQueryClient() {
 	return new QueryClient({
 		defaultOptions: {
 			queries: {
@@ -26,16 +26,4 @@ export function TestWrapper({ children }: { children: ReactNode }) {
 	return (
 		<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 	);
-}
-
-/**
- * Create wrapper function for renderHook
- */
-export function createWrapper() {
-	const queryClient = createTestQueryClient();
-	return function Wrapper({ children }: { children: ReactNode }) {
-		return (
-			<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-		);
-	};
 }

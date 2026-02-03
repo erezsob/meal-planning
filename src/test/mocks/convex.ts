@@ -21,7 +21,7 @@ export function createMockDish(
 /**
  * Mock factory for MealPlan documents
  */
-export function createMockMealPlan(
+function createMockMealPlan(
 	overrides: Partial<Doc<"mealPlans">> = {},
 ): Doc<"mealPlans"> {
 	return {
