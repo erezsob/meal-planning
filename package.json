@@ -2,6 +2,7 @@
   "name": "meal-planning-app-1",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@10.28.0",
   "scripts": {
     "dev": "concurrently \"vite dev --port 3000\" \"convex dev\"",
     "dev:vite": "vite dev --port 3000",
