@@ -20,6 +20,11 @@ export const DISH_TAGS = [
 
 export type DishTag = (typeof DISH_TAGS)[number];
 
+/** Type guard for validating DishTag values */
+export function isDishTag(value: string): value is DishTag {
+	return DISH_TAGS.includes(value as DishTag);
+}
+
 /**
  * Ingredient categories for shopping list grouping
  */
@@ -63,6 +68,32 @@ export const INGREDIENT_UNITS = [
 export const MEAL_TYPES = ["breakfast", "lunch", "dinner"] as const;
 
 export type MealType = (typeof MEAL_TYPES)[number];
+
+/**
+ * Meal component roles (main, side, dessert, drink, other).
+ * Multiple components per role per slot allowed (e.g. dinner party).
+ */
+export const MEAL_COMPONENT_ROLES = [
+	"main",
+	"side",
+	"dessert",
+	"drink",
+	"other",
+] as const;
+
+export type MealComponentRole = (typeof MEAL_COMPONENT_ROLES)[number];
+
+/** Default role when adding a component (e.g. for backfill / new plans). */
+export const DEFAULT_COMPONENT_ROLE: MealComponentRole = "main";
+
+/** Display labels for component roles (for UI grouping). */
+export const COMPONENT_ROLE_LABELS = {
+	main: "Main",
+	side: "Side",
+	dessert: "Dessert",
+	drink: "Drink",
+	other: "Other",
+} as const satisfies Record<MealComponentRole, string>;
 
 /**
  * Meal plan statuses

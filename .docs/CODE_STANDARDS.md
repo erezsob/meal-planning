@@ -41,7 +41,8 @@
 - Lazy loading for large datasets
 
 ## 7. Maintainability
-- DRY (Don't Repeat Yourself) principle
+- DRY (Don't Repeat Yourself) principle — reuse components, logic and markup.
+- When a pattern repeats (e.g. form fields, validation), extract to a reusable component or function.
 - Clear naming conventions
 - Logical file structure
 - Easy to test and modify
@@ -71,8 +72,8 @@ The codebase includes custom FP utilities for explicit error handling and functi
 Use `Result<T, E>` for operations that can fail instead of try/catch:
 
 ```typescript
-import { type Result, ok, err, tryCatchAsync } from "lib/fp";
-import { type DbError, queryFailed } from "lib/errors";
+import { type Result, ok, err, tryCatchAsync } from "@/lib/fp";
+import { type DbError, queryFailed } from "@/lib/errors";
 
 // Return Result instead of throwing
 async function getUser(id: number): Promise<Result<User, DbError>> {
@@ -96,7 +97,7 @@ if (result.ok) {
 Use `Option<T>` for values that may or may not exist:
 
 ```typescript
-import { type Option, some, none, fromNullable, matchOption } from "lib/fp";
+import { type Option, some, none, fromNullable, matchOption } from "@/lib/fp";
 
 // Detect clipboard change - returns Option
 const detectClipboardChange = (
@@ -117,7 +118,7 @@ if (change.some) {
 Use `pipe` for composing data transformations:
 
 ```typescript
-import { pipe } from "lib/fp";
+import { pipe } from "@/lib/fp";
 
 // Transform data through a pipeline
 const result = pipe(
@@ -133,7 +134,7 @@ const result = pipe(
 Define typed errors for better error handling:
 
 ```typescript
-import { type DbError, dbNotReady, queryFailed } from "lib/errors";
+import { type DbError, dbNotReady, queryFailed } from "@/lib/errors";
 
 // Create specific error types
 const error: DbError = queryFailed("User not found", originalError);

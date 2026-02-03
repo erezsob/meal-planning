@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { DEFAULT_COMPONENT_ROLE } from "../lib/constants";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
 
@@ -6,6 +7,14 @@ const mealTypeValidator = v.union(
 	v.literal("breakfast"),
 	v.literal("lunch"),
 	v.literal("dinner"),
+);
+
+const componentRoleValidator = v.union(
+	v.literal("main"),
+	v.literal("side"),
+	v.literal("dessert"),
+	v.literal("drink"),
+	v.literal("other"),
 );
 
 /**
@@ -42,6 +51,7 @@ export const getWeek = query({
 
 		return weekMeals.map((meal) => ({
 			...meal,
+			componentRole: meal.componentRole ?? DEFAULT_COMPONENT_ROLE,
 			dish: meal.dishId ? dishMap.get(meal.dishId) : null,
 		}));
 	},
@@ -57,7 +67,11 @@ export const getOne = query({
 		if (!meal) return null;
 
 		const dish = meal.dishId ? await ctx.db.get(meal.dishId) : null;
-		return { ...meal, dish };
+		return {
+			...meal,
+			componentRole: meal.componentRole ?? DEFAULT_COMPONENT_ROLE,
+			dish,
+		};
 	},
 });
 
@@ -87,12 +101,16 @@ export const getAvailableLeftovers = query({
 			.filter((m) => m.status === "eaten")
 			.reduce((sum, m) => sum + m.servingsUsed, 0);
 
-		return Math.max(0, (dish.defaultServings ?? 1) - totalUsed);
+		// Use servingsMade if set, else fall back to dish.defaultServings
+		const totalServings = sourceMeal.servingsMade ?? dish.defaultServings ?? 1;
+
+		return Math.max(0, totalServings - totalUsed);
 	},
 });
 
 /**
  * Get all available leftover sources for a household
+ * Includes both eaten AND planned fresh meals as sources
  */
 export const getLeftoverSources = query({
 	args: { householdId: v.string() },
@@ -102,14 +120,22 @@ export const getLeftoverSources = query({
 			.withIndex("by_householdId", (q) => q.eq("householdId", args.householdId))
 			.collect();
 
+		const today = new Date().toISOString().split("T")[0];
+
+		// Source meals: non-leftover meals that are eaten OR planned (fresh cook events)
 		const sourceMeals = meals.filter(
-			(m) => m.status === "eaten" && !m.isLeftover && m.dishId,
+			(m) =>
+				!m.isLeftover &&
+				m.dishId &&
+				(m.status === "eaten" || m.status === "planned"),
 		);
 
 		const results: Array<{
 			meal: Doc<"mealPlans">;
 			dish: Doc<"dishes">;
 			available: number;
+			scheduledCount: number;
+			isUnscheduled: boolean;
 		}> = [];
 
 		for (const meal of sourceMeals) {
@@ -117,17 +143,34 @@ export const getLeftoverSources = query({
 			const dish = await ctx.db.get(meal.dishId);
 			if (!dish) continue;
 
+			// All meals linked to this source (the source itself + leftovers from it)
 			const relatedMeals = meals.filter(
 				(m) => m._id === meal._id || m.sourceMealId === meal._id,
 			);
 
-			const totalUsed = relatedMeals
+			// Total servings made (use servingsMade if set, else dish default)
+			const totalServings = meal.servingsMade ?? dish.defaultServings ?? 1;
+
+			// Eaten servings
+			const eatenServings = relatedMeals
 				.filter((m) => m.status === "eaten")
 				.reduce((sum, m) => sum + m.servingsUsed, 0);
 
-			const available = (dish.defaultServings ?? 1) - totalUsed;
+			// Planned future servings (leftovers scheduled but not eaten yet)
+			const plannedFutureServings = relatedMeals
+				.filter((m) => m.status === "planned" && m.isLeftover && m.day >= today)
+				.reduce((sum, m) => sum + m.servingsUsed, 0);
+
+			// Count of future scheduled leftover meals
+			const scheduledCount = relatedMeals.filter(
+				(m) => m.status === "planned" && m.isLeftover && m.day >= today,
+			).length;
+
+			const available = totalServings - eatenServings - plannedFutureServings;
+			const isUnscheduled = available > 0 && scheduledCount === 0;
+
 			if (available > 0) {
-				results.push({ meal, dish, available });
+				results.push({ meal, dish, available, scheduledCount, isUnscheduled });
 			}
 		}
 
@@ -136,26 +179,31 @@ export const getLeftoverSources = query({
 });
 
 /**
- * Plan a new meal (status: planned)
+ * Plan a new meal component (status: planned)
  */
 export const planMeal = mutation({
 	args: {
 		day: v.string(),
 		mealType: mealTypeValidator,
+		componentRole: v.optional(componentRoleValidator),
 		dishId: v.optional(v.id("dishes")),
 		customName: v.optional(v.string()),
 		servingsUsed: v.number(),
+		servingsMade: v.optional(v.number()),
 		isLeftover: v.boolean(),
 		sourceMealId: v.optional(v.id("mealPlans")),
 		householdId: v.string(),
 	},
 	handler: async (ctx, args) => {
+		const componentRole = args.componentRole ?? "main";
 		return await ctx.db.insert("mealPlans", {
 			day: args.day,
 			mealType: args.mealType,
+			componentRole,
 			dishId: args.dishId,
 			customName: args.customName,
 			servingsUsed: args.servingsUsed,
+			servingsMade: args.servingsMade,
 			status: "planned",
 			isLeftover: args.isLeftover,
 			sourceMealId: args.sourceMealId,
@@ -185,11 +233,12 @@ export const skipMeal = mutation({
 });
 
 /**
- * Update meal plan details
+ * Update meal plan component details
  */
 export const update = mutation({
 	args: {
 		id: v.id("mealPlans"),
+		componentRole: componentRoleValidator,
 		dishId: v.optional(v.id("dishes")),
 		customName: v.optional(v.string()),
 		servingsUsed: v.number(),
@@ -198,6 +247,7 @@ export const update = mutation({
 	},
 	handler: async (ctx, args) => {
 		return await ctx.db.patch(args.id, {
+			componentRole: args.componentRole,
 			dishId: args.dishId,
 			customName: args.customName,
 			servingsUsed: args.servingsUsed,
@@ -234,13 +284,16 @@ export const voidLeftovers = mutation({
 			.filter((m) => m.status === "eaten")
 			.reduce((sum, m) => sum + m.servingsUsed, 0);
 
-		const remaining = (dish.defaultServings ?? 1) - totalUsed;
+		// Use servingsMade if set, else fall back to dish.defaultServings
+		const totalServings = sourceMeal.servingsMade ?? dish.defaultServings ?? 1;
+		const remaining = totalServings - totalUsed;
 
 		if (remaining <= 0) return null;
 
 		return await ctx.db.insert("mealPlans", {
 			day: new Date().toISOString().split("T")[0],
 			mealType: "dinner",
+			componentRole: sourceMeal.componentRole ?? DEFAULT_COMPONENT_ROLE,
 			dishId: sourceMeal.dishId,
 			customName: `${dish.name} (voided)`,
 			servingsUsed: remaining,
@@ -259,5 +312,69 @@ export const remove = mutation({
 	args: { id: v.id("mealPlans") },
 	handler: async (ctx, args) => {
 		return await ctx.db.delete(args.id);
+	},
+});
+
+/**
+ * Mark all planned meals in a slot as eaten.
+ * Slot = (householdId, day, mealType).
+ * Returns count of updated meals.
+ */
+export const eatSlot = mutation({
+	args: {
+		householdId: v.string(),
+		day: v.string(),
+		mealType: mealTypeValidator,
+	},
+	handler: async (ctx, args) => {
+		const meals = await ctx.db
+			.query("mealPlans")
+			.withIndex("by_householdId", (q) => q.eq("householdId", args.householdId))
+			.collect();
+
+		const slotMeals = meals.filter(
+			(m) =>
+				m.day === args.day &&
+				m.mealType === args.mealType &&
+				m.status === "planned",
+		);
+
+		await Promise.all(
+			slotMeals.map((m) => ctx.db.patch(m._id, { status: "eaten" })),
+		);
+
+		return slotMeals.length;
+	},
+});
+
+/**
+ * Mark all planned meals in a slot as skipped.
+ * Slot = (householdId, day, mealType).
+ * Returns count of updated meals.
+ */
+export const skipSlot = mutation({
+	args: {
+		householdId: v.string(),
+		day: v.string(),
+		mealType: mealTypeValidator,
+	},
+	handler: async (ctx, args) => {
+		const meals = await ctx.db
+			.query("mealPlans")
+			.withIndex("by_householdId", (q) => q.eq("householdId", args.householdId))
+			.collect();
+
+		const slotMeals = meals.filter(
+			(m) =>
+				m.day === args.day &&
+				m.mealType === args.mealType &&
+				m.status === "planned",
+		);
+
+		await Promise.all(
+			slotMeals.map((m) => ctx.db.patch(m._id, { status: "skipped" })),
+		);
+
+		return slotMeals.length;
 	},
 });

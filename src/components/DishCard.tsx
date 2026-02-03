@@ -1,5 +1,8 @@
 import type { Doc } from "convex/_generated/dataModel";
 import { ExternalLink, Users } from "lucide-react";
+import { Button } from "@/lib/components/button";
+import { Card, CardFooter } from "@/lib/components/card";
+import { Skeleton } from "@/lib/components/skeleton";
 import { TagList } from "./TagBadge";
 
 interface DishCardProps {
@@ -14,21 +17,21 @@ interface DishCardProps {
  */
 export function DishCard({ dish, onClick }: DishCardProps) {
 	return (
-		<article className="flex flex-col rounded-xl bg-gray-800 border border-gray-700 hover:border-gray-600 transition-colors overflow-hidden">
+		<Card className="gap-0 py-0 overflow-hidden hover:border-gray-600 transition-colors">
 			<button
 				type="button"
 				onClick={onClick}
-				className="flex-1 p-4 text-left hover:bg-gray-750 transition-colors"
+				className="flex-1 p-4 text-left hover:bg-accent/50 transition-colors"
 			>
-				<h3 className="font-semibold text-gray-100 mb-1">{dish.name}</h3>
+				<h3 className="font-semibold text-card-foreground mb-1">{dish.name}</h3>
 
 				{dish.description && (
-					<p className="text-sm text-gray-400 line-clamp-2 mb-3">
+					<p className="text-sm text-muted-foreground line-clamp-2 mb-3">
 						{dish.description}
 					</p>
 				)}
 
-				<div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+				<div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
 					<span className="flex items-center gap-1">
 						<Users size={14} />
 						{dish.defaultServings ?? 1} servings
@@ -44,17 +47,20 @@ export function DishCard({ dish, onClick }: DishCardProps) {
 			</button>
 
 			{dish.sourceUrl && (
-				<a
-					href={dish.sourceUrl}
-					target="_blank"
-					rel="noopener noreferrer"
-					className="flex items-center justify-center gap-2 px-4 py-2 text-sm text-gray-400 hover:text-gray-200 border-t border-gray-700 hover:bg-gray-750 transition-colors"
-				>
-					<ExternalLink size={14} />
-					View Recipe
-				</a>
+				<CardFooter className="border-t px-0 py-0">
+					<Button
+						variant="ghost"
+						asChild
+						className="w-full rounded-none h-auto py-2"
+					>
+						<a href={dish.sourceUrl} target="_blank" rel="noopener noreferrer">
+							<ExternalLink size={14} />
+							View Recipe
+						</a>
+					</Button>
+				</CardFooter>
 			)}
-		</article>
+		</Card>
 	);
 }
 
@@ -66,26 +72,30 @@ interface DishCardSkeletonProps {
 /**
  * Loading skeleton for dish cards
  */
+/** Stable keys for skeleton cards */
+const DISH_SKELETON_KEYS = [
+	"sk-1",
+	"sk-2",
+	"sk-3",
+	"sk-4",
+	"sk-5",
+	"sk-6",
+] as const;
+
 export function DishCardSkeleton({ count = 1 }: DishCardSkeletonProps) {
 	return (
 		<>
-			{Array.from({ length: count }).map(() => {
-				const key = `dish-skeleton-${crypto.randomUUID()}`;
-				return (
-					<div
-						key={key}
-						className="flex flex-col rounded-xl bg-gray-800 border border-gray-700 p-4 animate-pulse"
-					>
-						<div className="h-5 bg-gray-700 rounded w-3/4 mb-2" />
-						<div className="h-4 bg-gray-700 rounded w-full mb-1" />
-						<div className="h-4 bg-gray-700 rounded w-2/3 mb-3" />
-						<div className="flex gap-2">
-							<div className="h-4 bg-gray-700 rounded w-16" />
-							<div className="h-4 bg-gray-700 rounded w-20" />
-						</div>
+			{DISH_SKELETON_KEYS.slice(0, count).map((key) => (
+				<Card key={key} className="gap-0 p-4 py-4">
+					<Skeleton className="h-5 w-3/4 mb-2" />
+					<Skeleton className="h-4 w-full mb-1" />
+					<Skeleton className="h-4 w-2/3 mb-3" />
+					<div className="flex gap-2">
+						<Skeleton className="h-4 w-16" />
+						<Skeleton className="h-4 w-20" />
 					</div>
-				);
-			})}
+				</Card>
+			))}
 		</>
 	);
 }

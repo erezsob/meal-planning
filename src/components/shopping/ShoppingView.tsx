@@ -3,6 +3,9 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { api } from "convex/_generated/api";
 import type { GroupedShoppingList, ShoppingItem } from "convex/shoppingList";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Checkbox } from "@/lib/components/checkbox";
+import { Label } from "@/lib/components/label";
+import { Skeleton } from "@/lib/components/skeleton";
 import {
 	formatDateKey,
 	getShoppingItemKey,
@@ -10,7 +13,7 @@ import {
 	HOUSEHOLD_ID,
 	INGREDIENT_CATEGORIES,
 	SHOPPING_CHECKED_KEY_PREFIX,
-} from "../../../lib/constants";
+} from "@/lib/constants";
 import { WeekHeader } from "../dashboard/WeekHeader";
 
 /** Format quantity + unit for display (no conversion per spec) */
@@ -40,28 +43,26 @@ function ShoppingListItem({
 	const itemKey = getShoppingItemKey(item);
 	const id = `shopping-${startDateKey}-${itemKey}`;
 
-	const handleChange = () => {
-		onToggle(itemKey, !checked);
+	const handleChange = (checkedState: boolean | "indeterminate") => {
+		onToggle(itemKey, checkedState === true);
 	};
 
 	return (
-		<li className="flex items-center gap-3 py-2 border-b border-gray-800 last:border-0">
-			<input
+		<li className="flex items-center gap-3 py-2 px-4 border-b border-border last:border-0">
+			<Checkbox
 				id={id}
-				type="checkbox"
 				checked={checked}
-				onChange={handleChange}
-				className="h-4 w-4 rounded border-gray-600 bg-gray-800 text-emerald-600 focus:ring-emerald-500"
+				onCheckedChange={handleChange}
 				aria-label={`Mark ${item.name} as purchased`}
 			/>
-			<label
+			<Label
 				htmlFor={id}
-				className={`flex-1 text-gray-200 cursor-pointer select-none ${
-					checked ? "line-through text-gray-500" : ""
+				className={`flex-1 cursor-pointer select-none ${
+					checked ? "line-through text-muted-foreground" : "text-foreground"
 				}`}
 			>
 				{formatQuantity(item)}
-			</label>
+			</Label>
 		</li>
 	);
 }
@@ -88,17 +89,17 @@ function CategorySection({
 	const headingId = `category-${label.replace(/\s+/g, "-")}`;
 	return (
 		<section
-			className="rounded-xl bg-gray-800/60 border border-gray-700 overflow-hidden"
+			className="rounded-xl bg-card/60 border overflow-hidden"
 			aria-labelledby={headingId}
 		>
 			<h2
 				id={headingId}
-				className="px-4 py-3 text-sm font-semibold text-gray-300 bg-gray-800/80 border-b border-gray-700"
+				className="px-4 py-3 text-sm font-semibold text-muted-foreground bg-card/80 border-b"
 			>
 				{label}
 			</h2>
 			<ul
-				className="divide-y divide-gray-800 list-none p-0 m-0"
+				className="divide-y divide-border list-none p-0 m-0"
 				aria-label={`${label} items`}
 			>
 				{items.map((item) => (
@@ -202,7 +203,7 @@ export function ShoppingView() {
 			/>
 
 			{totalItems === 0 ? (
-				<p className="text-gray-400 py-8 text-center">
+				<p className="text-muted-foreground py-8 text-center">
 					No meals planned for this week. Add meals on the dashboard to see
 					ingredients here.
 				</p>
@@ -231,23 +232,20 @@ export function ShoppingViewSkeleton() {
 	return (
 		<div className="space-y-6">
 			<div className="flex justify-between items-center">
-				<div className="h-8 bg-gray-700 rounded w-48 animate-pulse" />
+				<Skeleton className="h-8 w-48" />
 				<div className="flex gap-2">
-					<div className="h-10 w-10 bg-gray-700 rounded animate-pulse" />
-					<div className="h-10 w-32 bg-gray-700 rounded animate-pulse" />
-					<div className="h-10 w-10 bg-gray-700 rounded animate-pulse" />
+					<Skeleton className="h-10 w-10" />
+					<Skeleton className="h-10 w-32" />
+					<Skeleton className="h-10 w-10" />
 				</div>
 			</div>
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 				{["Produce", "Dairy", "Pantry"].map((label) => (
-					<div
-						key={label}
-						className="rounded-xl bg-gray-800/60 border border-gray-700 p-4 animate-pulse"
-					>
-						<div className="h-5 bg-gray-700 rounded w-24 mb-4" />
+					<div key={label} className="rounded-xl bg-card/60 border p-4">
+						<Skeleton className="h-5 w-24 mb-4" />
 						<div className="space-y-2">
 							{[1, 2, 3].map((i) => (
-								<div key={i} className="h-4 bg-gray-700 rounded w-full" />
+								<Skeleton key={i} className="h-4 w-full" />
 							))}
 						</div>
 					</div>

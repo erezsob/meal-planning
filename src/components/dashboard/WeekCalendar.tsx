@@ -7,7 +7,7 @@ import {
 	MEAL_TYPES,
 	type MealType,
 	WEEKDAYS,
-} from "../../../lib/constants";
+} from "@/lib/constants";
 import { MealSlot, MealSlotHeader } from "../MealSlot";
 import type { MealWithDish } from "./types";
 
@@ -18,7 +18,7 @@ interface WeekCalendarProps {
 	weekDates: Date[];
 	/** Called when clicking empty slot to add meal */
 	onAddMeal: (day: string, mealType: MealType) => void;
-	/** Called when clicking existing meal */
+	/** Called when clicking a component in a slot */
 	onSelectMeal: (meal: MealWithDish, day: string, mealType: MealType) => void;
 }
 
@@ -38,8 +38,8 @@ export function WeekCalendar({
 		}),
 	);
 
-	const getMeal = (day: string, mealType: MealType): MealWithDish | undefined =>
-		meals.find((m) => m.day === day && m.mealType === mealType);
+	const getSlotMeals = (day: string, mealType: MealType): MealWithDish[] =>
+		meals.filter((m) => m.day === day && m.mealType === mealType);
 
 	const today = formatDateKey(new Date());
 
@@ -48,21 +48,21 @@ export function WeekCalendar({
 			<DesktopCalendar
 				weekDates={weekDates}
 				today={today}
-				getMeal={getMeal}
+				getSlotMeals={getSlotMeals}
 				onAddMeal={onAddMeal}
 				onSelectMeal={onSelectMeal}
 			/>
 			<TabletCalendar
 				weekDates={weekDates}
 				today={today}
-				getMeal={getMeal}
+				getSlotMeals={getSlotMeals}
 				onAddMeal={onAddMeal}
 				onSelectMeal={onSelectMeal}
 			/>
 			<MobileCalendar
 				weekDates={weekDates}
 				today={today}
-				getMeal={getMeal}
+				getSlotMeals={getSlotMeals}
 				onAddMeal={onAddMeal}
 				onSelectMeal={onSelectMeal}
 			/>
@@ -73,7 +73,7 @@ export function WeekCalendar({
 interface CalendarViewProps {
 	weekDates: Date[];
 	today: string;
-	getMeal: (day: string, mealType: MealType) => MealWithDish | undefined;
+	getSlotMeals: (day: string, mealType: MealType) => MealWithDish[];
 	onAddMeal: (day: string, mealType: MealType) => void;
 	onSelectMeal: (meal: MealWithDish, day: string, mealType: MealType) => void;
 }
@@ -84,7 +84,7 @@ interface CalendarViewProps {
 function DesktopCalendar({
 	weekDates,
 	today,
-	getMeal,
+	getSlotMeals,
 	onAddMeal,
 	onSelectMeal,
 }: CalendarViewProps) {
@@ -130,15 +130,15 @@ function DesktopCalendar({
 						</div>
 						{weekDates.map((date) => {
 							const dateKey = formatDateKey(date);
-							const meal = getMeal(dateKey, mealType);
+							const slotMeals = getSlotMeals(dateKey, mealType);
 							return (
 								<MealSlot
 									key={`${dateKey}-${mealType}`}
 									day={dateKey}
 									mealType={mealType}
-									meal={meal}
+									meals={slotMeals}
 									onAdd={() => onAddMeal(dateKey, mealType)}
-									onSelect={() => meal && onSelectMeal(meal, dateKey, mealType)}
+									onSelectMeal={(meal) => onSelectMeal(meal, dateKey, mealType)}
 								/>
 							);
 						})}
@@ -155,7 +155,7 @@ function DesktopCalendar({
 function TabletCalendar({
 	weekDates,
 	today,
-	getMeal,
+	getSlotMeals,
 	onAddMeal,
 	onSelectMeal,
 }: CalendarViewProps) {
@@ -190,16 +190,16 @@ function TabletCalendar({
 							</div>
 							<div className="space-y-1">
 								{MEAL_TYPES.map((mealType) => {
-									const meal = getMeal(dateKey, mealType);
+									const slotMeals = getSlotMeals(dateKey, mealType);
 									return (
 										<MealSlot
 											key={`${dateKey}-${mealType}`}
 											day={dateKey}
 											mealType={mealType}
-											meal={meal}
+											meals={slotMeals}
 											onAdd={() => onAddMeal(dateKey, mealType)}
-											onSelect={() =>
-												meal && onSelectMeal(meal, dateKey, mealType)
+											onSelectMeal={(meal) =>
+												onSelectMeal(meal, dateKey, mealType)
 											}
 										/>
 									);
@@ -219,7 +219,7 @@ function TabletCalendar({
 function MobileCalendar({
 	weekDates,
 	today,
-	getMeal,
+	getSlotMeals,
 	onAddMeal,
 	onSelectMeal,
 }: CalendarViewProps) {
@@ -255,16 +255,16 @@ function MobileCalendar({
 						</div>
 						<div className="space-y-2">
 							{MEAL_TYPES.map((mealType) => {
-								const meal = getMeal(dateKey, mealType);
+								const slotMeals = getSlotMeals(dateKey, mealType);
 								return (
 									<MealSlot
 										key={`${dateKey}-${mealType}`}
 										day={dateKey}
 										mealType={mealType}
-										meal={meal}
+										meals={slotMeals}
 										onAdd={() => onAddMeal(dateKey, mealType)}
-										onSelect={() =>
-											meal && onSelectMeal(meal, dateKey, mealType)
+										onSelectMeal={(meal) =>
+											onSelectMeal(meal, dateKey, mealType)
 										}
 									/>
 								);

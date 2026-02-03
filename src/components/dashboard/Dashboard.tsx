@@ -1,11 +1,8 @@
 import { Suspense, useState } from "react";
-import {
-	formatDateKey,
-	getWeekDates,
-	getWeekStart,
-} from "../../../lib/constants";
+import { formatDateKey, getWeekDates, getWeekStart } from "@/lib/constants";
 import { AddMealModal } from "./AddMealModal";
 import { CalendarSkeleton } from "./CalendarSkeleton";
+import { LeftoverTracker } from "./LeftoverTracker";
 import { MealActionModal } from "./MealActionModal";
 import type { SelectedMeal, SelectedSlot } from "./types";
 import { WeekCalendar } from "./WeekCalendar";
@@ -51,10 +48,14 @@ export function Dashboard() {
 				/>
 			</Suspense>
 
+			<LeftoverTracker />
+
 			{selectedSlot && (
 				<AddMealModal
+					key={selectedSlot.existingMeal?._id ?? "add"}
 					day={selectedSlot.day}
 					mealType={selectedSlot.mealType}
+					existingMeal={selectedSlot.existingMeal}
 					onClose={() => setSelectedSlot(null)}
 				/>
 			)}
@@ -64,6 +65,14 @@ export function Dashboard() {
 					meal={selectedMeal.meal}
 					onClose={() => setSelectedMeal(null)}
 					onEdit={() => {
+						setSelectedSlot({
+							day: selectedMeal.day,
+							mealType: selectedMeal.mealType,
+							existingMeal: selectedMeal.meal,
+						});
+						setSelectedMeal(null);
+					}}
+					onAddAnother={() => {
 						setSelectedSlot({
 							day: selectedMeal.day,
 							mealType: selectedMeal.mealType,

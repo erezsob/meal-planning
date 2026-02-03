@@ -1,15 +1,25 @@
 import { api } from "convex/_generated/api";
 import { useMutation } from "convex/react";
-import { Edit, Trash2, X } from "lucide-react";
+import { Edit, Plus, Trash2 } from "lucide-react";
+import { Button } from "@/lib/components/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from "@/lib/components/dialog";
+import { COMPONENT_ROLE_LABELS, DEFAULT_COMPONENT_ROLE } from "@/lib/constants";
 import type { MealWithDish } from "./types";
 
 interface MealActionModalProps {
-	/** The meal to show actions for */
+	/** The meal (component) to show actions for */
 	meal: MealWithDish;
 	/** Called when closing the modal */
 	onClose: () => void;
 	/** Called when edit action is triggered */
 	onEdit: () => void;
+	/** Called when "Add another component" is clicked (same slot) */
+	onAddAnother: () => void;
 }
 
 /**
@@ -19,12 +29,16 @@ export function MealActionModal({
 	meal,
 	onClose,
 	onEdit,
+	onAddAnother,
 }: MealActionModalProps) {
 	const eatMeal = useMutation(api.mealPlans.eatMeal);
 	const skipMeal = useMutation(api.mealPlans.skipMeal);
 	const removeMeal = useMutation(api.mealPlans.remove);
 
+	const roleLabel =
+		COMPONENT_ROLE_LABELS[meal.componentRole ?? DEFAULT_COMPONENT_ROLE];
 	const displayName = meal.dish?.name ?? meal.customName ?? "Unknown";
+	const title = `${roleLabel}: ${displayName}`;
 
 	const handleEat = () => {
 		eatMeal({ id: meal._id });
@@ -42,55 +56,30 @@ export function MealActionModal({
 	};
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-			{/* Backdrop */}
-			<div
-				className="absolute inset-0 bg-black/60"
-				onClick={onClose}
-				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				aria-hidden="true"
-			/>
+		<Dialog open onOpenChange={(open) => !open && onClose()}>
+			<DialogContent className="sm:max-w-sm">
+				<DialogHeader>
+					<DialogTitle className="truncate pr-6">{title}</DialogTitle>
+				</DialogHeader>
 
-			{/* Modal */}
-			<div className="relative w-full max-w-sm bg-gray-900 rounded-xl border border-gray-700 shadow-2xl">
-				{/* Header */}
-				<div className="flex items-center justify-between p-4 border-b border-gray-700">
-					<h2 className="text-lg font-semibold text-gray-100 truncate pr-2">
-						{displayName}
-					</h2>
-					<button
-						type="button"
-						onClick={onClose}
-						className="p-2 hover:bg-gray-800 rounded-lg transition-colors flex-shrink-0"
-						aria-label="Close"
-					>
-						<X size={20} />
-					</button>
-				</div>
-
-				{/* Actions */}
-				<div className="p-4 space-y-2">
+				<div className="space-y-2">
 					{meal.status === "planned" && (
 						<>
-							<button
-								type="button"
-								onClick={handleEat}
-								className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-							>
+							<Button onClick={handleEat} className="w-full" size="lg">
 								✓ Ate it
-							</button>
-							<button
-								type="button"
+							</Button>
+							<Button
 								onClick={handleSkip}
-								className="w-full py-3 px-4 bg-amber-600 hover:bg-amber-700 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+								className="w-full bg-amber-600 hover:bg-amber-700"
+								size="lg"
 							>
 								↺ Skipped
-							</button>
+							</Button>
 						</>
 					)}
 
 					{meal.status === "eaten" && (
-						<div className="text-center py-2 text-emerald-400 font-medium">
+						<div className="text-center py-2 text-primary font-medium">
 							✓ Already eaten
 						</div>
 					)}
@@ -101,26 +90,32 @@ export function MealActionModal({
 						</div>
 					)}
 
-					<div className="pt-2 border-t border-gray-700 flex gap-2">
-						<button
-							type="button"
-							onClick={onEdit}
-							className="flex-1 py-2 px-4 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors flex items-center justify-center gap-2"
+					<div className="pt-2 border-t space-y-2">
+						<Button
+							variant="secondary"
+							onClick={onAddAnother}
+							className="w-full"
 						>
-							<Edit size={16} />
-							Edit
-						</button>
-						<button
-							type="button"
-							onClick={handleDelete}
-							className="flex-1 py-2 px-4 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg transition-colors flex items-center justify-center gap-2"
-						>
-							<Trash2 size={16} />
-							Delete
-						</button>
+							<Plus size={16} />
+							Add another component
+						</Button>
+						<div className="flex gap-2">
+							<Button variant="secondary" onClick={onEdit} className="flex-1">
+								<Edit size={16} />
+								Edit
+							</Button>
+							<Button
+								variant="destructive"
+								onClick={handleDelete}
+								className="flex-1"
+							>
+								<Trash2 size={16} />
+								Delete
+							</Button>
+						</div>
 					</div>
 				</div>
-			</div>
-		</div>
+			</DialogContent>
+		</Dialog>
 	);
 }

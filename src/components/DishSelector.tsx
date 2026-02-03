@@ -3,8 +3,18 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { api } from "convex/_generated/api";
 import type { Doc, Id } from "convex/_generated/dataModel";
 import type { FunctionReturnType } from "convex/server";
-import { RefreshCw, Search, UtensilsCrossed, X } from "lucide-react";
-import { Suspense, useEffect, useId, useRef, useState } from "react";
+import { RefreshCw, Search, UtensilsCrossed } from "lucide-react";
+import { Suspense, useId, useState } from "react";
+import { Button } from "@/lib/components/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from "@/lib/components/dialog";
+import { Input } from "@/lib/components/input";
+import { Label } from "@/lib/components/label";
+import { Skeleton } from "@/lib/components/skeleton";
 import { HOUSEHOLD_ID } from "../../lib/constants";
 import { TagList } from "./TagBadge";
 
@@ -30,6 +40,8 @@ interface DishSelectorProps {
 		dish: Doc<"dishes">,
 		available: number,
 	) => void;
+	/** Optional content rendered below header (e.g. role picker) */
+	headerContent?: React.ReactNode;
 }
 
 /**
@@ -42,12 +54,18 @@ export function DishSelector({
 	onSelectCustom,
 	leftoverSources = [],
 	onSelectLeftover,
+	headerContent,
 }: DishSelectorProps) {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [customName, setCustomName] = useState("");
 	const [activeTab, setActiveTab] = useState<"dishes" | "custom" | "leftovers">(
 		"dishes",
 	);
+
+	// Compute effective tab - reset to "dishes" if leftovers tab selected but no leftovers available
+	const hasLeftovers = leftoverSources.length > 0;
+	const effectiveTab =
+		activeTab === "leftovers" && !hasLeftovers ? "dishes" : activeTab;
 
 	if (!isOpen) return null;
 
@@ -61,39 +79,25 @@ export function DishSelector({
 	};
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-			{/* Backdrop */}
-			<div
-				className="absolute inset-0 bg-black/60"
-				onClick={onClose}
-				onKeyDown={(e) => e.key === "Escape" && onClose()}
-				aria-hidden="true"
-			/>
+		<Dialog open onOpenChange={(open) => !open && onClose()}>
+			<DialogContent className="sm:max-w-lg max-h-[80vh] flex flex-col gap-0 p-0">
+				<DialogHeader className="p-4 pb-0">
+					<DialogTitle>Add Meal</DialogTitle>
+				</DialogHeader>
 
-			{/* Modal */}
-			<div className="relative w-full max-w-lg max-h-[80vh] flex flex-col bg-gray-900 rounded-xl border border-gray-700 shadow-2xl">
-				{/* Header */}
-				<div className="flex items-center justify-between p-4 border-b border-gray-700">
-					<h2 className="text-lg font-semibold text-gray-100">Add Meal</h2>
-					<button
-						type="button"
-						onClick={onClose}
-						className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
-						aria-label="Close"
-					>
-						<X size={20} />
-					</button>
-				</div>
+				{headerContent && (
+					<div className="px-4 pt-2 pb-3 border-b">{headerContent}</div>
+				)}
 
 				{/* Tabs */}
-				<div className="flex border-b border-gray-700">
+				<div className="flex border-b">
 					<button
 						type="button"
 						onClick={() => setActiveTab("dishes")}
 						className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-							activeTab === "dishes"
-								? "text-emerald-400 border-b-2 border-emerald-400"
-								: "text-gray-400 hover:text-gray-200"
+							effectiveTab === "dishes"
+								? "text-primary border-b-2 border-primary"
+								: "text-muted-foreground hover:text-foreground"
 						}`}
 					>
 						<UtensilsCrossed size={16} className="inline mr-2" />
@@ -103,21 +107,21 @@ export function DishSelector({
 						type="button"
 						onClick={() => setActiveTab("custom")}
 						className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-							activeTab === "custom"
-								? "text-emerald-400 border-b-2 border-emerald-400"
-								: "text-gray-400 hover:text-gray-200"
+							effectiveTab === "custom"
+								? "text-primary border-b-2 border-primary"
+								: "text-muted-foreground hover:text-foreground"
 						}`}
 					>
 						Custom Meal
 					</button>
-					{leftoverSources.length > 0 && (
+					{hasLeftovers && (
 						<button
 							type="button"
 							onClick={() => setActiveTab("leftovers")}
 							className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-								activeTab === "leftovers"
-									? "text-emerald-400 border-b-2 border-emerald-400"
-									: "text-gray-400 hover:text-gray-200"
+								effectiveTab === "leftovers"
+									? "text-primary border-b-2 border-primary"
+									: "text-muted-foreground hover:text-foreground"
 							}`}
 						>
 							<RefreshCw size={16} className="inline mr-2" />
@@ -128,20 +132,20 @@ export function DishSelector({
 
 				{/* Content */}
 				<div className="flex-1 overflow-y-auto p-4">
-					{activeTab === "dishes" && (
+					{effectiveTab === "dishes" && (
 						<>
 							{/* Search */}
 							<div className="relative mb-4">
 								<Search
 									size={18}
-									className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
+									className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
 								/>
-								<input
+								<Input
 									type="text"
 									value={searchQuery}
 									onChange={(e) => setSearchQuery(e.target.value)}
 									placeholder="Search dishes..."
-									className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:border-emerald-500"
+									className="pl-10"
 								/>
 							</div>
 
@@ -151,14 +155,13 @@ export function DishSelector({
 									searchQuery={searchQuery}
 									onSelect={(dish) => {
 										onSelectDish(dish);
-										onClose();
 									}}
 								/>
 							</Suspense>
 						</>
 					)}
 
-					{activeTab === "custom" && (
+					{effectiveTab === "custom" && (
 						<CustomMealForm
 							customName={customName}
 							setCustomName={setCustomName}
@@ -166,7 +169,7 @@ export function DishSelector({
 						/>
 					)}
 
-					{activeTab === "leftovers" && (
+					{effectiveTab === "leftovers" && (
 						<div className="space-y-2">
 							{leftoverSources.map(({ meal, dish, available }) => (
 								<button
@@ -180,11 +183,11 @@ export function DishSelector({
 										);
 										onClose();
 									}}
-									className="w-full p-3 flex items-center justify-between bg-gray-800 hover:bg-gray-750 border border-gray-700 rounded-lg transition-colors text-left"
+									className="w-full p-3 flex items-center justify-between bg-card hover:bg-accent border rounded-lg transition-colors text-left"
 								>
 									<div>
-										<p className="font-medium text-gray-100">{dish.name}</p>
-										<p className="text-sm text-gray-400">
+										<p className="font-medium text-foreground">{dish.name}</p>
+										<p className="text-sm text-muted-foreground">
 											Cooked on {meal.day}
 										</p>
 									</div>
@@ -196,8 +199,8 @@ export function DishSelector({
 						</div>
 					)}
 				</div>
-			</div>
-		</div>
+			</DialogContent>
+		</Dialog>
 	);
 }
 
@@ -216,38 +219,25 @@ function CustomMealForm({
 	onSubmit,
 }: CustomMealFormProps) {
 	const inputId = useId();
-	const inputRef = useRef<HTMLInputElement>(null);
-
-	useEffect(() => {
-		inputRef.current?.focus();
-	}, []);
 
 	return (
 		<form onSubmit={onSubmit} className="space-y-4">
 			<div>
-				<label
-					htmlFor={inputId}
-					className="block text-sm font-medium text-gray-300 mb-2"
-				>
+				<Label htmlFor={inputId} className="mb-2">
 					Meal Name
-				</label>
-				<input
-					ref={inputRef}
+				</Label>
+				<Input
 					id={inputId}
 					type="text"
 					value={customName}
 					onChange={(e) => setCustomName(e.target.value)}
 					placeholder="e.g., Takeout, Restaurant, etc."
-					className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:border-emerald-500"
+					autoFocus
 				/>
 			</div>
-			<button
-				type="submit"
-				disabled={!customName.trim()}
-				className="w-full py-2 px-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-700 disabled:text-gray-500 rounded-lg font-medium transition-colors"
-			>
+			<Button type="submit" disabled={!customName.trim()} className="w-full">
 				Add Custom Meal
-			</button>
+			</Button>
 		</form>
 	);
 }
@@ -270,7 +260,7 @@ function DishList({ searchQuery, onSelect }: DishListProps) {
 
 	if (dishes.length === 0) {
 		return (
-			<div className="text-center py-8 text-gray-500">
+			<div className="text-center py-8 text-muted-foreground">
 				{searchQuery
 					? "No dishes match your search"
 					: "No dishes in library yet"}
@@ -285,11 +275,11 @@ function DishList({ searchQuery, onSelect }: DishListProps) {
 					key={dish._id}
 					type="button"
 					onClick={() => onSelect(dish)}
-					className="w-full p-3 flex flex-col items-start bg-gray-800 hover:bg-gray-750 border border-gray-700 rounded-lg transition-colors text-left"
+					className="w-full p-3 flex flex-col items-start bg-card hover:bg-accent border rounded-lg transition-colors text-left"
 				>
-					<span className="font-medium text-gray-100">{dish.name}</span>
+					<span className="font-medium text-foreground">{dish.name}</span>
 					{dish.description && (
-						<span className="text-sm text-gray-400 line-clamp-1">
+						<span className="text-sm text-muted-foreground line-clamp-1">
 							{dish.description}
 						</span>
 					)}
@@ -304,24 +294,21 @@ function DishList({ searchQuery, onSelect }: DishListProps) {
 	);
 }
 
+/** Stable keys for dish list skeleton */
+const DISH_LIST_SKELETON_KEYS = ["dl-sk-1", "dl-sk-2", "dl-sk-3"] as const;
+
 /**
  * Loading skeleton for dish list
  */
 function DishListSkeleton() {
 	return (
 		<div className="space-y-2">
-			{Array.from({ length: 3 }).map(() => {
-				const key = `dish-list-skeleton-${crypto.randomUUID()}`;
-				return (
-					<div
-						key={key}
-						className="p-3 bg-gray-800 border border-gray-700 rounded-lg animate-pulse"
-					>
-						<div className="h-5 bg-gray-700 rounded w-1/2 mb-2" />
-						<div className="h-4 bg-gray-700 rounded w-3/4" />
-					</div>
-				);
-			})}
+			{DISH_LIST_SKELETON_KEYS.map((key) => (
+				<div key={key} className="p-3 bg-card border rounded-lg">
+					<Skeleton className="h-5 w-1/2 mb-2" />
+					<Skeleton className="h-4 w-3/4" />
+				</div>
+			))}
 		</div>
 	);
 }

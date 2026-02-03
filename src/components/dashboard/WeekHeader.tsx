@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { formatDateKey, getWeekStart } from "../../../lib/constants";
+import { Button } from "@/lib/components/button";
+import { formatDateKey, getWeekStart } from "@/lib/constants";
 
 interface WeekHeaderProps {
 	/** Start date of the current week */
@@ -51,36 +52,32 @@ export function WeekHeader({
 
 			<div className="flex items-center gap-2">
 				{!isCurrentWeek && (
-					<button
-						type="button"
-						onClick={onToday}
-						className="ml-2 px-3 py-1.5 text-sm bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors"
-					>
+					<Button onClick={onToday} size="sm" className="ml-2">
 						Today
-					</button>
+					</Button>
 				)}
 
-				<button
-					type="button"
+				<Button
+					variant="ghost"
+					size="icon"
 					onClick={onPrevious}
-					className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
 					aria-label="Previous week"
 				>
 					<ChevronLeft size={20} />
-				</button>
+				</Button>
 
 				<span className="min-w-[180px] text-center font-medium text-gray-200">
 					{formatRange()}
 				</span>
 
-				<button
-					type="button"
+				<Button
+					variant="ghost"
+					size="icon"
 					onClick={onNext}
-					className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
 					aria-label="Next week"
 				>
 					<ChevronRight size={20} />
-				</button>
+				</Button>
 			</div>
 		</header>
 	);

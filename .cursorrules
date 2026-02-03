@@ -1,9 +1,15 @@
+---
+description: 
+alwaysApply: true
+---
+
 # Cursor IDE Rules for Meal Planning App
 
 ## Project Context
 This is a meal planning app built with React, TypeScript, and Convex. The application provides a meal planning and shopping list.
 
 ## Code Style & Standards
+- Use pnpm to run npm commands and scripts (don't use yarn or npm).
 - Follow the code quality standards in `.docs/CODE_STANDARDS.md`
 - Use TypeScript with strict mode
 - Prefer functional components and hooks
