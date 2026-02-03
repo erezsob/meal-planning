@@ -1,5 +1,5 @@
 {
-  "name": "meal-planning-app-1",
+  "name": "meal-planning-app",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.28.0",
