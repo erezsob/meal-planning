@@ -200,6 +200,7 @@ Coverage reports are generated in multiple formats:
 2. **Use `fireEvent`** - For simple click/input events
 3. **Avoid implementation details** - Test behavior, not internals
 4. **Test user interactions** - Click handlers, form inputs, keyboard events
+5. **Use only screen queries via testing-library/react** - Avoid direct DOM queries (e.g., `container.querySelector`)
 
 ### Async Testing
 

@@ -5,6 +5,7 @@ import { Button } from "@/lib/components/button";
 import {
 	Dialog,
 	DialogContent,
+	DialogDescription,
 	DialogHeader,
 	DialogTitle,
 } from "@/lib/components/dialog";
@@ -60,6 +61,9 @@ export function MealActionModal({
 			<DialogContent className="sm:max-w-sm">
 				<DialogHeader>
 					<DialogTitle className="truncate pr-6">{title}</DialogTitle>
+					<DialogDescription className="sr-only">
+						Actions for this meal component
+					</DialogDescription>
 				</DialogHeader>
 
 				<div className="space-y-2">
