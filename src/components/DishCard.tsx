@@ -84,7 +84,7 @@ const DISH_SKELETON_KEYS = [
 
 export function DishCardSkeleton({ count = 1 }: DishCardSkeletonProps) {
 	return (
-		<>
+		<div role="presentation" aria-label="Dish card skeleton">
 			{DISH_SKELETON_KEYS.slice(0, count).map((key) => (
 				<Card key={key} className="gap-0 p-4 py-4">
 					<Skeleton className="h-5 w-3/4 mb-2" />
@@ -96,6 +96,6 @@ export function DishCardSkeleton({ count = 1 }: DishCardSkeletonProps) {
 					</div>
 				</Card>
 			))}
-		</>
+		</div>
 	);
 }

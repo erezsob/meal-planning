@@ -9,6 +9,7 @@ import { Button } from "@/lib/components/button";
 import {
 	Dialog,
 	DialogContent,
+	DialogDescription,
 	DialogHeader,
 	DialogTitle,
 } from "@/lib/components/dialog";
@@ -83,6 +84,9 @@ export function DishSelector({
 			<DialogContent className="sm:max-w-lg max-h-[80vh] flex flex-col gap-0 p-0">
 				<DialogHeader className="p-4 pb-0">
 					<DialogTitle>Add Meal</DialogTitle>
+					<DialogDescription className="sr-only">
+						Select a dish from library, enter custom meal, or choose leftovers
+					</DialogDescription>
 				</DialogHeader>
 
 				{headerContent && (
