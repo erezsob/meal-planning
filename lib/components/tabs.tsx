@@ -1,9 +1,8 @@
 import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "lib/utils";
 import { Tabs as TabsPrimitive } from "radix-ui";
 
-import { cn } from "lib/utils";
-
-function Tabs({
+export function Tabs({
 	className,
 	orientation = "horizontal",
 	...props
@@ -37,7 +36,7 @@ const tabsListVariants = cva(
 	},
 );
 
-function TabsList({
+export function TabsList({
 	className,
 	variant = "default",
 	...props
@@ -53,7 +52,7 @@ function TabsList({
 	);
 }
 
-function TabsTrigger({
+export function TabsTrigger({
 	className,
 	...props
 }: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
@@ -72,7 +71,7 @@ function TabsTrigger({
 	);
 }
 
-function TabsContent({
+export function TabsContent({
 	className,
 	...props
 }: React.ComponentProps<typeof TabsPrimitive.Content>) {
@@ -84,5 +83,3 @@ function TabsContent({
 		/>
 	);
 }
-
-export { Tabs, TabsList, TabsTrigger, TabsContent, tabsListVariants };
