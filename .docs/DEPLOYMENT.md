@@ -45,14 +45,22 @@ npx convex dashboard --prod
 pnpm build && pnpm run deploy
 ```
 
-### Secrets
+### Environment Files (gitignored)
 
-Convex URL is stored as a Cloudflare Worker secret:
+Create these files locally:
 
-```bash
-npx wrangler secret put VITE_CONVEX_URL --name plan
-# Enter value from VITE_CONVEX_URL_PROD in .env.local
+**`.env.local`** (for local dev):
 ```
+CONVEX_DEPLOYMENT=dev:<your-dev-deployment>
+VITE_CONVEX_URL=https://<your-dev-deployment>.convex.cloud
+```
+
+**`.env.production`** (for prod builds):
+```
+VITE_CONVEX_URL=https://<your-prod-deployment>.convex.cloud
+```
+
+Vite automatically loads `.env.production` during `pnpm build`.
 
 ## Access Control
 
