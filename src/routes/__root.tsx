@@ -40,14 +40,18 @@ export const Route = createRootRouteWithContext<{
 				content: "width=device-width, initial-scale=1",
 			},
 			{
-				title: "Meal Planner",
+				title: "Sick Meals",
+			},
+			{
+				name: "theme-color",
+				content: "#030712",
 			},
 		],
 		links: [
-			{
-				rel: "stylesheet",
-				href: appCss,
-			},
+			{ rel: "icon", href: "/favicon.ico" },
+			{ rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+			{ rel: "manifest", href: "/manifest.json" },
+			{ rel: "stylesheet", href: appCss },
 		],
 	}),
 
