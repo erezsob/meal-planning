@@ -1,6 +1,6 @@
 import { Check, CircleDot, Lightbulb } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PLAN_STEPS, PLAN_STEP_LABELS, type PlanStep } from "./types";
+import { PLAN_STEP_LABELS, PLAN_STEPS, type PlanStep } from "./types";
 
 const STEP_ICONS: Record<PlanStep, React.ElementType> = {
 	collect: Lightbulb,
