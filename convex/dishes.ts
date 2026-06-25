@@ -71,6 +71,26 @@ export const getByTags = query({
 });
 
 /**
+ * Create a minimal dish (used by plan mode for custom quick-add meals).
+ * Returns the new dish ID.
+ */
+export const createQuick = mutation({
+	args: {
+		name: v.string(),
+		householdId: v.string(),
+		defaultServings: v.optional(v.number()),
+	},
+	handler: async (ctx, args) => {
+		return await ctx.db.insert("dishes", {
+			name: args.name,
+			ingredients: [],
+			householdId: args.householdId,
+			defaultServings: args.defaultServings,
+		});
+	},
+});
+
+/**
  * Create a new dish
  */
 export const create = mutation({

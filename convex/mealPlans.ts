@@ -213,6 +213,49 @@ export const planMeal = mutation({
 });
 
 /**
+ * Batch-plan multiple meal components in one transaction.
+ * Used by Plan Mode to commit an entire week at once.
+ */
+export const planMealBatch = mutation({
+	args: {
+		meals: v.array(
+			v.object({
+				day: v.string(),
+				mealType: mealTypeValidator,
+				componentRole: v.optional(componentRoleValidator),
+				dishId: v.optional(v.id("dishes")),
+				customName: v.optional(v.string()),
+				servingsUsed: v.number(),
+				servingsMade: v.optional(v.number()),
+				isLeftover: v.boolean(),
+				sourceMealId: v.optional(v.id("mealPlans")),
+			}),
+		),
+		householdId: v.string(),
+	},
+	handler: async (ctx, args) => {
+		const ids = await Promise.all(
+			args.meals.map((meal) =>
+				ctx.db.insert("mealPlans", {
+					day: meal.day,
+					mealType: meal.mealType,
+					componentRole: meal.componentRole ?? "main",
+					dishId: meal.dishId,
+					customName: meal.customName,
+					servingsUsed: meal.servingsUsed,
+					servingsMade: meal.servingsMade,
+					status: "planned",
+					isLeftover: meal.isLeftover,
+					sourceMealId: meal.sourceMealId,
+					householdId: args.householdId,
+				}),
+			),
+		);
+		return ids;
+	},
+});
+
+/**
  * Mark a meal as eaten
  */
 export const eatMeal = mutation({

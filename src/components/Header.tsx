@@ -1,5 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { BookOpen, Calendar, Menu, ShoppingCart } from "lucide-react";
+import {
+	BookOpen,
+	Calendar,
+	ClipboardList,
+	Menu,
+	ShoppingCart,
+} from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/lib/components/button";
 import {
@@ -70,6 +76,17 @@ export function Header() {
 				{/* Desktop navigation */}
 				<nav className="hidden md:flex items-center gap-1" aria-label="Main">
 					<Link
+						to="/plan"
+						className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-accent transition-colors"
+						activeProps={{
+							className:
+								"flex items-center gap-2 px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 transition-colors",
+						}}
+					>
+						<ClipboardList size={18} />
+						<span>Plan</span>
+					</Link>
+					<Link
 						to="/"
 						className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-accent transition-colors"
 						activeProps={{
@@ -116,6 +133,12 @@ export function Header() {
 					</SheetHeader>
 
 					<nav className="flex-1 p-4 space-y-2" aria-label="Mobile">
+						<NavItem
+							to="/plan"
+							icon={<ClipboardList size={20} />}
+							label="Plan Mode"
+							onNavigate={closeMenu}
+						/>
 						<NavItem
 							to="/"
 							icon={<Calendar size={20} />}

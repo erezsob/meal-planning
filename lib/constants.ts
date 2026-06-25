@@ -149,6 +149,16 @@ export const getWeekDates = (weekStart: Date): Date[] => {
 };
 
 /**
+ * Get array of N dates starting from a given date
+ */
+export const getDateRange = (start: Date, numDays: number): Date[] =>
+	Array.from({ length: numDays }, (_, i) => {
+		const d = new Date(start);
+		d.setDate(d.getDate() + i);
+		return d;
+	});
+
+/**
  * localStorage key prefix for shopping list checked state (per week)
  */
 export const SHOPPING_CHECKED_KEY_PREFIX = "shopping-checked";
