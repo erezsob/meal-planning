@@ -4,6 +4,14 @@ Enhancements and features for future development.
 
 ---
 
+## Meal Logging & History
+
+**Status**: Design complete — see [MEAL_LOGGING.md](./MEAL_LOGGING.md)
+
+Quick on-the-go logging of custom or library meals (creates `eaten` records immediately), plus a `/history` view for browsing and analyzing past consumption. Domain terms in [CONTEXT.md](../CONTEXT.md).
+
+---
+
 ## User-Defined Component Roles
 
 **Context**: Currently using fixed roles: `main`, `side`, `dessert`, `drink`, `other`.
