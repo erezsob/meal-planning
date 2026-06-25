@@ -12,9 +12,6 @@ import type { MealWithDish } from "./dashboard/types";
 import { LeftoverBadge } from "./LeftoverBadge";
 import { StatusBadge } from "./StatusBadge";
 
-/** Max width for component name truncation in slot chip. */
-const COMPONENT_NAME_MAX_WIDTH = "120px";
-
 /** Meal type display configuration */
 const MEAL_TYPE_CONFIG: Record<MealType, { label: string; emoji: string }> = {
 	breakfast: { label: "Breakfast", emoji: "🌅" },
@@ -134,10 +131,7 @@ export function MealSlot({
 										}}
 										className="inline-flex flex-wrap items-center gap-1.5 px-2 py-1 rounded-md bg-gray-700/80 hover:bg-gray-600 border border-gray-600 hover:border-gray-500 text-left transition-colors"
 									>
-										<span
-											className="font-medium text-xs text-gray-100 truncate"
-											style={{ maxWidth: COMPONENT_NAME_MAX_WIDTH }}
-										>
+										<span className="font-medium text-xs text-gray-100 truncate max-w-[120px]">
 											{getMealDisplayName(meal)}
 										</span>
 										<StatusBadge status={meal.status} />

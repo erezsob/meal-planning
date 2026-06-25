@@ -1,7 +1,6 @@
 import { convexQuery } from "@convex-dev/react-query";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "convex/_generated/api";
-import type { Id } from "convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { AlertCircle, Calendar, Trash2 } from "lucide-react";
@@ -106,7 +105,7 @@ function LeftoverCard({ leftover, onSchedule }: LeftoverCardProps) {
 	const handleVoid = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		if (window.confirm(`Void ${available} servings of ${dish.name}?`)) {
-			voidLeftovers({ sourceMealId: meal._id as Id<"mealPlans"> });
+			voidLeftovers({ sourceMealId: meal._id });
 		}
 	};
 
@@ -190,7 +189,7 @@ function ScheduleLeftoverModal({
 			dishId: dish._id,
 			servingsUsed: servings,
 			isLeftover: true,
-			sourceMealId: meal._id as Id<"mealPlans">,
+			sourceMealId: meal._id,
 			householdId: HOUSEHOLD_ID,
 		});
 		onClose();
