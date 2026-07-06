@@ -84,7 +84,7 @@ export const MEAL_TYPE_ORDER: Record<MealType, number> = {
 };
 
 /** Hour boundaries for inferring meal type from time of day */
-export const MEAL_TYPE_INFERENCE = {
+const MEAL_TYPE_INFERENCE = {
 	breakfastEndHour: 11,
 	lunchEndHour: 16,
 } as const;
@@ -110,8 +110,12 @@ export const HISTORY_RANGE_LABELS: Record<HistoryRangePreset, string> = {
 	all: "All time",
 };
 
+/** Milliseconds in one calendar day (for date diffs) */
+export const MS_PER_DAY = 1000 * 60 * 60 * 24;
+
 /**
  * Resolve a history preset into optional start/end date keys (YYYY-MM-DD).
+ * Presets include today plus the prior N-1 days (e.g. 7d = 7 calendar days).
  */
 export function getHistoryDateRange(
 	preset: HistoryRangePreset,
@@ -121,7 +125,7 @@ export function getHistoryDateRange(
 	if (preset === "all") return { endDate };
 
 	const start = new Date(today);
-	const daysBack = preset === "7d" ? 7 : 30;
+	const daysBack = preset === "7d" ? 6 : 29;
 	start.setDate(start.getDate() - daysBack);
 	return { startDate: formatDateKey(start), endDate };
 }

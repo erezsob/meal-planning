@@ -16,10 +16,9 @@ import {
 	MEAL_TYPE_LABELS,
 } from "@/lib/constants";
 import { MealActionModal } from "../dashboard/MealActionModal";
-import type { MealWithDish } from "../dashboard/types";
+import type { MealPlanWithDish } from "../dashboard/types";
 import { LogMealModal } from "../log";
 import {
-	type EatenMeal,
 	formatHistoryDayHeader,
 	getMealDisplayName,
 	groupMealsByDay,
@@ -34,8 +33,10 @@ export function HistoryView() {
 	const [customStart, setCustomStart] = useState("");
 	const [customEnd, setCustomEnd] = useState("");
 	const [useCustomRange, setUseCustomRange] = useState(false);
-	const [selectedMeal, setSelectedMeal] = useState<EatenMeal | null>(null);
-	const [editingMeal, setEditingMeal] = useState<MealWithDish | null>(null);
+	const [selectedMeal, setSelectedMeal] = useState<MealPlanWithDish | null>(
+		null,
+	);
+	const [editingMeal, setEditingMeal] = useState<MealPlanWithDish | null>(null);
 
 	const searchId = useId();
 	const startDateId = useId();
@@ -143,6 +144,9 @@ export function HistoryView() {
 				)}
 
 				<div className="relative">
+					<Label htmlFor={searchId} className="sr-only">
+						Search meals
+					</Label>
 					<Search
 						size={18}
 						className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
@@ -194,11 +198,11 @@ export function HistoryView() {
 
 			{selectedMeal && (
 				<MealActionModal
-					meal={selectedMeal as MealWithDish}
+					meal={selectedMeal}
 					eatenOnly
 					onClose={() => setSelectedMeal(null)}
 					onEdit={() => {
-						setEditingMeal(selectedMeal as MealWithDish);
+						setEditingMeal(selectedMeal);
 						setSelectedMeal(null);
 					}}
 				/>

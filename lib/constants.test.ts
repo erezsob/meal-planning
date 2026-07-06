@@ -123,7 +123,14 @@ describe("getHistoryDateRange", () => {
 		const today = new Date("2026-02-08");
 		const range = getHistoryDateRange("7d", today);
 		expect(range.endDate).toBe("2026-02-08");
-		expect(range.startDate).toBe("2026-02-01");
+		expect(range.startDate).toBe("2026-02-02");
+	});
+
+	it("returns last 30 days for 30d preset", () => {
+		const today = new Date("2026-02-08");
+		const range = getHistoryDateRange("30d", today);
+		expect(range.endDate).toBe("2026-02-08");
+		expect(range.startDate).toBe("2026-01-10");
 	});
 
 	it("returns no start date for all preset", () => {

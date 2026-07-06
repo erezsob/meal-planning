@@ -55,6 +55,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 	);
 }
 
+/**
+ * Show a brief confirmation or error message via the global toast.
+ */
 export function useToast(): ToastContextValue {
 	const context = useContext(ToastContext);
 	if (!context) {

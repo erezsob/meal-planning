@@ -1,10 +1,7 @@
-import type { api } from "convex/_generated/api";
-import type { FunctionReturnType } from "convex/server";
-import { MEAL_TYPE_ORDER } from "@/lib/constants";
+import { MEAL_TYPE_ORDER, MS_PER_DAY } from "@/lib/constants";
+import type { MealPlanWithDish } from "../dashboard/types";
 
-export type EatenMeal = FunctionReturnType<
-	typeof api.mealPlans.getEatenHistory
->[number];
+export type EatenMeal = MealPlanWithDish;
 
 export interface HistoryDayGroup {
 	day: string;
@@ -19,8 +16,7 @@ export function groupMealsByDay(meals: EatenMeal[]): HistoryDayGroup[] {
 
 	for (const meal of meals) {
 		const list = byDay.get(meal.day) ?? [];
-		list.push(meal);
-		byDay.set(meal.day, list);
+		byDay.set(meal.day, [...list, meal]);
 	}
 
 	return [...byDay.entries()]
@@ -45,7 +41,7 @@ export function formatHistoryDayHeader(day: string): string {
 	target.setHours(0, 0, 0, 0);
 
 	const diffDays = Math.round(
-		(today.getTime() - target.getTime()) / (1000 * 60 * 60 * 24),
+		(today.getTime() - target.getTime()) / MS_PER_DAY,
 	);
 
 	if (diffDays === 0) return "Today";
@@ -58,6 +54,9 @@ export function formatHistoryDayHeader(day: string): string {
 	});
 }
 
+/**
+ * Resolve the display name for an eaten meal (dish name, custom name, or fallback).
+ */
 export function getMealDisplayName(meal: EatenMeal): string {
 	return meal.dish?.name ?? meal.customName ?? "Unknown";
 }

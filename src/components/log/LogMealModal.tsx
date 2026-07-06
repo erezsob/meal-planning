@@ -1,5 +1,4 @@
 import { api } from "convex/_generated/api";
-import type { Id } from "convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import {
 	Dialog,
@@ -9,14 +8,14 @@ import {
 	DialogTitle,
 } from "@/lib/components/dialog";
 import { useToast } from "@/lib/components/toast";
-import { HOUSEHOLD_ID, MEAL_TYPE_LABELS, type MealType } from "@/lib/constants";
-import type { MealWithDish } from "../dashboard/types";
+import { HOUSEHOLD_ID, MEAL_TYPE_LABELS } from "@/lib/constants";
+import type { MealPlanWithDish } from "../dashboard/types";
 import { LogMealForm, type LogMealFormValues } from "./LogMealForm";
 
 interface LogMealModalProps {
 	onClose: () => void;
 	/** When set, modal opens in edit mode */
-	existingMeal?: MealWithDish;
+	existingMeal?: MealPlanWithDish;
 }
 
 /**
@@ -29,26 +28,32 @@ export function LogMealModal({ onClose, existingMeal }: LogMealModalProps) {
 	const isEdit = existingMeal !== undefined;
 
 	const handleSubmit = async (values: LogMealFormValues) => {
-		if (isEdit) {
-			await updateLog({
-				id: existingMeal._id,
-				day: values.day,
-				mealType: values.mealType,
-				dishId: values.dishId,
-				customName: values.customName,
-			});
-			showToast("Meal updated");
-		} else {
-			await logMeal({
-				householdId: HOUSEHOLD_ID,
-				day: values.day,
-				mealType: values.mealType,
-				dishId: values.dishId,
-				customName: values.customName,
-			});
-			showToast(`Logged ${MEAL_TYPE_LABELS[values.mealType].toLowerCase()}`);
+		try {
+			if (isEdit) {
+				await updateLog({
+					id: existingMeal._id,
+					day: values.day,
+					mealType: values.mealType,
+					dishId: values.dishId,
+					customName: values.customName,
+				});
+				showToast("Meal updated");
+			} else {
+				await logMeal({
+					householdId: HOUSEHOLD_ID,
+					day: values.day,
+					mealType: values.mealType,
+					dishId: values.dishId,
+					customName: values.customName,
+				});
+				showToast(`Logged ${MEAL_TYPE_LABELS[values.mealType].toLowerCase()}`);
+			}
+			onClose();
+		} catch (error) {
+			const message =
+				error instanceof Error ? error.message : "Could not save meal";
+			showToast(message);
 		}
-		onClose();
 	};
 
 	return (
@@ -68,8 +73,8 @@ export function LogMealModal({ onClose, existingMeal }: LogMealModalProps) {
 						existingMeal
 							? {
 									day: existingMeal.day,
-									mealType: existingMeal.mealType as MealType,
-									dishId: existingMeal.dishId as Id<"dishes"> | undefined,
+									mealType: existingMeal.mealType,
+									dishId: existingMeal.dishId,
 									customName: existingMeal.customName,
 									dish: existingMeal.dish,
 								}

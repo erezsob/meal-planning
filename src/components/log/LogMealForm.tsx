@@ -63,6 +63,11 @@ export function LogMealForm({
 
 	const dateId = useId();
 	const customNameId = useId();
+	const librarySearchId = useId();
+	const customTabId = useId();
+	const libraryTabId = useId();
+	const customPanelId = useId();
+	const libraryPanelId = useId();
 
 	const canSubmit =
 		activeTab === "custom"
@@ -99,8 +104,8 @@ export function LogMealForm({
 						required
 					/>
 				</div>
-				<div>
-					<span className="mb-1 block text-sm font-medium">Meal</span>
+				<fieldset>
+					<legend className="mb-1 block text-sm font-medium">Meal</legend>
 					<div className="flex gap-1">
 						{MEAL_TYPES.map((type) => (
 							<Button
@@ -110,17 +115,22 @@ export function LogMealForm({
 								size="sm"
 								className="flex-1 px-2 text-xs"
 								onClick={() => setMealType(type)}
+								aria-pressed={mealType === type}
 							>
 								{MEAL_TYPE_LABELS[type]}
 							</Button>
 						))}
 					</div>
-				</div>
+				</fieldset>
 			</div>
 
-			<div className="flex border-b">
+			<div className="flex border-b" role="tablist" aria-label="Meal source">
 				<button
 					type="button"
+					id={customTabId}
+					role="tab"
+					aria-selected={activeTab === "custom"}
+					aria-controls={customPanelId}
 					onClick={() => setActiveTab("custom")}
 					className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
 						activeTab === "custom"
@@ -132,6 +142,10 @@ export function LogMealForm({
 				</button>
 				<button
 					type="button"
+					id={libraryTabId}
+					role="tab"
+					aria-selected={activeTab === "library"}
+					aria-controls={libraryPanelId}
 					onClick={() => setActiveTab("library")}
 					className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
 						activeTab === "library"
@@ -145,7 +159,7 @@ export function LogMealForm({
 			</div>
 
 			{activeTab === "custom" ? (
-				<div>
+				<div id={customPanelId} role="tabpanel" aria-labelledby={customTabId}>
 					<Label htmlFor={customNameId} className="mb-1">
 						What did you eat?
 					</Label>
@@ -159,13 +173,22 @@ export function LogMealForm({
 					/>
 				</div>
 			) : (
-				<div className="space-y-3">
+				<div
+					id={libraryPanelId}
+					role="tabpanel"
+					aria-labelledby={libraryTabId}
+					className="space-y-3"
+				>
 					<div className="relative">
+						<Label htmlFor={librarySearchId} className="sr-only">
+							Search dishes
+						</Label>
 						<Search
 							size={18}
 							className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
 						/>
 						<Input
+							id={librarySearchId}
 							type="text"
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
@@ -191,7 +214,12 @@ export function LogMealForm({
 			)}
 
 			<div className="flex gap-2 pt-2">
-				<Button type="button" variant="secondary" onClick={onCancel} className="flex-1">
+				<Button
+					type="button"
+					variant="secondary"
+					onClick={onCancel}
+					className="flex-1"
+				>
 					Cancel
 				</Button>
 				<Button type="submit" disabled={!canSubmit} className="flex-1">
@@ -223,7 +251,9 @@ function LogDishList({
 	if (dishes.length === 0) {
 		return (
 			<p className="py-4 text-center text-sm text-muted-foreground">
-				{searchQuery ? "No dishes match your search" : "No dishes in library yet"}
+				{searchQuery
+					? "No dishes match your search"
+					: "No dishes in library yet"}
 			</p>
 		);
 	}

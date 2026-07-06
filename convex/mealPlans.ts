@@ -1,5 +1,6 @@
 import { v } from "convex/values";
-import { DEFAULT_COMPONENT_ROLE } from "../lib/constants";
+import { DEFAULT_COMPONENT_ROLE, MEAL_TYPE_ORDER } from "../lib/constants";
+import { validateLogMealInput } from "../lib/logMealValidation";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
 
@@ -52,7 +53,7 @@ export const getWeek = query({
 		return weekMeals.map((meal) => ({
 			...meal,
 			componentRole: meal.componentRole ?? DEFAULT_COMPONENT_ROLE,
-			dish: meal.dishId ? dishMap.get(meal.dishId) : null,
+			dish: meal.dishId ? (dishMap.get(meal.dishId) ?? null) : null,
 		}));
 	},
 });
@@ -274,16 +275,7 @@ export const logMeal = mutation({
 		customName: v.optional(v.string()),
 	},
 	handler: async (ctx, args) => {
-		const hasDish = args.dishId !== undefined;
-		const hasCustom = args.customName !== undefined && args.customName.trim() !== "";
-		if (hasDish === hasCustom) {
-			throw new Error("Provide either dishId or customName");
-		}
-
-		const today = new Date().toISOString().split("T")[0];
-		if (args.day > today) {
-			throw new Error("Cannot log meals for future dates");
-		}
+		validateLogMealInput(args);
 
 		const meals = await ctx.db
 			.query("mealPlans")
@@ -333,16 +325,7 @@ export const updateLog = mutation({
 			throw new Error("Only eaten meals can be updated via log edit");
 		}
 
-		const hasDish = args.dishId !== undefined;
-		const hasCustom = args.customName !== undefined && args.customName.trim() !== "";
-		if (hasDish === hasCustom) {
-			throw new Error("Provide either dishId or customName");
-		}
-
-		const today = new Date().toISOString().split("T")[0];
-		if (args.day > today) {
-			throw new Error("Cannot log meals for future dates");
-		}
+		validateLogMealInput(args);
 
 		return await ctx.db.patch(args.id, {
 			day: args.day,
@@ -400,7 +383,7 @@ export const getEatenHistory = query({
 			});
 		}
 
-		const mealTypeOrder = { breakfast: 0, lunch: 1, dinner: 2 };
+		const mealTypeOrder = MEAL_TYPE_ORDER;
 
 		eaten.sort((a, b) => {
 			if (a.day !== b.day) return b.day.localeCompare(a.day);
