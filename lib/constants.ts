@@ -164,19 +164,6 @@ export const MEAL_STATUSES = ["planned", "eaten", "skipped"] as const;
 export type MealStatus = (typeof MEAL_STATUSES)[number];
 
 /**
- * Days of the week (Monday start)
- */
-export const WEEKDAYS = [
-	"Monday",
-	"Tuesday",
-	"Wednesday",
-	"Thursday",
-	"Friday",
-	"Saturday",
-	"Sunday",
-] as const;
-
-/**
  * Get the Monday of the week containing the given date
  */
 export const getWeekStart = (date: Date): Date => {
