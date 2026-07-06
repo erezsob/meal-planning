@@ -244,6 +244,8 @@ export const update = mutation({
 		servingsUsed: v.number(),
 		isLeftover: v.boolean(),
 		sourceMealId: v.optional(v.id("mealPlans")),
+		day: v.optional(v.string()),
+		mealType: v.optional(mealTypeValidator),
 	},
 	handler: async (ctx, args) => {
 		return await ctx.db.patch(args.id, {
@@ -253,7 +255,163 @@ export const update = mutation({
 			servingsUsed: args.servingsUsed,
 			isLeftover: args.isLeftover,
 			sourceMealId: args.sourceMealId,
+			...(args.day !== undefined ? { day: args.day } : {}),
+			...(args.mealType !== undefined ? { mealType: args.mealType } : {}),
 		});
+	},
+});
+
+/**
+ * Log a meal as eaten (on-the-go consumption record).
+ * Auto-skips any planned items in the target slot.
+ */
+export const logMeal = mutation({
+	args: {
+		householdId: v.string(),
+		day: v.string(),
+		mealType: mealTypeValidator,
+		dishId: v.optional(v.id("dishes")),
+		customName: v.optional(v.string()),
+	},
+	handler: async (ctx, args) => {
+		const hasDish = args.dishId !== undefined;
+		const hasCustom = args.customName !== undefined && args.customName.trim() !== "";
+		if (hasDish === hasCustom) {
+			throw new Error("Provide either dishId or customName");
+		}
+
+		const today = new Date().toISOString().split("T")[0];
+		if (args.day > today) {
+			throw new Error("Cannot log meals for future dates");
+		}
+
+		const meals = await ctx.db
+			.query("mealPlans")
+			.withIndex("by_householdId", (q) => q.eq("householdId", args.householdId))
+			.collect();
+
+		const plannedInSlot = meals.filter(
+			(m) =>
+				m.day === args.day &&
+				m.mealType === args.mealType &&
+				m.status === "planned",
+		);
+
+		await Promise.all(
+			plannedInSlot.map((m) => ctx.db.patch(m._id, { status: "skipped" })),
+		);
+
+		return await ctx.db.insert("mealPlans", {
+			day: args.day,
+			mealType: args.mealType,
+			componentRole: DEFAULT_COMPONENT_ROLE,
+			dishId: args.dishId,
+			customName: args.customName?.trim(),
+			servingsUsed: 1,
+			status: "eaten",
+			isLeftover: false,
+			householdId: args.householdId,
+		});
+	},
+});
+
+/**
+ * Update a logged (eaten) meal — name/dish, day, and meal type only.
+ */
+export const updateLog = mutation({
+	args: {
+		id: v.id("mealPlans"),
+		day: v.string(),
+		mealType: mealTypeValidator,
+		dishId: v.optional(v.id("dishes")),
+		customName: v.optional(v.string()),
+	},
+	handler: async (ctx, args) => {
+		const meal = await ctx.db.get(args.id);
+		if (!meal) throw new Error("Meal not found");
+		if (meal.status !== "eaten") {
+			throw new Error("Only eaten meals can be updated via log edit");
+		}
+
+		const hasDish = args.dishId !== undefined;
+		const hasCustom = args.customName !== undefined && args.customName.trim() !== "";
+		if (hasDish === hasCustom) {
+			throw new Error("Provide either dishId or customName");
+		}
+
+		const today = new Date().toISOString().split("T")[0];
+		if (args.day > today) {
+			throw new Error("Cannot log meals for future dates");
+		}
+
+		return await ctx.db.patch(args.id, {
+			day: args.day,
+			mealType: args.mealType,
+			dishId: args.dishId,
+			customName: args.customName?.trim(),
+		});
+	},
+});
+
+/**
+ * Get eaten meals for the history view (date range + optional name search).
+ */
+export const getEatenHistory = query({
+	args: {
+		householdId: v.string(),
+		startDate: v.optional(v.string()),
+		endDate: v.optional(v.string()),
+		searchQuery: v.optional(v.string()),
+	},
+	handler: async (ctx, args) => {
+		const meals = await ctx.db
+			.query("mealPlans")
+			.withIndex("by_householdId", (q) => q.eq("householdId", args.householdId))
+			.collect();
+
+		let eaten = meals.filter((m) => m.status === "eaten");
+
+		if (args.startDate !== undefined) {
+			const startDate = args.startDate;
+			eaten = eaten.filter((m) => m.day >= startDate);
+		}
+		if (args.endDate !== undefined) {
+			const endDate = args.endDate;
+			eaten = eaten.filter((m) => m.day <= endDate);
+		}
+
+		const dishIds = [
+			...new Set(eaten.filter((m) => m.dishId).map((m) => m.dishId)),
+		] as Id<"dishes">[];
+
+		const dishes = await Promise.all(dishIds.map((id) => ctx.db.get(id)));
+		const dishMap = new Map(
+			dishes
+				.filter((d): d is NonNullable<typeof d> => d !== null)
+				.map((d) => [d._id, d]),
+		);
+
+		const search = args.searchQuery?.trim().toLowerCase();
+		if (search) {
+			eaten = eaten.filter((m) => {
+				const dishName = m.dishId ? dishMap.get(m.dishId)?.name : undefined;
+				const name = m.customName ?? dishName ?? "";
+				return name.toLowerCase().includes(search);
+			});
+		}
+
+		const mealTypeOrder = { breakfast: 0, lunch: 1, dinner: 2 };
+
+		eaten.sort((a, b) => {
+			if (a.day !== b.day) return b.day.localeCompare(a.day);
+			return mealTypeOrder[a.mealType] - mealTypeOrder[b.mealType];
+		});
+
+		return eaten.map((meal) => ({
+			...meal,
+			componentRole: meal.componentRole ?? DEFAULT_COMPONENT_ROLE,
+			dish: meal.dishId ? (dishMap.get(meal.dishId) ?? null) : null,
+		}));
 	},
 });
 

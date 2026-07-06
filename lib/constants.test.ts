@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
 	formatDateKey,
+	getHistoryDateRange,
 	getShoppingItemKey,
 	getWeekDates,
 	getWeekStart,
+	inferMealType,
 	isDishTag,
 } from "./constants";
 
@@ -99,6 +101,36 @@ describe("Date functions", () => {
 				"2026-02-08",
 			]);
 		});
+	});
+});
+
+describe("inferMealType", () => {
+	it("returns breakfast before 11:00", () => {
+		expect(inferMealType(new Date("2026-02-03T08:00:00"))).toBe("breakfast");
+	});
+
+	it("returns lunch between 11:00 and 16:00", () => {
+		expect(inferMealType(new Date("2026-02-03T12:00:00"))).toBe("lunch");
+	});
+
+	it("returns dinner after 16:00", () => {
+		expect(inferMealType(new Date("2026-02-03T18:00:00"))).toBe("dinner");
+	});
+});
+
+describe("getHistoryDateRange", () => {
+	it("returns last 7 days for 7d preset", () => {
+		const today = new Date("2026-02-08");
+		const range = getHistoryDateRange("7d", today);
+		expect(range.endDate).toBe("2026-02-08");
+		expect(range.startDate).toBe("2026-02-01");
+	});
+
+	it("returns no start date for all preset", () => {
+		const today = new Date("2026-02-08");
+		const range = getHistoryDateRange("all", today);
+		expect(range.endDate).toBe("2026-02-08");
+		expect(range.startDate).toBeUndefined();
 	});
 });
 

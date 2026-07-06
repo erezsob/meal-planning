@@ -15,12 +15,14 @@ import type { MealWithDish } from "./types";
 interface MealActionModalProps {
 	/** The meal (component) to show actions for */
 	meal: MealWithDish;
+	/** Trimmed actions for eaten meals (edit + delete only) */
+	eatenOnly?: boolean;
 	/** Called when closing the modal */
 	onClose: () => void;
 	/** Called when edit action is triggered */
 	onEdit: () => void;
 	/** Called when "Add another component" is clicked (same slot) */
-	onAddAnother: () => void;
+	onAddAnother?: () => void;
 }
 
 /**
@@ -28,6 +30,7 @@ interface MealActionModalProps {
  */
 export function MealActionModal({
 	meal,
+	eatenOnly = false,
 	onClose,
 	onEdit,
 	onAddAnother,
@@ -39,7 +42,7 @@ export function MealActionModal({
 	const roleLabel =
 		COMPONENT_ROLE_LABELS[meal.componentRole ?? DEFAULT_COMPONENT_ROLE];
 	const displayName = meal.dish?.name ?? meal.customName ?? "Unknown";
-	const title = `${roleLabel}: ${displayName}`;
+	const title = eatenOnly ? displayName : `${roleLabel}: ${displayName}`;
 
 	const handleEat = () => {
 		eatMeal({ id: meal._id });
@@ -67,7 +70,7 @@ export function MealActionModal({
 				</DialogHeader>
 
 				<div className="space-y-2">
-					{meal.status === "planned" && (
+					{!eatenOnly && meal.status === "planned" && (
 						<>
 							<Button onClick={handleEat} className="w-full" size="lg">
 								✓ Ate it
@@ -82,27 +85,29 @@ export function MealActionModal({
 						</>
 					)}
 
-					{meal.status === "eaten" && (
+					{!eatenOnly && meal.status === "eaten" && (
 						<div className="text-center py-2 text-primary font-medium">
 							✓ Already eaten
 						</div>
 					)}
 
-					{meal.status === "skipped" && (
+					{!eatenOnly && meal.status === "skipped" && (
 						<div className="text-center py-2 text-amber-400 font-medium">
 							↺ Already skipped
 						</div>
 					)}
 
-					<div className="pt-2 border-t space-y-2">
-						<Button
-							variant="secondary"
-							onClick={onAddAnother}
-							className="w-full"
-						>
-							<Plus size={16} />
-							Add another component
-						</Button>
+					<div className={eatenOnly ? "space-y-2" : "pt-2 border-t space-y-2"}>
+						{!eatenOnly && onAddAnother && (
+							<Button
+								variant="secondary"
+								onClick={onAddAnother}
+								className="w-full"
+							>
+								<Plus size={16} />
+								Add another component
+							</Button>
+						)}
 						<div className="flex gap-2">
 							<Button variant="secondary" onClick={onEdit} className="flex-1">
 								<Edit size={16} />

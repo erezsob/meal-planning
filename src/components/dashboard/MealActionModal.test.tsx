@@ -116,6 +116,29 @@ describe("MealActionModal", () => {
 		});
 	});
 
+	describe("eatenOnly mode", () => {
+		it("shows only edit and delete with meal name title", () => {
+			const meal = createMockMealWithDish({ status: "eaten" });
+			render(
+				<MealActionModal
+					meal={meal}
+					eatenOnly
+					onClose={vi.fn()}
+					onEdit={vi.fn()}
+				/>,
+			);
+			expect(screen.getByText("Test Dish")).toBeInTheDocument();
+			expect(screen.queryByText(/already eaten/i)).not.toBeInTheDocument();
+			expect(
+				screen.queryByRole("button", { name: /add another component/i }),
+			).not.toBeInTheDocument();
+			expect(screen.getByRole("button", { name: /edit/i })).toBeInTheDocument();
+			expect(
+				screen.getByRole("button", { name: /delete/i }),
+			).toBeInTheDocument();
+		});
+	});
+
 	describe("skipped status", () => {
 		it("shows 'Already skipped' message", () => {
 			const meal = createMockMealWithDish({ status: "skipped" });
