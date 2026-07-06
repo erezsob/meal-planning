@@ -1,5 +1,5 @@
 import { MEAL_TYPE_ORDER, MS_PER_DAY } from "@/lib/constants";
-import type { MealPlanWithDish } from "../dashboard/types";
+import type { MealPlanWithDish } from "@/lib/mealPlanTypes";
 
 export type EatenMeal = MealPlanWithDish;
 

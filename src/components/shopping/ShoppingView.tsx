@@ -14,7 +14,7 @@ import {
 	INGREDIENT_CATEGORIES,
 	SHOPPING_CHECKED_KEY_PREFIX,
 } from "@/lib/constants";
-import { WeekHeader } from "../dashboard/WeekHeader";
+import { WeekHeader } from "./WeekHeader";
 
 /** Format quantity + unit for display (no conversion per spec) */
 function formatQuantity(item: ShoppingItem): string {
@@ -204,7 +204,8 @@ export function ShoppingView() {
 
 			{totalItems === 0 ? (
 				<p className="text-muted-foreground py-8 text-center">
-					No meals planned for this week. Add meals on the dashboard to see
+					No meals planned for this week. Planned meals with library dishes
+					appear here once week planning is connected to the shopping list.
 					ingredients here.
 				</p>
 			) : (

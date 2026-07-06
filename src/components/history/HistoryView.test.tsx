@@ -34,7 +34,7 @@ vi.mock("../log", () => ({
 	LogMealModal: () => null,
 }));
 
-vi.mock("../dashboard/MealActionModal", () => ({
+vi.mock("@/components/meal", () => ({
 	MealActionModal: ({
 		meal,
 		onClose,

@@ -15,8 +15,8 @@ import {
 	HOUSEHOLD_ID,
 	MEAL_TYPE_LABELS,
 } from "@/lib/constants";
-import { MealActionModal } from "../dashboard/MealActionModal";
-import type { MealPlanWithDish } from "../dashboard/types";
+import { MealActionModal } from "@/components/meal";
+import type { MealPlanWithDish } from "@/lib/mealPlanTypes";
 import { LogMealModal } from "../log";
 import {
 	formatHistoryDayHeader,

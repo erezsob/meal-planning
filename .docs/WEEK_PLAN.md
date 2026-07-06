@@ -2,7 +2,7 @@
 
 Feature plan — replace the slot-based calendar with a simple spreadsheet-style week plan.
 
-**Status:** Design complete — ready for implementation
+**Status:** Implemented
 
 ---
 

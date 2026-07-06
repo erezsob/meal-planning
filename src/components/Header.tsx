@@ -1,12 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import {
 	BookOpen,
-	Calendar,
 	ClipboardList,
 	History,
+	LayoutList,
 	Menu,
 	Plus,
-	ShoppingCart,
 } from "lucide-react";
 import { useState } from "react";
 import { LogMealModal } from "@/components/log";
@@ -83,8 +82,8 @@ export function Header() {
 								"flex items-center gap-2 px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 transition-colors",
 						}}
 					>
-						<Calendar size={18} />
-						<span>Calendar</span>
+						<LayoutList size={18} />
+						<span>Plan</span>
 					</Link>
 					<Link
 						to="/history"
@@ -107,17 +106,6 @@ export function Header() {
 					>
 						<BookOpen size={18} />
 						<span>Library</span>
-					</Link>
-					<Link
-						to="/shopping"
-						className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-accent transition-colors"
-						activeProps={{
-							className:
-								"flex items-center gap-2 px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 transition-colors",
-						}}
-					>
-						<ShoppingCart size={18} />
-						<span>Shopping</span>
 					</Link>
 					<Button onClick={() => setIsLogOpen(true)} className="ml-2 gap-2">
 						<ClipboardList size={18} />
@@ -147,8 +135,8 @@ export function Header() {
 					<nav className="flex-1 p-4 space-y-2" aria-label="Mobile">
 						<NavItem
 							to="/"
-							icon={<Calendar size={20} />}
-							label="Calendar"
+							icon={<LayoutList size={20} />}
+							label="Plan"
 							onNavigate={closeMenu}
 						/>
 						<NavItem
@@ -161,12 +149,6 @@ export function Header() {
 							to="/library"
 							icon={<BookOpen size={20} />}
 							label="Recipe Library"
-							onNavigate={closeMenu}
-						/>
-						<NavItem
-							to="/shopping"
-							icon={<ShoppingCart size={20} />}
-							label="Shopping List"
 							onNavigate={closeMenu}
 						/>
 						<Button

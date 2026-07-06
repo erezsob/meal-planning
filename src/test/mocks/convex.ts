@@ -1,5 +1,5 @@
 import type { Doc, Id } from "convex/_generated/dataModel";
-import type { MealWithDish } from "@/components/dashboard/types";
+import type { MealWithDish } from "@/lib/mealPlanTypes";
 
 /**
  * Mock factory for Dish documents
