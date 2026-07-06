@@ -8,7 +8,7 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-
+import { ToastProvider } from "@/lib/components/toast";
 import { Header } from "../components/Header";
 
 import appCss from "../styles.css?url";
@@ -61,12 +61,14 @@ export const Route = createRootRouteWithContext<{
 
 function RootLayout() {
 	return (
-		<div className="min-h-screen bg-gray-950 text-gray-100">
-			<Header />
-			<main className="max-w-7xl mx-auto px-4 py-6">
-				<Outlet />
-			</main>
-		</div>
+		<ToastProvider>
+			<div className="min-h-screen bg-gray-950 text-gray-100">
+				<Header />
+				<main className="max-w-7xl mx-auto px-4 py-6">
+					<Outlet />
+				</main>
+			</div>
+		</ToastProvider>
 	);
 }
 

@@ -2,10 +2,13 @@ import type { api } from "convex/_generated/api";
 import type { FunctionReturnType } from "convex/server";
 import type { MealType } from "@/lib/constants";
 
-/** Meal plan with joined dish data - inferred from getWeek query return type */
-export type MealWithDish = FunctionReturnType<
+/** Meal plan with joined dish data — shared by calendar and history queries */
+export type MealPlanWithDish = FunctionReturnType<
 	typeof api.mealPlans.getWeek
 >[number];
+
+/** @alias MealPlanWithDish */
+export type MealWithDish = MealPlanWithDish;
 
 /** Selected meal slot for adding or editing a component */
 export interface SelectedSlot {

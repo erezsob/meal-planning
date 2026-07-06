@@ -1,6 +1,15 @@
 import { Link } from "@tanstack/react-router";
-import { BookOpen, Calendar, Menu, ShoppingCart } from "lucide-react";
+import {
+	BookOpen,
+	Calendar,
+	ClipboardList,
+	History,
+	Menu,
+	Plus,
+	ShoppingCart,
+} from "lucide-react";
 import { useState } from "react";
+import { LogMealModal } from "@/components/log";
 import { Button } from "@/lib/components/button";
 import {
 	Sheet,
@@ -21,9 +30,6 @@ interface NavItemProps {
 	onNavigate: () => void;
 }
 
-/**
- * Navigation link item with icon and label
- */
 function NavItem({ to, icon, label, onNavigate }: NavItemProps) {
 	return (
 		<Link
@@ -39,10 +45,11 @@ function NavItem({ to, icon, label, onNavigate }: NavItemProps) {
 }
 
 /**
- * App header with mobile-friendly navigation drawer
+ * App header with mobile-friendly navigation drawer and global log action.
  */
 export function Header() {
 	const [isOpen, setIsOpen] = useState(false);
+	const [isLogOpen, setIsLogOpen] = useState(false);
 
 	const closeMenu = () => setIsOpen(false);
 
@@ -67,7 +74,6 @@ export function Header() {
 					</Link>
 				</div>
 
-				{/* Desktop navigation */}
 				<nav className="hidden md:flex items-center gap-1" aria-label="Main">
 					<Link
 						to="/"
@@ -79,6 +85,17 @@ export function Header() {
 					>
 						<Calendar size={18} />
 						<span>Calendar</span>
+					</Link>
+					<Link
+						to="/history"
+						className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-accent transition-colors"
+						activeProps={{
+							className:
+								"flex items-center gap-2 px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 transition-colors",
+						}}
+					>
+						<History size={18} />
+						<span>History</span>
 					</Link>
 					<Link
 						to="/library"
@@ -102,10 +119,22 @@ export function Header() {
 						<ShoppingCart size={18} />
 						<span>Shopping</span>
 					</Link>
+					<Button onClick={() => setIsLogOpen(true)} className="ml-2 gap-2">
+						<ClipboardList size={18} />
+						<span>Log meal</span>
+					</Button>
 				</nav>
 			</header>
 
-			{/* Mobile drawer using Sheet */}
+			<Button
+				onClick={() => setIsLogOpen(true)}
+				className="fixed bottom-6 right-4 z-40 h-14 w-14 rounded-full shadow-lg md:hidden"
+				size="icon"
+				aria-label="Log meal"
+			>
+				<Plus size={24} />
+			</Button>
+
 			<Sheet open={isOpen} onOpenChange={setIsOpen}>
 				<SheetContent side="left" className="w-72 p-0 md:hidden">
 					<SheetHeader className="border-b p-4">
@@ -123,6 +152,12 @@ export function Header() {
 							onNavigate={closeMenu}
 						/>
 						<NavItem
+							to="/history"
+							icon={<History size={20} />}
+							label="History"
+							onNavigate={closeMenu}
+						/>
+						<NavItem
 							to="/library"
 							icon={<BookOpen size={20} />}
 							label="Recipe Library"
@@ -134,9 +169,21 @@ export function Header() {
 							label="Shopping List"
 							onNavigate={closeMenu}
 						/>
+						<Button
+							onClick={() => {
+								setIsLogOpen(true);
+								closeMenu();
+							}}
+							className="w-full gap-2"
+						>
+							<ClipboardList size={18} />
+							Log meal
+						</Button>
 					</nav>
 				</SheetContent>
 			</Sheet>
+
+			{isLogOpen && <LogMealModal onClose={() => setIsLogOpen(false)} />}
 		</>
 	);
 }

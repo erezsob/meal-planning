@@ -2,7 +2,7 @@
 
 Feature plan — quick on-the-go logging of custom or library meals, plus a history view for reviewing past consumption.
 
-**Status:** Planned (design complete, not yet implemented)
+**Status:** Implemented
 
 ---
 

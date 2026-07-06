@@ -1,5 +1,6 @@
 import { Suspense, useState } from "react";
 import { formatDateKey, getWeekDates, getWeekStart } from "@/lib/constants";
+import { LogMealModal } from "../log";
 import { AddMealModal } from "./AddMealModal";
 import { CalendarSkeleton } from "./CalendarSkeleton";
 import { LeftoverTracker } from "./LeftoverTracker";
@@ -16,6 +17,9 @@ export function Dashboard() {
 	const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
 	const [selectedSlot, setSelectedSlot] = useState<SelectedSlot | null>(null);
 	const [selectedMeal, setSelectedMeal] = useState<SelectedMeal | null>(null);
+	const [editingLoggedMeal, setEditingLoggedMeal] = useState<
+		SelectedMeal["meal"] | null
+	>(null);
 
 	const weekDates = getWeekDates(weekStart);
 	const startDateKey = formatDateKey(weekStart);
@@ -63,8 +67,14 @@ export function Dashboard() {
 			{selectedMeal && (
 				<MealActionModal
 					meal={selectedMeal.meal}
+					eatenOnly={selectedMeal.meal.status === "eaten"}
 					onClose={() => setSelectedMeal(null)}
 					onEdit={() => {
+						if (selectedMeal.meal.status === "eaten") {
+							setEditingLoggedMeal(selectedMeal.meal);
+							setSelectedMeal(null);
+							return;
+						}
 						setSelectedSlot({
 							day: selectedMeal.day,
 							mealType: selectedMeal.mealType,
@@ -72,13 +82,24 @@ export function Dashboard() {
 						});
 						setSelectedMeal(null);
 					}}
-					onAddAnother={() => {
-						setSelectedSlot({
-							day: selectedMeal.day,
-							mealType: selectedMeal.mealType,
-						});
-						setSelectedMeal(null);
-					}}
+					onAddAnother={
+						selectedMeal.meal.status !== "eaten"
+							? () => {
+									setSelectedSlot({
+										day: selectedMeal.day,
+										mealType: selectedMeal.mealType,
+									});
+									setSelectedMeal(null);
+								}
+							: undefined
+					}
+				/>
+			)}
+
+			{editingLoggedMeal && (
+				<LogMealModal
+					existingMeal={editingLoggedMeal}
+					onClose={() => setEditingLoggedMeal(null)}
 				/>
 			)}
 		</div>

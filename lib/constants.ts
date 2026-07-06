@@ -69,6 +69,67 @@ export const MEAL_TYPES = ["breakfast", "lunch", "dinner"] as const;
 
 export type MealType = (typeof MEAL_TYPES)[number];
 
+/** Display labels for meal types */
+export const MEAL_TYPE_LABELS = {
+	breakfast: "Breakfast",
+	lunch: "Lunch",
+	dinner: "Dinner",
+} as const satisfies Record<MealType, string>;
+
+/** Sort order for meal types within a day */
+export const MEAL_TYPE_ORDER: Record<MealType, number> = {
+	breakfast: 0,
+	lunch: 1,
+	dinner: 2,
+};
+
+/** Hour boundaries for inferring meal type from time of day */
+const MEAL_TYPE_INFERENCE = {
+	breakfastEndHour: 11,
+	lunchEndHour: 16,
+} as const;
+
+/**
+ * Infer breakfast / lunch / dinner from the current time of day.
+ */
+export function inferMealType(date: Date = new Date()): MealType {
+	const hour = date.getHours();
+	if (hour < MEAL_TYPE_INFERENCE.breakfastEndHour) return "breakfast";
+	if (hour < MEAL_TYPE_INFERENCE.lunchEndHour) return "lunch";
+	return "dinner";
+}
+
+/** Preset date ranges for the history view */
+export const HISTORY_RANGE_PRESETS = ["7d", "30d", "all"] as const;
+
+export type HistoryRangePreset = (typeof HISTORY_RANGE_PRESETS)[number];
+
+export const HISTORY_RANGE_LABELS: Record<HistoryRangePreset, string> = {
+	"7d": "Last 7 days",
+	"30d": "Last 30 days",
+	all: "All time",
+};
+
+/** Milliseconds in one calendar day (for date diffs) */
+export const MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+/**
+ * Resolve a history preset into optional start/end date keys (YYYY-MM-DD).
+ * Presets include today plus the prior N-1 days (e.g. 7d = 7 calendar days).
+ */
+export function getHistoryDateRange(
+	preset: HistoryRangePreset,
+	today: Date = new Date(),
+): { startDate?: string; endDate: string } {
+	const endDate = formatDateKey(today);
+	if (preset === "all") return { endDate };
+
+	const start = new Date(today);
+	const daysBack = preset === "7d" ? 6 : 29;
+	start.setDate(start.getDate() - daysBack);
+	return { startDate: formatDateKey(start), endDate };
+}
+
 /**
  * Meal component roles (main, side, dessert, drink, other).
  * Multiple components per role per slot allowed (e.g. dinner party).
