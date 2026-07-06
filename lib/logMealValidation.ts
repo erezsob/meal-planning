@@ -1,8 +1,6 @@
-import type { Id } from "convex/_generated/dataModel";
-
 export interface LogMealInput {
 	day: string;
-	dishId?: Id<"dishes">;
+	dishId?: string;
 	customName?: string;
 }
 
