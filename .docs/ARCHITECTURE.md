@@ -126,7 +126,9 @@ Meal Planning App - weekly meal planner with recipe library and auto-generated s
 
 ## Core Features
 
-### 1. Weekly Calendar (Dashboard)
+> **In transition:** The slot-based calendar is being replaced by a simple week plan grid. See [WEEK_PLAN.md](./WEEK_PLAN.md) for the new design. Sections below describe the current (legacy) implementation until migration is complete.
+
+### 1. Weekly Calendar (Dashboard) — legacy
 - 7-day grid, Monday start
 - 3 meal slots per day (breakfast, lunch, dinner)
 - Multi-component meals (main + sides)

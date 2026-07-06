@@ -4,8 +4,20 @@ Weekly meal planning and consumption tracking for a household — plan what to c
 
 ## Language
 
+**Week plan**:
+The household's current meal scratch pad — a simple grid of what you intend to cook or buy this week. Not tied to calendar dates.
+_Avoid_: Calendar, schedule
+
+**Week plan line**:
+One row in the week plan — a weekday (Saturday through Friday), a backlog entry, or a weekly row (weekly lunch, weekly breakfast).
+_Avoid_: Slot, cell
+
+**Backlog line**:
+A week plan line with no day label — a meal idea not yet assigned to a weekday.
+_Avoid_: Queue item, todo
+
 **Plan**:
-Future intent to eat something on a specific day and meal slot. A plan may affect the shopping list.
+Future intent to eat something on a specific day and meal slot. Stored in `mealPlans`; may affect the derived shopping list. Distinct from the week plan grid in v1.
 _Avoid_: Schedule (when used for retrospective records)
 
 **Log**:
@@ -13,7 +25,7 @@ A record of consumption — what was actually eaten. Created as eaten immediatel
 _Avoid_: Track, journal entry
 
 **Meal slot**:
-A specific day and meal type (breakfast, lunch, or dinner) on the calendar. Multiple meal components can share one slot.
+A specific day and meal type (breakfast, lunch, or dinner). Used by Log and History. Multiple meal components can share one slot.
 _Avoid_: Meal time, eating occasion
 
 **Custom meal**:
