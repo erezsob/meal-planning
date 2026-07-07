@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - run: pnpm biome check
+      - run: pnpm biome ci
       - run: pnpm types:check
       - run: pnpm knip
 
