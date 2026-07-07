@@ -10,6 +10,9 @@ export const DEFAULT_BACKLOG_ROW_COUNT = 1;
 /** Debounced auto-save delay (ms) */
 export const WEEK_PLAN_SAVE_DEBOUNCE_MS = 300;
 
+/** Copy-to-clipboard success message duration (ms) */
+export const WEEK_PLAN_COPY_FEEDBACK_MS = 2000;
+
 export const WEEKDAY_KEYS = [
 	"saturday",
 	"sunday",

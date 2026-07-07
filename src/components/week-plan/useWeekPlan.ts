@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
 	addBacklogRow,
 	loadWeekPlan,
@@ -19,6 +19,14 @@ import {
 export function useWeekPlan() {
 	const [plan, setPlanState] = useState<WeekPlan>(loadWeekPlan);
 	const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	useEffect(() => {
+		return () => {
+			if (saveTimerRef.current) {
+				clearTimeout(saveTimerRef.current);
+			}
+		};
+	}, []);
 
 	const persist = useCallback((next: WeekPlan) => {
 		if (saveTimerRef.current) {

@@ -1,5 +1,5 @@
 import { ClipboardCopy, ClipboardPaste, Eraser } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/lib/components/button";
 import {
 	Dialog,
@@ -14,7 +14,10 @@ import {
 	parseWeekPlanImport,
 	serializeWeekPlanExport,
 } from "@/lib/weekPlanStorage";
-import type { WeekPlan } from "@/lib/weekPlanTypes";
+import {
+	WEEK_PLAN_COPY_FEEDBACK_MS,
+	type WeekPlan,
+} from "@/lib/weekPlanTypes";
 
 interface WeekPlanToolbarProps {
 	plan: WeekPlan;
@@ -35,12 +38,36 @@ export function WeekPlanToolbar({
 	const [importText, setImportText] = useState("");
 	const [importError, setImportError] = useState<string | null>(null);
 	const [copyMessage, setCopyMessage] = useState<string | null>(null);
+	const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	useEffect(() => {
+		return () => {
+			if (copyTimerRef.current) {
+				clearTimeout(copyTimerRef.current);
+			}
+		};
+	}, []);
 
 	const handleCopy = async () => {
 		const json = serializeWeekPlanExport(plan);
-		await navigator.clipboard.writeText(json);
-		setCopyMessage("Copied to clipboard");
-		setTimeout(() => setCopyMessage(null), 2000);
+		try {
+			await navigator.clipboard.writeText(json);
+			setCopyMessage("Copied to clipboard");
+			if (copyTimerRef.current) {
+				clearTimeout(copyTimerRef.current);
+			}
+			copyTimerRef.current = setTimeout(() => {
+				setCopyMessage(null);
+			}, WEEK_PLAN_COPY_FEEDBACK_MS);
+		} catch {
+			setCopyMessage("Could not copy to clipboard");
+			if (copyTimerRef.current) {
+				clearTimeout(copyTimerRef.current);
+			}
+			copyTimerRef.current = setTimeout(() => {
+				setCopyMessage(null);
+			}, WEEK_PLAN_COPY_FEEDBACK_MS);
+		}
 	};
 
 	const handleImport = () => {

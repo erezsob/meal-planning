@@ -20,8 +20,10 @@ describe("WeekPlanView", () => {
 
 	it("renders default backlog rows", () => {
 		render(<WeekPlanView />);
-		const backlogLabels = screen.getAllByLabelText(/Backlog dish/);
-		expect(backlogLabels.length).toBeGreaterThanOrEqual(
+		const backlogEditors = screen.getAllByRole("button", {
+			name: /Backlog dish/i,
+		});
+		expect(backlogEditors.length).toBeGreaterThanOrEqual(
 			DEFAULT_BACKLOG_ROW_COUNT,
 		);
 	});
@@ -31,8 +33,10 @@ describe("WeekPlanView", () => {
 		const addButtons = screen.getAllByRole("button", { name: /Add row/i });
 		fireEvent.click(addButtons[0]);
 
-		const backlogLabels = screen.getAllByLabelText(/Backlog dish/);
-		expect(backlogLabels.length).toBeGreaterThanOrEqual(
+		const backlogEditors = screen.getAllByRole("button", {
+			name: /Backlog dish/i,
+		});
+		expect(backlogEditors.length).toBeGreaterThanOrEqual(
 			DEFAULT_BACKLOG_ROW_COUNT + 1,
 		);
 	});
