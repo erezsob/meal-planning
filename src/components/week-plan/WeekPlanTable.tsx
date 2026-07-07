@@ -87,7 +87,7 @@ export function WeekPlanTable({
 	return (
 		<div className="space-y-3">
 			<div className="overflow-x-auto">
-				<table className="w-full min-w-[640px] border-collapse border border-border text-sm">
+				<table className="w-full min-w-[640px] table-fixed border-collapse border border-border text-sm">
 					<thead>
 						<tr className="bg-muted/40">
 							<th
@@ -101,7 +101,7 @@ export function WeekPlanTable({
 							</th>
 							<th
 								className={cn(
-									"text-left font-semibold",
+									"w-2/5 max-w-0 text-left font-semibold",
 									cellBorder,
 									cellPadding,
 								)}
@@ -110,7 +110,7 @@ export function WeekPlanTable({
 							</th>
 							<th
 								className={cn(
-									"text-left font-semibold",
+									"w-2/5 max-w-0 text-left font-semibold",
 									cellBorder,
 									cellPadding,
 								)}
@@ -138,7 +138,7 @@ export function WeekPlanTable({
 										</span>
 									)}
 								</td>
-								<td className={cn("align-top p-0", cellBorder)}>
+								<td className={cn("max-w-0 align-top p-0", cellBorder)}>
 									<WeekPlanCellEditor
 										embedded
 										label={`${row.label || "Backlog"} dish`}
@@ -152,7 +152,7 @@ export function WeekPlanTable({
 										}
 									/>
 								</td>
-								<td className={cn("align-top p-0", cellBorder)}>
+								<td className={cn("max-w-0 align-top p-0", cellBorder)}>
 									<WeekPlanCellEditor
 										embedded
 										label={`${row.label || "Backlog"} grocery list`}

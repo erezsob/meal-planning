@@ -22,10 +22,10 @@ const displayClassName = (
 	className?: string,
 ) =>
 	cn(
-		"min-h-[3rem] w-full rounded-md border border-transparent px-3 py-2 text-left text-sm whitespace-pre-wrap break-words",
+		"min-h-[3rem] w-full min-w-0 rounded-md border border-transparent px-3 py-2 text-left text-sm whitespace-pre-wrap break-words",
 		"hover:border-border hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
 		embedded &&
-			"min-h-full rounded-none border-0 px-2 py-2 hover:border-0 focus-visible:ring-0",
+			"min-h-full max-w-full rounded-none border-0 px-2 py-2 hover:border-0 focus-visible:ring-0",
 		!hasValue && "text-muted-foreground",
 		className,
 	);
@@ -35,7 +35,7 @@ const textareaClassName = (embedded: boolean, className?: string) =>
 		"min-h-[3rem] bg-background",
 		embedded ? "resize-none" : "resize-y",
 		embedded &&
-			"min-h-full rounded-none border-0 shadow-none focus-visible:ring-0",
+			"field-sizing-fixed min-h-full max-w-full min-w-0 rounded-none border-0 shadow-none focus-visible:ring-0",
 		className,
 	);
 
