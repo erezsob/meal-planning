@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
 	addBacklogRow,
-	isWeekPlan,
 	removeBacklogRow,
 	updateWeekPlanCell,
 } from "./weekPlan";
@@ -11,15 +10,6 @@ import {
 } from "./weekPlanTypes";
 
 describe("weekPlan", () => {
-	it("isWeekPlan accepts a valid default plan", () => {
-		expect(isWeekPlan(createDefaultWeekPlan())).toBe(true);
-	});
-
-	it("isWeekPlan rejects invalid structures", () => {
-		expect(isWeekPlan(null)).toBe(false);
-		expect(isWeekPlan({})).toBe(false);
-	});
-
 	it("updateWeekPlanCell updates weekday immutably", () => {
 		const plan = createDefaultWeekPlan();
 		const next = updateWeekPlanCell({

@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { isWeekPlan, weekPlanValidator } from "../lib/weekPlanValidator";
+import { weekPlanValidator } from "../lib/weekPlanValidator";
 import { mutation, query } from "./_generated/server";
 
 /**
@@ -26,10 +26,6 @@ export const save = mutation({
 		plan: weekPlanValidator,
 	},
 	handler: async (ctx, args) => {
-		if (!isWeekPlan(args.plan)) {
-			throw new Error("Invalid week plan structure");
-		}
-
 		const existing = await ctx.db
 			.query("weekPlans")
 			.withIndex("by_householdId", (q) => q.eq("householdId", args.householdId))

@@ -22,6 +22,11 @@ function planFromRemote(remotePlan: WeekPlan | null): WeekPlan {
 
 /**
  * Manage week plan state with debounced Convex persistence.
+ *
+ * Local edits overlay the remote plan until saved; when not editing, remote
+ * subscription updates apply automatically without a sync effect.
+ *
+ * @returns Plan state, cell/backlog actions, and save error message (if any).
  */
 export function useWeekPlan() {
 	const { data: remotePlan } = useSuspenseQuery(
@@ -29,11 +34,15 @@ export function useWeekPlan() {
 	);
 
 	const saveWeekPlanMutation = useMutation(api.weekPlans.save);
-	const [plan, setPlanState] = useState<WeekPlan>(() =>
-		planFromRemote(remotePlan),
-	);
-	const isDirtyRef = useRef(false);
+	const [pendingPlan, setPendingPlan] = useState<WeekPlan | null>(null);
+	const [saveError, setSaveError] = useState<string | null>(null);
+	const editGenerationRef = useRef(0);
+	const remotePlanRef = useRef(remotePlan);
 	const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	remotePlanRef.current = remotePlan;
+
+	const plan = pendingPlan ?? planFromRemote(remotePlan);
 
 	useEffect(() => {
 		return () => {
@@ -43,47 +52,56 @@ export function useWeekPlan() {
 		};
 	}, []);
 
-	useEffect(() => {
-		if (!isDirtyRef.current) {
-			setPlanState(planFromRemote(remotePlan));
-		}
-	}, [remotePlan]);
+	const getBasePlan = useCallback(
+		() => planFromRemote(remotePlanRef.current),
+		[],
+	);
 
-	const saveToDb = useCallback(
-		async (next: WeekPlan) => {
-			isDirtyRef.current = true;
-			return saveWeekPlanMutation({
-				householdId: HOUSEHOLD_ID,
-				plan: next,
-			}).finally(() => {
-				isDirtyRef.current = false;
-			});
+	const commitSave = useCallback(
+		async (next: WeekPlan, generationAtSaveStart: number) => {
+			try {
+				await saveWeekPlanMutation({
+					householdId: HOUSEHOLD_ID,
+					plan: next,
+				});
+				setSaveError(null);
+				if (editGenerationRef.current === generationAtSaveStart) {
+					setPendingPlan(null);
+				}
+			} catch (error) {
+				setSaveError(
+					error instanceof Error ? error.message : "Could not save plan",
+				);
+			}
 		},
 		[saveWeekPlanMutation],
 	);
 
 	const persist = useCallback(
 		(next: WeekPlan) => {
-			isDirtyRef.current = true;
 			if (saveTimerRef.current) {
 				clearTimeout(saveTimerRef.current);
 			}
 			saveTimerRef.current = setTimeout(() => {
-				void saveToDb(next);
+				const generation = editGenerationRef.current;
+				void commitSave(next, generation);
 			}, WEEK_PLAN_SAVE_DEBOUNCE_MS);
 		},
-		[saveToDb],
+		[commitSave],
 	);
 
 	const setPlan = useCallback(
 		(updater: WeekPlan | ((prev: WeekPlan) => WeekPlan)) => {
-			setPlanState((prev) => {
-				const next = typeof updater === "function" ? updater(prev) : updater;
+			editGenerationRef.current += 1;
+			setSaveError(null);
+			setPendingPlan((prevPending) => {
+				const base = prevPending ?? getBasePlan();
+				const next = typeof updater === "function" ? updater(base) : updater;
 				persist(next);
 				return next;
 			});
 		},
-		[persist],
+		[persist, getBasePlan],
 	);
 
 	const updateCell = useCallback(
@@ -108,9 +126,12 @@ export function useWeekPlan() {
 		if (saveTimerRef.current) {
 			clearTimeout(saveTimerRef.current);
 		}
-		setPlanState(empty);
-		await saveToDb(empty);
-	}, [saveToDb]);
+		editGenerationRef.current += 1;
+		const generationAtSaveStart = editGenerationRef.current;
+		setSaveError(null);
+		setPendingPlan(empty);
+		await commitSave(empty, generationAtSaveStart);
+	}, [commitSave]);
 
 	const addBacklog = useCallback(() => {
 		setPlan((prev) => addBacklogRow(prev));
@@ -125,6 +146,7 @@ export function useWeekPlan() {
 
 	return {
 		plan,
+		saveError,
 		updateCell,
 		clearPlan,
 		addBacklog,

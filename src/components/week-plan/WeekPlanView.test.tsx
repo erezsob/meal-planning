@@ -1,9 +1,10 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { Suspense } from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	createDefaultWeekPlan,
 	DEFAULT_BACKLOG_ROW_COUNT,
+	WEEK_PLAN_SAVE_DEBOUNCE_MS,
 } from "@/lib/weekPlanTypes";
 import { TestWrapper } from "@/test/utils";
 import { WeekPlanView } from "./WeekPlanView";
@@ -44,6 +45,10 @@ describe("WeekPlanView", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mockSave.mockResolvedValue(undefined);
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
 	});
 
 	it("renders weekday rows and weekly rows", () => {
@@ -100,5 +105,45 @@ describe("WeekPlanView", () => {
 			householdId: "household-1",
 			plan: createDefaultWeekPlan(),
 		});
+	});
+
+	it("saves cell edit to Convex after debounce", async () => {
+		vi.useFakeTimers();
+		renderView();
+
+		const dishButtons = screen.getAllByRole("button", {
+			name: /Saturday dish/i,
+		});
+		fireEvent.click(dishButtons[0]);
+		fireEvent.change(screen.getAllByLabelText("Saturday dish")[0], {
+			target: { value: "Ribs" },
+		});
+
+		expect(mockSave).not.toHaveBeenCalled();
+
+		await vi.advanceTimersByTimeAsync(WEEK_PLAN_SAVE_DEBOUNCE_MS);
+
+		expect(mockSave).toHaveBeenCalledWith({
+			householdId: "household-1",
+			plan: expect.objectContaining({
+				weekdays: expect.objectContaining({
+					saturday: { dish: "Ribs", grocery: "" },
+				}),
+			}),
+		});
+	});
+
+	it("shows an error when save fails", async () => {
+		mockSave.mockRejectedValue(new Error("Network error"));
+		renderView();
+
+		fireEvent.click(screen.getByRole("button", { name: /Clear plan/i }));
+		fireEvent.click(
+			within(screen.getByRole("dialog")).getByRole("button", {
+				name: /Clear plan/i,
+			}),
+		);
+
+		expect(await screen.findByRole("alert")).toHaveTextContent("Network error");
 	});
 });

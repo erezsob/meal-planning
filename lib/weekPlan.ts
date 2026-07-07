@@ -5,10 +5,14 @@ import {
 	type WeekPlanCell,
 } from "./weekPlanTypes";
 
-export { isWeekPlan } from "./weekPlanValidator";
-
 /**
  * Update a single cell field immutably.
+ *
+ * @param params.plan - Current week plan
+ * @param params.location - Which cell to update (weekday, weekly row, or backlog index)
+ * @param params.field - Cell field to change (`dish` or `grocery`)
+ * @param params.value - New field value
+ * @returns New week plan with the cell updated
  */
 export function updateWeekPlanCell({
 	plan,
@@ -59,7 +63,12 @@ export type WeekPlanCellLocation =
 	| { type: "weekly"; key: "lunch" | "breakfast" }
 	| { type: "backlog"; index: number };
 
-/** Add an empty backlog row */
+/**
+ * Add an empty backlog row.
+ *
+ * @param plan - Current week plan
+ * @returns New week plan with one additional empty backlog row
+ */
 export function addBacklogRow(plan: WeekPlan): WeekPlan {
 	return {
 		...plan,
@@ -67,7 +76,13 @@ export function addBacklogRow(plan: WeekPlan): WeekPlan {
 	};
 }
 
-/** Remove a backlog row by index */
+/**
+ * Remove a backlog row by index.
+ *
+ * @param plan - Current week plan
+ * @param index - Backlog row index to remove
+ * @returns New week plan without the row at index
+ */
 export function removeBacklogRow(plan: WeekPlan, index: number): WeekPlan {
 	return {
 		...plan,

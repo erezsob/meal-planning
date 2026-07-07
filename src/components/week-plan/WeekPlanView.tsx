@@ -8,7 +8,7 @@ import { WeekPlanToolbar } from "./WeekPlanToolbar";
  * Week plan grid — simple free-text scratch pad for meal planning
  */
 export function WeekPlanView() {
-	const { plan, updateCell, clearPlan, addBacklog, removeBacklog } =
+	const { plan, saveError, updateCell, clearPlan, addBacklog, removeBacklog } =
 		useWeekPlan();
 
 	const rows = useMemo(() => buildWeekPlanRows(plan), [plan]);
@@ -21,6 +21,12 @@ export function WeekPlanView() {
 					Plan what to cook and what to buy — free text, no rules.
 				</p>
 			</header>
+
+			{saveError && (
+				<p className="text-sm text-destructive" role="alert">
+					{saveError}
+				</p>
+			)}
 
 			<WeekPlanToolbar onClear={() => void clearPlan()} />
 
@@ -45,6 +51,7 @@ export function WeekPlanView() {
 	);
 }
 
+/** Loading placeholder for the week plan route */
 export function WeekPlanViewSkeleton() {
 	return (
 		<div className="space-y-6">
