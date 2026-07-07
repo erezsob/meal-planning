@@ -1,7 +1,9 @@
 import { type KeyboardEvent, type MouseEvent, useState } from "react";
-import { parseLinkifiedSegments } from "@/lib/linkify";
 import { Textarea } from "@/lib/components/textarea";
+import { parseLinkifiedSegments } from "@/lib/linkify";
 import { cn } from "@/lib/utils";
+
+const WEEK_PLAN_CELL_SELECTOR = "[data-week-plan-cell]";
 
 interface WeekPlanCellEditorProps {
 	/** Accessible label for the field */
@@ -28,6 +30,15 @@ const displayClassName = (
 		className,
 	);
 
+const textareaClassName = (embedded: boolean, className?: string) =>
+	cn(
+		"min-h-[3rem] bg-background",
+		embedded ? "resize-none" : "resize-y",
+		embedded &&
+			"min-h-full rounded-none border-0 shadow-none focus-visible:ring-0",
+		className,
+	);
+
 const startEditingOnKeyDown = (
 	event: KeyboardEvent,
 	startEditing: () => void,
@@ -36,6 +47,33 @@ const startEditingOnKeyDown = (
 		event.preventDefault();
 		startEditing();
 	}
+};
+
+const focusNextTableCell = ({
+	event,
+	onClose,
+}: {
+	event: KeyboardEvent<HTMLTextAreaElement>;
+	onClose: () => void;
+}) => {
+	const table = event.currentTarget.closest("table");
+	if (!table) return;
+
+	const cells = [
+		...table.querySelectorAll<HTMLElement>(WEEK_PLAN_CELL_SELECTOR),
+	];
+	const current = event.currentTarget.closest<HTMLElement>(
+		WEEK_PLAN_CELL_SELECTOR,
+	);
+	if (!current) return;
+
+	const index = cells.indexOf(current);
+	const next = cells[index + (event.shiftKey ? -1 : 1)];
+	if (!next) return;
+
+	event.preventDefault();
+	onClose();
+	next.focus();
 };
 
 /**
@@ -51,37 +89,50 @@ export function WeekPlanCellEditor({
 }: WeekPlanCellEditorProps) {
 	const [isEditing, setIsEditing] = useState(false);
 
+	const startEditing = () => setIsEditing(true);
+	const stopEditing = () => setIsEditing(false);
+
+	const handleBlur = () => {
+		stopEditing();
+	};
+
+	const handleTextareaKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+		if (event.key === "Tab" && embedded) {
+			focusNextTableCell({ event, onClose: stopEditing });
+		}
+	};
+
 	if (isEditing) {
 		return (
 			<Textarea
+				data-week-plan-cell
 				aria-label={label}
 				value={value}
 				onChange={(event) => onChange(event.target.value)}
-				onBlur={() => setIsEditing(false)}
+				onBlur={handleBlur}
+				onKeyDown={handleTextareaKeyDown}
 				autoFocus
 				rows={minRows}
-				className={cn(
-					"min-h-[3rem] resize-y bg-background",
-					embedded &&
-						"min-h-full rounded-none border-0 shadow-none focus-visible:ring-0",
-					className,
-				)}
+				className={textareaClassName(embedded, className)}
 			/>
 		);
 	}
 
 	const segments = parseLinkifiedSegments(value);
 	const ariaLabel = `${label}${value ? "" : " (empty)"}`;
-	const hasLinks = segments.some((segment) => segment.type === "link");
+	const hasLinks =
+		!embedded && segments.some((segment) => segment.type === "link");
 
-	const startEditing = () => setIsEditing(true);
+	const focusDisplayProps = embedded ? { onFocus: startEditing } : undefined;
 
 	if (!hasLinks) {
 		return (
 			<button
 				type="button"
+				data-week-plan-cell
 				aria-label={ariaLabel}
 				onClick={startEditing}
+				{...focusDisplayProps}
 				className={displayClassName(embedded, Boolean(value), className)}
 			>
 				{segments.length === 0 ? (

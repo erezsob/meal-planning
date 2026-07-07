@@ -14,10 +14,7 @@ import {
 	parseWeekPlanImport,
 	serializeWeekPlanExport,
 } from "@/lib/weekPlanStorage";
-import {
-	WEEK_PLAN_COPY_FEEDBACK_MS,
-	type WeekPlan,
-} from "@/lib/weekPlanTypes";
+import { WEEK_PLAN_COPY_FEEDBACK_MS, type WeekPlan } from "@/lib/weekPlanTypes";
 
 interface WeekPlanToolbarProps {
 	plan: WeekPlan;
@@ -111,7 +108,9 @@ export function WeekPlanToolbar({
 					Import plan
 				</Button>
 				{copyMessage && (
-					<output className="text-sm text-muted-foreground">{copyMessage}</output>
+					<output className="text-sm text-muted-foreground">
+						{copyMessage}
+					</output>
 				)}
 			</div>
 
@@ -120,8 +119,8 @@ export function WeekPlanToolbar({
 					<DialogHeader>
 						<DialogTitle>Clear plan?</DialogTitle>
 						<DialogDescription>
-							This will remove all dishes and grocery lists. This cannot be undone
-							unless you copied the plan first.
+							This will remove all dishes and grocery lists. This cannot be
+							undone unless you copied the plan first.
 						</DialogDescription>
 					</DialogHeader>
 					<DialogFooter>

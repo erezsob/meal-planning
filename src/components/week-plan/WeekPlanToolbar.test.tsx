@@ -22,7 +22,11 @@ describe("WeekPlanToolbar", () => {
 		writeText.mockResolvedValue(undefined);
 
 		render(
-			<WeekPlanToolbar plan={defaultPlan} onClear={onClear} onImport={onImport} />,
+			<WeekPlanToolbar
+				plan={defaultPlan}
+				onClear={onClear}
+				onImport={onImport}
+			/>,
 		);
 
 		fireEvent.click(screen.getByRole("button", { name: /Copy plan/i }));
@@ -30,16 +34,18 @@ describe("WeekPlanToolbar", () => {
 		expect(writeText).toHaveBeenCalledWith(
 			serializeWeekPlanExport(defaultPlan),
 		);
-		expect(
-			await screen.findByText("Copied to clipboard"),
-		).toBeInTheDocument();
+		expect(await screen.findByText("Copied to clipboard")).toBeInTheDocument();
 	});
 
 	it("shows error when clipboard copy fails", async () => {
 		writeText.mockRejectedValue(new Error("denied"));
 
 		render(
-			<WeekPlanToolbar plan={defaultPlan} onClear={onClear} onImport={onImport} />,
+			<WeekPlanToolbar
+				plan={defaultPlan}
+				onClear={onClear}
+				onImport={onImport}
+			/>,
 		);
 
 		fireEvent.click(screen.getByRole("button", { name: /Copy plan/i }));
@@ -51,7 +57,11 @@ describe("WeekPlanToolbar", () => {
 
 	it("shows import error for invalid JSON", () => {
 		render(
-			<WeekPlanToolbar plan={defaultPlan} onClear={onClear} onImport={onImport} />,
+			<WeekPlanToolbar
+				plan={defaultPlan}
+				onClear={onClear}
+				onImport={onImport}
+			/>,
 		);
 
 		fireEvent.click(screen.getByRole("button", { name: /Import plan/i }));
@@ -72,7 +82,11 @@ describe("WeekPlanToolbar", () => {
 		const json = serializeWeekPlanExport(importedPlan);
 
 		render(
-			<WeekPlanToolbar plan={defaultPlan} onClear={onClear} onImport={onImport} />,
+			<WeekPlanToolbar
+				plan={defaultPlan}
+				onClear={onClear}
+				onImport={onImport}
+			/>,
 		);
 
 		fireEvent.click(screen.getByRole("button", { name: /Import plan/i }));
@@ -91,7 +105,11 @@ describe("WeekPlanToolbar", () => {
 
 	it("calls onClear when confirming clear plan", () => {
 		render(
-			<WeekPlanToolbar plan={defaultPlan} onClear={onClear} onImport={onImport} />,
+			<WeekPlanToolbar
+				plan={defaultPlan}
+				onClear={onClear}
+				onImport={onImport}
+			/>,
 		);
 
 		fireEvent.click(screen.getByRole("button", { name: /Clear plan/i }));
