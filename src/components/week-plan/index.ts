@@ -1,1 +1,1 @@
-export { WeekPlanView } from "./WeekPlanView";
+export { WeekPlanView, WeekPlanViewSkeleton } from "./WeekPlanView";

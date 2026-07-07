@@ -1,17 +1,8 @@
-/** localStorage key for the single active week plan */
-export const WEEK_PLAN_STORAGE_KEY = "meal-planner-week-plan-v1";
-
-/** Export JSON format version */
-export const WEEK_PLAN_EXPORT_VERSION = 1;
-
 /** Empty backlog rows on first load */
 export const DEFAULT_BACKLOG_ROW_COUNT = 1;
 
 /** Debounced auto-save delay (ms) */
 export const WEEK_PLAN_SAVE_DEBOUNCE_MS = 300;
-
-/** Copy-to-clipboard success message duration (ms) */
-export const WEEK_PLAN_COPY_FEEDBACK_MS = 2000;
 
 export const WEEKDAY_KEYS = [
 	"saturday",
@@ -35,11 +26,6 @@ export interface WeekPlan {
 	weeklyLunch: WeekPlanCell;
 	weeklyBreakfast: WeekPlanCell;
 	backlog: WeekPlanCell[];
-}
-
-export interface WeekPlanExport {
-	version: typeof WEEK_PLAN_EXPORT_VERSION;
-	plan: WeekPlan;
 }
 
 export const WEEKDAY_LABELS: Record<WeekdayKey, string> = {

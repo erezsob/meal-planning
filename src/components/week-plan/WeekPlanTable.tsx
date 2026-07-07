@@ -1,7 +1,7 @@
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/lib/components/button";
 import { cn } from "@/lib/utils";
-import type { WeekPlanCellLocation } from "@/lib/weekPlanStorage";
+import type { WeekPlanCellLocation } from "@/lib/weekPlan";
 import {
 	WEEKDAY_KEYS,
 	WEEKDAY_LABELS,

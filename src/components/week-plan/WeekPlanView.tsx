@@ -8,14 +8,8 @@ import { WeekPlanToolbar } from "./WeekPlanToolbar";
  * Week plan grid — simple free-text scratch pad for meal planning
  */
 export function WeekPlanView() {
-	const {
-		plan,
-		updateCell,
-		clearPlan,
-		replacePlan,
-		addBacklog,
-		removeBacklog,
-	} = useWeekPlan();
+	const { plan, saveError, updateCell, clearPlan, addBacklog, removeBacklog } =
+		useWeekPlan();
 
 	const rows = useMemo(() => buildWeekPlanRows(plan), [plan]);
 
@@ -28,7 +22,13 @@ export function WeekPlanView() {
 				</p>
 			</header>
 
-			<WeekPlanToolbar plan={plan} onClear={clearPlan} onImport={replacePlan} />
+			{saveError && (
+				<p className="text-sm text-destructive" role="alert">
+					{saveError}
+				</p>
+			)}
+
+			<WeekPlanToolbar onClear={() => void clearPlan()} />
 
 			<div className="hidden md:block">
 				<WeekPlanTable
@@ -46,6 +46,24 @@ export function WeekPlanView() {
 					onRemoveBacklog={removeBacklog}
 					onAddBacklog={addBacklog}
 				/>
+			</div>
+		</div>
+	);
+}
+
+/** Loading placeholder for the week plan route */
+export function WeekPlanViewSkeleton() {
+	return (
+		<div className="space-y-6">
+			<div className="space-y-2">
+				<div className="h-8 w-32 animate-pulse rounded bg-muted" />
+				<div className="h-4 w-64 animate-pulse rounded bg-muted" />
+			</div>
+			<div className="h-9 w-28 animate-pulse rounded bg-muted" />
+			<div className="space-y-2">
+				{["wp-sk-1", "wp-sk-2", "wp-sk-3", "wp-sk-4", "wp-sk-5"].map((key) => (
+					<div key={key} className="h-12 animate-pulse rounded-lg bg-muted" />
+				))}
 			</div>
 		</div>
 	);
