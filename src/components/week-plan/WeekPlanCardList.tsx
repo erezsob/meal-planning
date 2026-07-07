@@ -1,6 +1,6 @@
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/lib/components/button";
-import type { WeekPlanCellLocation } from "@/lib/weekPlanStorage";
+import type { WeekPlanCellLocation } from "@/lib/weekPlan";
 import { WeekPlanCellEditor } from "./WeekPlanCellEditor";
 import type { WeekPlanRowDescriptor } from "./WeekPlanTable";
 

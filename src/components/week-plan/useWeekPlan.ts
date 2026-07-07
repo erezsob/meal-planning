@@ -1,23 +1,38 @@
+import { convexQuery } from "@convex-dev/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { api } from "convex/_generated/api";
+import { useMutation } from "convex/react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { HOUSEHOLD_ID } from "@/lib/constants";
 import {
 	addBacklogRow,
-	loadWeekPlan,
 	removeBacklogRow,
-	saveWeekPlan,
 	updateWeekPlanCell,
 	type WeekPlanCellLocation,
-} from "@/lib/weekPlanStorage";
+} from "@/lib/weekPlan";
 import {
 	createDefaultWeekPlan,
 	WEEK_PLAN_SAVE_DEBOUNCE_MS,
 	type WeekPlan,
 } from "@/lib/weekPlanTypes";
 
+function planFromRemote(remotePlan: WeekPlan | null): WeekPlan {
+	return remotePlan ?? createDefaultWeekPlan();
+}
+
 /**
- * Manage week plan state with debounced localStorage persistence.
+ * Manage week plan state with debounced Convex persistence.
  */
 export function useWeekPlan() {
-	const [plan, setPlanState] = useState<WeekPlan>(loadWeekPlan);
+	const { data: remotePlan } = useSuspenseQuery(
+		convexQuery(api.weekPlans.get, { householdId: HOUSEHOLD_ID }),
+	);
+
+	const saveWeekPlanMutation = useMutation(api.weekPlans.save);
+	const [plan, setPlanState] = useState<WeekPlan>(() =>
+		planFromRemote(remotePlan),
+	);
+	const isDirtyRef = useRef(false);
 	const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	useEffect(() => {
@@ -28,14 +43,37 @@ export function useWeekPlan() {
 		};
 	}, []);
 
-	const persist = useCallback((next: WeekPlan) => {
-		if (saveTimerRef.current) {
-			clearTimeout(saveTimerRef.current);
+	useEffect(() => {
+		if (!isDirtyRef.current) {
+			setPlanState(planFromRemote(remotePlan));
 		}
-		saveTimerRef.current = setTimeout(() => {
-			saveWeekPlan(next);
-		}, WEEK_PLAN_SAVE_DEBOUNCE_MS);
-	}, []);
+	}, [remotePlan]);
+
+	const saveToDb = useCallback(
+		async (next: WeekPlan) => {
+			isDirtyRef.current = true;
+			return saveWeekPlanMutation({
+				householdId: HOUSEHOLD_ID,
+				plan: next,
+			}).finally(() => {
+				isDirtyRef.current = false;
+			});
+		},
+		[saveWeekPlanMutation],
+	);
+
+	const persist = useCallback(
+		(next: WeekPlan) => {
+			isDirtyRef.current = true;
+			if (saveTimerRef.current) {
+				clearTimeout(saveTimerRef.current);
+			}
+			saveTimerRef.current = setTimeout(() => {
+				void saveToDb(next);
+			}, WEEK_PLAN_SAVE_DEBOUNCE_MS);
+		},
+		[saveToDb],
+	);
 
 	const setPlan = useCallback(
 		(updater: WeekPlan | ((prev: WeekPlan) => WeekPlan)) => {
@@ -65,22 +103,14 @@ export function useWeekPlan() {
 		[setPlan],
 	);
 
-	const clearPlan = useCallback(() => {
+	const clearPlan = useCallback(async () => {
 		const empty = createDefaultWeekPlan();
 		if (saveTimerRef.current) {
 			clearTimeout(saveTimerRef.current);
 		}
 		setPlanState(empty);
-		saveWeekPlan(empty);
-	}, []);
-
-	const replacePlan = useCallback((next: WeekPlan) => {
-		if (saveTimerRef.current) {
-			clearTimeout(saveTimerRef.current);
-		}
-		setPlanState(next);
-		saveWeekPlan(next);
-	}, []);
+		await saveToDb(empty);
+	}, [saveToDb]);
 
 	const addBacklog = useCallback(() => {
 		setPlan((prev) => addBacklogRow(prev));
@@ -97,7 +127,6 @@ export function useWeekPlan() {
 		plan,
 		updateCell,
 		clearPlan,
-		replacePlan,
 		addBacklog,
 		removeBacklog,
 	};

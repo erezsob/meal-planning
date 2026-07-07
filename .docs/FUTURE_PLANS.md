@@ -83,7 +83,7 @@ Quick on-the-go logging of custom or library meals (creates `eaten` records imme
 
 **Supersedes**: Plan Mode (Decoupled Meal Planning) below — the slot-based calendar has been removed in favor of a simple free-text grid.
 
-Replace the home screen with a spreadsheet-style week plan (Sat–Fri, backlog, weekly rows). v1 uses `localStorage`; Log/History unchanged.
+Replace the home screen with a spreadsheet-style week plan (Sat–Fri, backlog, weekly rows). Persisted in Convex `weekPlans`; Log/History unchanged.
 
 ---
 

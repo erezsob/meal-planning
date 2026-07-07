@@ -35,17 +35,21 @@ Meal Planning App - weekly meal planner with a simple week-plan grid, recipe lib
 ┌─────────────────────────────────────────────────────────────┐
 │                    Convex Backend                            │
 │  ┌───────────────┐ ┌───────────────┐ ┌───────────────────┐  │
-│  │    dishes     │ │   mealPlans   │ │    shoppingList   │  │
-│  │   (queries/   │ │   (queries/   │ │     (query)       │  │
-│  │   mutations)  │ │   mutations)  │ │                   │  │
+│  │    dishes     │ │   mealPlans   │ │    weekPlans      │  │
+│  │   (queries/   │ │   (queries/   │ │   (queries/       │  │
+│  │   mutations)  │ │   mutations)  │ │    mutations)     │  │
 │  └───────┬───────┘ └───────┬───────┘ └─────────┬─────────┘  │
 │          │                 │                   │             │
-│          └─────────────────┴───────────────────┘             │
+│  ┌───────┴───────┐ ┌───────┴───────┐ ┌─────────▼─────────┐  │
+│  │ shoppingList  │ │               │ │                   │  │
+│  │   (query)     │ │               │ │                   │  │
+│  └───────┬───────┘ └───────────────┘ └───────────────────┘  │
 │                            │                                 │
 │                    ┌───────▼───────┐                         │
 │                    │   Document DB │                         │
 │                    │  (dishes,     │                         │
 │                    │   mealPlans,  │                         │
+│                    │   weekPlans,  │                         │
 │                    │   tasks)      │                         │
 │                    └───────────────┘                         │
 └─────────────────────────────────────────────────────────────┘
@@ -59,6 +63,7 @@ Meal Planning App - weekly meal planner with a simple week-plan grid, recipe lib
 │   ├── schema.ts         # Database schema definitions
 │   ├── dishes.ts         # Dish CRUD queries/mutations
 │   ├── mealPlans.ts      # Meal planning queries/mutations
+│   ├── weekPlans.ts      # Week plan scratch pad queries/mutations
 │   ├── shoppingList.ts   # Shopping list aggregation query
 │   └── _generated/       # Auto-generated types
 ├── lib/                  # Shared code
@@ -119,17 +124,25 @@ Meal Planning App - weekly meal planner with a simple week-plan grid, recipe lib
 | sourceMealId  | Id<"mealPlans">?                                    | Original cook event (for leftovers) |
 | householdId   | string                                              | Multi-tenant identifier             |
 
+**weekPlans** - Household week plan scratch pad (timeless grid)
+| Field       | Type      | Description                              |
+| ----------- | --------- | ---------------------------------------- |
+| householdId | string    | Multi-tenant identifier (one plan each)  |
+| plan        | WeekPlan  | Full grid: weekdays, weekly rows, backlog |
+| updatedAt   | number    | Last save timestamp (ms)                 |
+
 **Indexes:**
 - `dishes.by_householdId` - filter by household
 - `mealPlans.by_householdId` - filter by household
 - `mealPlans.by_day` - query week's meals
 - `mealPlans.by_dishId` - find related meals for leftover tracking
+- `weekPlans.by_householdId` - fetch household week plan
 
 ## Core Features
 
 ### 1. Week Plan Grid
 - Home route shows a simple free-text planner (Sat-Friday rows, backlog, weekly breakfast/lunch)
-- Local `localStorage` persistence with clear/copy/import actions
+- Convex `weekPlans` persistence with debounced auto-save and clear plan action
 - No mandatory linkage between planning notes and meal slot records
 
 ### 2. Meal Logging & History
@@ -165,7 +178,7 @@ File-based routing in `src/routes/`:
 - **Queries**: `useSuspenseQuery(convexQuery(...))` for real-time data
 - **Mutations**: `useMutation(useConvexMutation(...))` for writes
 - **Local UI state**: React useState (plan editing, dialogs, filters)
-- **Persistence**: localStorage for week plan + shopping checkboxes
+- **Persistence**: Convex for week plan; localStorage for shopping checkboxes
 
 ### Component Patterns
 - Feature components in `src/components/<feature>/`

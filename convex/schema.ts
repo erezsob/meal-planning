@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { weekPlanValidator } from "../lib/weekPlanValidator";
 
 export default defineSchema({
 	dishes: defineTable({
@@ -56,4 +57,10 @@ export default defineSchema({
 		isCompleted: v.boolean(),
 		text: v.string(),
 	}),
+
+	weekPlans: defineTable({
+		householdId: v.string(),
+		plan: weekPlanValidator,
+		updatedAt: v.number(),
+	}).index("by_householdId", ["householdId"]),
 });
