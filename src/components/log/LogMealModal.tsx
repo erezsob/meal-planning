@@ -9,7 +9,7 @@ import {
 } from "@/lib/components/dialog";
 import { useToast } from "@/lib/components/toast";
 import { HOUSEHOLD_ID, MEAL_TYPE_LABELS } from "@/lib/constants";
-import type { MealPlanWithDish } from "../dashboard/types";
+import type { MealPlanWithDish } from "@/lib/mealPlanTypes";
 import { LogMealForm, type LogMealFormValues } from "./LogMealForm";
 
 interface LogMealModalProps {

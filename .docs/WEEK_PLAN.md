@@ -2,7 +2,7 @@
 
 Feature plan — replace the slot-based calendar with a simple spreadsheet-style week plan.
 
-**Status:** Design complete — ready for implementation
+**Status:** Implemented
 
 ---
 
@@ -22,27 +22,27 @@ See [CONTEXT.md](../CONTEXT.md) for domain terminology.
 
 ## Decisions
 
-| Topic                  | Choice                                                           |
-| ---------------------- | ---------------------------------------------------------------- |
-| Weekday rows           | Freeform per day (often dinner; not enforced)                    |
-| Weekly rows            | Weekly lunch + weekly breakfast                                  |
-| Backlog                | Dynamic idea rows (add/remove); **3 empty rows on first load**   |
-| Columns                | **Dish** + **Grocery List** — free text only                     |
-| Calendar tie-in        | **None** — timeless Sat–Fri labels (no dates on rows)            |
-| Week navigation        | **None**                                                         |
-| Persistence            | Single `localStorage` slot; no multi-week history                |
-| Clear plan             | Button with confirmation — wipes all cells                       |
-| Cross-device           | Export / import current plan as JSON via clipboard               |
-| Cell editing           | Multiline textarea; debounced auto-save (~300ms)                 |
-| Cell display           | Plain text; auto-link `https://…` URLs when not editing          |
-| Near future            | Markdown editor for `[label](url)` (hide long URLs)              |
-| Desktop layout         | 3-column table (Date \| Dish \| Grocery List)                    |
-| Mobile layout          | Stacked card per week plan line                                  |
-| Home (`/`)             | Week plan grid replaces dashboard                                |
-| Archive                | `WeekCalendar`, planning modals, `LeftoverTracker`, `WeekHeader` |
-| Log / History          | Unchanged — day + meal slot; logging is optional and flexible    |
-| Library                | Unchanged                                                        |
-| Shopping (`/shopping`) | Hidden from nav in v1; route and code kept for later             |
+| Topic                   | Choice                                                         |
+| ----------------------- | -------------------------------------------------------------- |
+| Weekday rows            | Freeform per day (often dinner; not enforced)                  |
+| Weekly rows             | Weekly lunch + weekly breakfast                                |
+| Backlog                 | Dynamic idea rows (add/remove); **3 empty rows on first load** |
+| Columns                 | **Dish** + **Grocery List** — free text only                   |
+| Calendar tie-in         | **None** — timeless Sat–Fri labels (no dates on rows)          |
+| Week navigation         | **None**                                                       |
+| Persistence             | Single `localStorage` slot; no multi-week history              |
+| Clear plan              | Button with confirmation — wipes all cells                     |
+| Cross-device            | Export / import current plan as JSON via clipboard             |
+| Cell editing            | Multiline textarea; debounced auto-save (~300ms)               |
+| Cell display            | Plain text; auto-link `https://…` URLs when not editing        |
+| Near future             | Markdown editor for `[label](url)` (hide long URLs)            |
+| Desktop layout          | 3-column table (Date \| Dish \| Grocery List)                  |
+| Mobile layout           | Stacked card per week plan line                                |
+| Home (`/`)              | Week plan grid replaces the old dashboard                      |
+| Calendar implementation | Removed from the active codebase                               |
+| Log / History           | Unchanged — day + meal slot; logging is optional and flexible  |
+| Library                 | Unchanged                                                      |
+| Shopping (`/shopping`)  | Hidden from nav in v1; route and code kept for later           |
 
 ---
 
@@ -123,13 +123,9 @@ interface WeekPlan {
 - `lib/linkify.ts` — URL linkification in display mode
 - Clear plan, copy to clipboard, import from clipboard
 
-### Phase 3 — Archive calendar
+### Phase 3 — Remove legacy calendar
 
-Move to `src/components/dashboard/_archived/`:
-
-- `WeekCalendar.tsx`, `AddMealModal.tsx`, `MealActionModal.tsx`
-- `LeftoverTracker.tsx`, `CalendarSkeleton.tsx`, `WeekHeader.tsx`, `types.ts`
-- `MealSlot.tsx` if only used by calendar
+Delete legacy calendar/dashboard files and keep only components required by active flows (week plan, history, log, shopping, library).
 
 ### Phase 4 — Nav & polish
 

@@ -4,12 +4,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockMealWithDish } from "@/test/mocks/convex";
 import { MealActionModal } from "./MealActionModal";
 
-// Mock Convex
 vi.mock("convex/react", () => ({
 	useMutation: vi.fn(() => vi.fn()),
 }));
 
-// Mock the api object
 vi.mock("convex/_generated/api", () => ({
 	api: {
 		mealPlans: {

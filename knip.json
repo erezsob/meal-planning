@@ -5,5 +5,10 @@
 		"type": true
 	},
 	"tags": ["-lintignore"],
-	"ignore": ["src/vite-env.d.ts", "lib/fp.ts", "lib/errors.ts", "lib/components/**/*"]
+	"ignore": [
+		"src/vite-env.d.ts",
+		"lib/fp.ts",
+		"lib/errors.ts",
+		"lib/components/**/*"
+	]
 }

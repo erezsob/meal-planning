@@ -10,7 +10,7 @@ import {
 	DialogTitle,
 } from "@/lib/components/dialog";
 import { COMPONENT_ROLE_LABELS, DEFAULT_COMPONENT_ROLE } from "@/lib/constants";
-import type { MealWithDish } from "./types";
+import type { MealWithDish } from "@/lib/mealPlanTypes";
 
 interface MealActionModalProps {
 	/** The meal (component) to show actions for */

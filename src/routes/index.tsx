@@ -1,4 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Dashboard } from "../components/dashboard";
+import { WeekPlanView } from "../components/week-plan";
 
-export const Route = createFileRoute("/")({ component: Dashboard });
+export const Route = createFileRoute("/")({ component: WeekPlanView });
