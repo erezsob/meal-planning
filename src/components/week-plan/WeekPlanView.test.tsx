@@ -14,7 +14,7 @@ describe("WeekPlanView", () => {
 
 		expect(screen.getAllByText("Saturday").length).toBeGreaterThan(0);
 		expect(screen.getAllByText("Friday").length).toBeGreaterThan(0);
-		expect(screen.getAllByText("Weekly lunch:").length).toBeGreaterThan(0);
+		expect(screen.getAllByText("Weekly lunch").length).toBeGreaterThan(0);
 		expect(screen.getAllByText("Weekly breakfast").length).toBeGreaterThan(0);
 	});
 
