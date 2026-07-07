@@ -13,7 +13,7 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
     include: ["src/**/*.{test,spec}.{ts,tsx}", "lib/**/*.{test,spec}.{ts,tsx}"],
-    exclude: ["node_modules/**", "src/components/dashboard/_archived/**"],
+    exclude: ["node_modules/**"],
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
@@ -22,7 +22,6 @@ export default defineConfig({
         "**/*.test.{ts,tsx}",
         "**/*.spec.{ts,tsx}",
         "convex/_generated/**",
-        "src/components/dashboard/_archived/**",
       ],
     },
   },

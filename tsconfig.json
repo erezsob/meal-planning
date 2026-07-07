@@ -1,6 +1,5 @@
 {
   "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["src/components/dashboard/_archived/**"],
   "compilerOptions": {
     "target": "ES2022",
     "jsx": "react-jsx",

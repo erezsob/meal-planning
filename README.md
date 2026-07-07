@@ -1,13 +1,13 @@
 # Meal Planner
 
-Weekly meal planning app with recipe library and auto-generated shopping lists.
+Weekly meal planning app with a simple week-plan grid, recipe library, and shopping support.
 
 ## Features
 
-- **Calendar** - 7-day meal grid (breakfast/lunch/dinner), status tracking
+- **Week Plan** - simple Sat-Friday free-text planning grid with grocery notes
 - **Recipe Library** - dish management with ingredients, tags, servings
-- **Leftover Tracking** - track remaining servings from cook events
-- **Shopping List** - auto-aggregated ingredients by category
+- **Meal Logging & History** - flexible logging by date and meal slot with historical browsing
+- **Shopping List** - ingredient aggregation from planned dish data
 
 ## Tech Stack
 

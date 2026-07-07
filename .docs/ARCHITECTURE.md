@@ -2,7 +2,7 @@
 
 ## Overview
 
-Meal Planning App - weekly meal planner with recipe library and auto-generated shopping lists.
+Meal Planning App - weekly meal planner with a simple week-plan grid, recipe library, and shopping support.
 
 **Stack:**
 - Frontend: TanStack Start (React 19) + Tailwind CSS v4
@@ -18,7 +18,7 @@ Meal Planning App - weekly meal planner with recipe library and auto-generated s
 │  ┌─────────────────────────────────────────────────────────┐ │
 │  │              TanStack Start (React 19)                  │ │
 │  │  ┌──────────┐  ┌──────────┐  ┌────────────────────────┐ │ │
-│  │  │ Calendar │  │ Library  │  │     Shopping List      │ │ │
+│  │  │ Week Plan│  │ Library  │  │     Shopping List      │ │ │
 │  │  │  (home)  │  │ /library │  │       /shopping        │ │ │
 │  │  └────┬─────┘  └────┬─────┘  └───────────┬────────────┘ │ │
 │  │       │             │                    │              │ │
@@ -70,11 +70,12 @@ Meal Planning App - weekly meal planner with recipe library and auto-generated s
 ├── src/
 │   ├── routes/           # TanStack file-based routes
 │   │   ├── __root.tsx    # Root layout + shell
-│   │   ├── index.tsx     # / → Dashboard
+│   │   ├── index.tsx     # / → WeekPlanView
 │   │   ├── library.tsx   # /library → LibraryView
 │   │   └── shopping.tsx  # /shopping → ShoppingView
 │   ├── components/       # Feature components
-│   │   ├── dashboard/    # Calendar, meal modals
+│   │   ├── week-plan/    # Week plan grid and toolbar
+│   │   ├── meal/         # Shared meal action modal
 │   │   ├── library/      # Dish list, form modal
 │   │   └── shopping/     # Shopping list view
 │   ├── router.tsx        # TanStack router setup + Convex provider
@@ -103,10 +104,10 @@ Meal Planning App - weekly meal planner with recipe library and auto-generated s
 - unit: string?
 - category: string? (Produce, Dairy, Meat, etc.)
 
-**mealPlans** - Planned meals on calendar
+**mealPlans** - Planned/logged meals by day + meal slot
 | Field         | Type                                                | Description                         |
 | ------------- | --------------------------------------------------- | ----------------------------------- |
-| day           | string (YYYY-MM-DD)                                 | Calendar date                       |
+| day           | string (YYYY-MM-DD)                                 | Meal date                           |
 | mealType      | "breakfast" \| "lunch" \| "dinner"                  | Slot type                           |
 | componentRole | "main" \| "side" \| "dessert" \| "drink" \| "other" | Role in meal                        |
 | dishId        | Id<"dishes">?                                       | Reference to dish (or null)         |
@@ -126,34 +127,23 @@ Meal Planning App - weekly meal planner with recipe library and auto-generated s
 
 ## Core Features
 
-> **In transition:** The slot-based calendar is being replaced by a simple week plan grid. See [WEEK_PLAN.md](./WEEK_PLAN.md) for the new design. Sections below describe the current (legacy) implementation until migration is complete.
+### 1. Week Plan Grid
+- Home route shows a simple free-text planner (Sat-Friday rows, backlog, weekly breakfast/lunch)
+- Local `localStorage` persistence with clear/copy/import actions
+- No mandatory linkage between planning notes and meal slot records
 
-### 1. Weekly Calendar (Dashboard) — legacy
-- 7-day grid, Monday start
-- 3 meal slots per day (breakfast, lunch, dinner)
-- Multi-component meals (main + sides)
-- Status indicators (planned/eaten/skipped)
-- Week navigation with "Today" shortcut
+### 2. Meal Logging & History
+- Log meals by date + meal type (breakfast/lunch/dinner)
+- History view for eaten meals, with actions/editing where applicable
+- Logging remains flexible and independent from week-plan notes
 
-### 2. Meal Planning
-- Add dish from library OR custom name
-- Set servings used/made
-- Mark meals as eaten/skipped
-- Slot-level batch actions (eat all, skip all)
-
-### 3. Leftover Tracking
-- Fresh cook → `isLeftover: false`, no `sourceMealId`
-- Leftover → `isLeftover: true`, `sourceMealId` points to original cook
-- Available servings = `servingsMade - sum(eaten servings)`
-- "Void leftovers" mutation marks remaining as consumed (food went bad)
-
-### 4. Recipe Library
+### 3. Recipe Library
 - CRUD operations for dishes
 - Search by name (client-side filter)
 - Filter by tags (high-protein, vegetarian, etc.)
 - Tag-based filtering (OR logic)
 
-### 5. Shopping List
+### 4. Shopping List
 - Auto-generated from week's planned meals
 - Aggregates ingredients by name+unit+category
 - Scales quantities by servings ratio
@@ -165,7 +155,7 @@ Meal Planning App - weekly meal planner with recipe library and auto-generated s
 ### Routing (TanStack Start)
 File-based routing in `src/routes/`:
 ```
-/           → Dashboard (WeekCalendar)
+/           → WeekPlanView
 /library    → LibraryView (dish management)
 /shopping   → ShoppingView (ingredient list)
 ```
@@ -174,8 +164,8 @@ File-based routing in `src/routes/`:
 - **Server state**: Convex subscriptions via `@convex-dev/react-query`
 - **Queries**: `useSuspenseQuery(convexQuery(...))` for real-time data
 - **Mutations**: `useMutation(useConvexMutation(...))` for writes
-- **Local UI state**: React useState (week navigation, modals, filters)
-- **Persistence**: localStorage for shopping checkboxes
+- **Local UI state**: React useState (plan editing, dialogs, filters)
+- **Persistence**: localStorage for week plan + shopping checkboxes
 
 ### Component Patterns
 - Feature components in `src/components/<feature>/`
@@ -201,7 +191,6 @@ User Action → useMutation → Convex Mutation → DB Write
 - `dishes.getByTags` - tag filter (OR)
 - `mealPlans.getWeek` - 7-day meals with dish data
 - `mealPlans.getOne` - single meal with dish
-- `mealPlans.getLeftoverSources` - available leftovers
 - `shoppingList.getWeekShoppingList` - aggregated ingredients
 
 ### Mutation Functions
@@ -209,8 +198,6 @@ User Action → useMutation → Convex Mutation → DB Write
 - `mealPlans.planMeal` - add new meal
 - `mealPlans.update` - modify meal details
 - `mealPlans.eatMeal/skipMeal` - status changes
-- `mealPlans.eatSlot/skipSlot` - batch status changes
-- `mealPlans.voidLeftovers` - mark leftovers as consumed
 - `mealPlans.remove` - delete meal
 
 ## Key Design Decisions
@@ -227,10 +214,7 @@ Shopping list displays quantities as stored; no smart unit merging (e.g., 500g +
 ### 4. Client-side Filtering
 Search and tag filtering happen in-browser after fetching all dishes. Works fine for typical household scale (~100s of dishes).
 
-### 5. Leftover Model
-Leftovers link back to source cook event via `sourceMealId`. Enables tracking remaining servings across multiple leftover usages.
-
-### 6. Component Roles
+### 5. Component Roles
 Meals support multiple components per slot (main, side, dessert, drink, other) for complex meals.
 
 ## Development Commands
