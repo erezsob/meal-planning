@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createDefaultWeekPlan } from "@/lib/weekPlanTypes";
 import { serializeWeekPlanExport } from "@/lib/weekPlanStorage";
+import { createDefaultWeekPlan } from "@/lib/weekPlanTypes";
 import { WeekPlanToolbar } from "./WeekPlanToolbar";
 
 describe("WeekPlanToolbar", () => {

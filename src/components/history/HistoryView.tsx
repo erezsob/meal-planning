@@ -3,6 +3,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { api } from "convex/_generated/api";
 import { Search } from "lucide-react";
 import { useId, useMemo, useState } from "react";
+import { MealActionModal } from "@/components/meal";
 import { Button } from "@/lib/components/button";
 import { Input } from "@/lib/components/input";
 import { Label } from "@/lib/components/label";
@@ -15,7 +16,6 @@ import {
 	HOUSEHOLD_ID,
 	MEAL_TYPE_LABELS,
 } from "@/lib/constants";
-import { MealActionModal } from "@/components/meal";
 import type { MealPlanWithDish } from "@/lib/mealPlanTypes";
 import { LogMealModal } from "../log";
 import {

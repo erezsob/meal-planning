@@ -1,18 +1,18 @@
-import { describe, expect, it, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
-	DEFAULT_BACKLOG_ROW_COUNT,
-	WEEK_PLAN_STORAGE_KEY,
-	createDefaultWeekPlan,
-} from "./weekPlanTypes";
-import {
+	addBacklogRow,
 	loadWeekPlan,
 	parseWeekPlanImport,
+	removeBacklogRow,
 	saveWeekPlan,
 	serializeWeekPlanExport,
 	updateWeekPlanCell,
-	addBacklogRow,
-	removeBacklogRow,
 } from "./weekPlanStorage";
+import {
+	createDefaultWeekPlan,
+	DEFAULT_BACKLOG_ROW_COUNT,
+	WEEK_PLAN_STORAGE_KEY,
+} from "./weekPlanTypes";
 
 describe("weekPlanStorage", () => {
 	beforeEach(() => {
