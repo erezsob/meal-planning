@@ -134,15 +134,7 @@ export function getHistoryDateRange(
  * Meal component roles (main, side, dessert, drink, other).
  * Multiple components per role per slot allowed (e.g. dinner party).
  */
-export const MEAL_COMPONENT_ROLES = [
-	"main",
-	"side",
-	"dessert",
-	"drink",
-	"other",
-] as const;
-
-export type MealComponentRole = (typeof MEAL_COMPONENT_ROLES)[number];
+export type MealComponentRole = "main" | "side" | "dessert" | "drink" | "other";
 
 /** Default role when adding a component (e.g. for backfill / new plans). */
 export const DEFAULT_COMPONENT_ROLE: MealComponentRole = "main";
