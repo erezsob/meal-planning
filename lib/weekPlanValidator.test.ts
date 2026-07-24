@@ -7,6 +7,11 @@ describe("weekPlanValidator", () => {
 		expect(isWeekPlan(createDefaultWeekPlan())).toBe(true);
 	});
 
+	it("isWeekPlan accepts legacy plans without customCategories", () => {
+		const { customCategories: _, ...legacyPlan } = createDefaultWeekPlan();
+		expect(isWeekPlan(legacyPlan)).toBe(true);
+	});
+
 	it("isWeekPlan rejects invalid structures", () => {
 		expect(isWeekPlan(null)).toBe(false);
 		expect(isWeekPlan({})).toBe(false);

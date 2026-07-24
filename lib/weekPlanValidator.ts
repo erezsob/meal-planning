@@ -1,11 +1,18 @@
 import { v } from "convex/values";
 import {
+	type CustomCategoryRow,
 	WEEKDAY_KEYS,
 	type WeekPlan,
 	type WeekPlanCell,
 } from "./weekPlanTypes";
 
 const weekPlanCellValidator = v.object({
+	dish: v.string(),
+	grocery: v.string(),
+});
+
+const customCategoryRowValidator = v.object({
+	category: v.string(),
 	dish: v.string(),
 	grocery: v.string(),
 });
@@ -24,6 +31,7 @@ export const weekPlanValidator = v.object({
 	weeklyLunch: weekPlanCellValidator,
 	weeklyBreakfast: weekPlanCellValidator,
 	backlog: v.array(weekPlanCellValidator),
+	customCategories: v.optional(v.array(customCategoryRowValidator)),
 });
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -33,6 +41,15 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function isWeekPlanCell(value: unknown): value is WeekPlanCell {
 	return (
 		isRecord(value) &&
+		typeof value.dish === "string" &&
+		typeof value.grocery === "string"
+	);
+}
+
+function isCustomCategoryRow(value: unknown): value is CustomCategoryRow {
+	return (
+		isRecord(value) &&
+		typeof value.category === "string" &&
 		typeof value.dish === "string" &&
 		typeof value.grocery === "string"
 	);
@@ -57,6 +74,12 @@ export function isWeekPlan(value: unknown): value is WeekPlan {
 	if (!isWeekPlanCell(value.weeklyLunch)) return false;
 	if (!isWeekPlanCell(value.weeklyBreakfast)) return false;
 	if (!Array.isArray(value.backlog)) return false;
+	if (!value.backlog.every(isWeekPlanCell)) return false;
 
-	return value.backlog.every(isWeekPlanCell);
+	if (value.customCategories !== undefined) {
+		if (!Array.isArray(value.customCategories)) return false;
+		if (!value.customCategories.every(isCustomCategoryRow)) return false;
+	}
+
+	return true;
 }

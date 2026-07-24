@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { normalizeWeekPlan } from "../lib/weekPlan";
 import { weekPlanValidator } from "../lib/weekPlanValidator";
 import { mutation, query } from "./_generated/server";
 
@@ -13,7 +14,7 @@ export const get = query({
 			.withIndex("by_householdId", (q) => q.eq("householdId", args.householdId))
 			.first();
 
-		return row?.plan ?? null;
+		return row?.plan != null ? normalizeWeekPlan(row.plan) : null;
 	},
 });
 
@@ -26,6 +27,7 @@ export const save = mutation({
 		plan: weekPlanValidator,
 	},
 	handler: async (ctx, args) => {
+		const plan = normalizeWeekPlan(args.plan);
 		const existing = await ctx.db
 			.query("weekPlans")
 			.withIndex("by_householdId", (q) => q.eq("householdId", args.householdId))
@@ -34,13 +36,13 @@ export const save = mutation({
 		const updatedAt = Date.now();
 
 		if (existing) {
-			await ctx.db.patch(existing._id, { plan: args.plan, updatedAt });
+			await ctx.db.patch(existing._id, { plan, updatedAt });
 			return existing._id;
 		}
 
 		return await ctx.db.insert("weekPlans", {
 			householdId: args.householdId,
-			plan: args.plan,
+			plan,
 			updatedAt,
 		});
 	},
