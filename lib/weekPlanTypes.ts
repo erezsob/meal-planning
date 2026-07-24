@@ -38,6 +38,11 @@ export interface WeekPlan {
 	customCategories: CustomCategoryRow[];
 }
 
+/** Week plan as stored in Convex before custom categories were added */
+export type StoredWeekPlan = Omit<WeekPlan, "customCategories"> & {
+	customCategories?: CustomCategoryRow[];
+};
+
 export const WEEKDAY_LABELS: Record<WeekdayKey, string> = {
 	saturday: "Saturday",
 	sunday: "Sunday",

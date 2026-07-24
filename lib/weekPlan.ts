@@ -4,6 +4,7 @@ import {
 	createEmptyCell,
 	createEmptyCustomCategoryRow,
 	DEFAULT_CUSTOM_CATEGORY_ROW_COUNT,
+	type StoredWeekPlan,
 	type WEEKDAY_KEYS,
 	type WeekPlan,
 	type WeekPlanCell,
@@ -102,13 +103,13 @@ export type CustomCategoryField = keyof CustomCategoryRow;
  * @param plan - Remote plan or null
  * @returns Plan with guaranteed customCategories array
  */
-export function normalizeWeekPlan(plan: WeekPlan | null): WeekPlan {
+export function normalizeWeekPlan(plan: StoredWeekPlan | null): WeekPlan {
 	if (!plan) {
 		return createDefaultWeekPlan();
 	}
 
 	const customCategories =
-		plan.customCategories?.length > 0
+		plan.customCategories !== undefined && plan.customCategories.length > 0
 			? plan.customCategories
 			: Array.from({ length: DEFAULT_CUSTOM_CATEGORY_ROW_COUNT }, () =>
 					createEmptyCustomCategoryRow(),

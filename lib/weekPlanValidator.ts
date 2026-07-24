@@ -31,7 +31,7 @@ export const weekPlanValidator = v.object({
 	weeklyLunch: weekPlanCellValidator,
 	weeklyBreakfast: weekPlanCellValidator,
 	backlog: v.array(weekPlanCellValidator),
-	customCategories: v.array(customCategoryRowValidator),
+	customCategories: v.optional(v.array(customCategoryRowValidator)),
 });
 
 function isRecord(value: unknown): value is Record<string, unknown> {
