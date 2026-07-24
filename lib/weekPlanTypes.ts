@@ -1,6 +1,9 @@
 /** Empty backlog rows on first load */
 export const DEFAULT_BACKLOG_ROW_COUNT = 1;
 
+/** Empty custom category rows on first load and after clear */
+export const DEFAULT_CUSTOM_CATEGORY_ROW_COUNT = 1;
+
 /** Debounced auto-save delay (ms) */
 export const WEEK_PLAN_SAVE_DEBOUNCE_MS = 300;
 
@@ -21,11 +24,18 @@ export interface WeekPlanCell {
 	grocery: string;
 }
 
+export interface CustomCategoryRow {
+	category: string;
+	dish: string;
+	grocery: string;
+}
+
 export interface WeekPlan {
 	weekdays: Record<WeekdayKey, WeekPlanCell>;
 	weeklyLunch: WeekPlanCell;
 	weeklyBreakfast: WeekPlanCell;
 	backlog: WeekPlanCell[];
+	customCategories: CustomCategoryRow[];
 }
 
 export const WEEKDAY_LABELS: Record<WeekdayKey, string> = {
@@ -43,6 +53,11 @@ export function createEmptyCell(): WeekPlanCell {
 	return { dish: "", grocery: "" };
 }
 
+/** Creates an empty custom category row */
+export function createEmptyCustomCategoryRow(): CustomCategoryRow {
+	return { category: "", dish: "", grocery: "" };
+}
+
 /** Creates a week plan with empty weekdays, weekly rows, and default backlog */
 export function createDefaultWeekPlan(): WeekPlan {
 	const weekdays = Object.fromEntries(
@@ -55,6 +70,10 @@ export function createDefaultWeekPlan(): WeekPlan {
 		weeklyBreakfast: createEmptyCell(),
 		backlog: Array.from({ length: DEFAULT_BACKLOG_ROW_COUNT }, () =>
 			createEmptyCell(),
+		),
+		customCategories: Array.from(
+			{ length: DEFAULT_CUSTOM_CATEGORY_ROW_COUNT },
+			() => createEmptyCustomCategoryRow(),
 		),
 	};
 }

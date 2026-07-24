@@ -9,12 +9,16 @@ The household's current meal scratch pad — a simple grid of what you intend to
 _Avoid_: Calendar, schedule
 
 **Week plan line**:
-One row in the week plan — a weekday (Saturday through Friday), a backlog entry, or a weekly row (weekly lunch, weekly breakfast).
+One row in the week plan — a weekday (Saturday through Friday), a backlog entry, a weekly row (weekly lunch, weekly breakfast), or a custom category row.
 _Avoid_: Slot, cell
 
 **Backlog line**:
 A week plan line with no day label — a meal idea not yet assigned to a weekday.
 _Avoid_: Queue item, todo
+
+**Custom category line**:
+A week plan line with a user-defined category name (e.g. "Baking projects") plus dish and grocery columns — lives in the Categories section below the main grid.
+_Avoid_: Tag, label row
 
 **Plan**:
 Future intent to eat something on a specific day and meal slot. Stored in `mealPlans`; may affect the derived shopping list. Distinct from the week plan grid in v1.

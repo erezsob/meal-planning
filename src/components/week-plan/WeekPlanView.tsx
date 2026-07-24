@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { CustomCategoriesSection } from "./CustomCategoriesSection";
 import { useWeekPlan } from "./useWeekPlan";
 import { WeekPlanCardList } from "./WeekPlanCardList";
 import { buildWeekPlanRows, WeekPlanTable } from "./WeekPlanTable";
@@ -8,8 +9,18 @@ import { WeekPlanToolbar } from "./WeekPlanToolbar";
  * Week plan grid — simple free-text scratch pad for meal planning
  */
 export function WeekPlanView() {
-	const { plan, saveError, updateCell, clearPlan, addBacklog, removeBacklog } =
-		useWeekPlan();
+	const {
+		plan,
+		saveError,
+		updateCell,
+		clearPlan,
+		addBacklog,
+		removeBacklog,
+		updateCustomCategory,
+		addCustomCategory,
+		removeCustomCategory,
+		clearCategories,
+	} = useWeekPlan();
 
 	const rows = useMemo(() => buildWeekPlanRows(plan), [plan]);
 
@@ -47,6 +58,14 @@ export function WeekPlanView() {
 					onAddBacklog={addBacklog}
 				/>
 			</div>
+
+			<CustomCategoriesSection
+				rows={plan.customCategories}
+				onCellChange={updateCustomCategory}
+				onRemoveRow={removeCustomCategory}
+				onAddRow={addCustomCategory}
+				onClear={() => void clearCategories()}
+			/>
 		</div>
 	);
 }

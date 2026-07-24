@@ -6,7 +6,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { HOUSEHOLD_ID } from "@/lib/constants";
 import {
 	addBacklogRow,
+	addCustomCategoryRow,
+	type CustomCategoryField,
+	clearCustomCategories,
+	normalizeWeekPlan,
 	removeBacklogRow,
+	removeCustomCategoryRow,
+	updateCustomCategoryCell,
 	updateWeekPlanCell,
 	type WeekPlanCellLocation,
 } from "@/lib/weekPlan";
@@ -17,7 +23,7 @@ import {
 } from "@/lib/weekPlanTypes";
 
 function planFromRemote(remotePlan: WeekPlan | null): WeekPlan {
-	return remotePlan ?? createDefaultWeekPlan();
+	return normalizeWeekPlan(remotePlan);
 }
 
 /**
@@ -26,7 +32,7 @@ function planFromRemote(remotePlan: WeekPlan | null): WeekPlan {
  * Local edits overlay the remote plan until saved; when not editing, remote
  * subscription updates apply automatically without a sync effect.
  *
- * @returns Plan state, cell/backlog actions, and save error message (if any).
+ * @returns Plan state, cell/backlog/custom category actions, and save error message (if any).
  */
 export function useWeekPlan() {
 	const { data: remotePlan } = useSuspenseQuery(
@@ -144,6 +150,49 @@ export function useWeekPlan() {
 		[setPlan],
 	);
 
+	const updateCustomCategory = useCallback(
+		({
+			index,
+			field,
+			value,
+		}: {
+			index: number;
+			field: CustomCategoryField;
+			value: string;
+		}) => {
+			setPlan((prev) =>
+				updateCustomCategoryCell({ plan: prev, index, field, value }),
+			);
+		},
+		[setPlan],
+	);
+
+	const addCustomCategory = useCallback(() => {
+		setPlan((prev) => addCustomCategoryRow(prev));
+	}, [setPlan]);
+
+	const removeCustomCategory = useCallback(
+		(index: number) => {
+			setPlan((prev) => removeCustomCategoryRow(prev, index));
+		},
+		[setPlan],
+	);
+
+	const clearCategories = useCallback(async () => {
+		if (saveTimerRef.current) {
+			clearTimeout(saveTimerRef.current);
+		}
+		editGenerationRef.current += 1;
+		const generationAtSaveStart = editGenerationRef.current;
+		setSaveError(null);
+		setPendingPlan((prevPending) => {
+			const base = prevPending ?? getBasePlan();
+			const next = clearCustomCategories(base);
+			void commitSave(next, generationAtSaveStart);
+			return next;
+		});
+	}, [commitSave, getBasePlan]);
+
 	return {
 		plan,
 		saveError,
@@ -151,5 +200,9 @@ export function useWeekPlan() {
 		clearPlan,
 		addBacklog,
 		removeBacklog,
+		updateCustomCategory,
+		addCustomCategory,
+		removeCustomCategory,
+		clearCategories,
 	};
 }

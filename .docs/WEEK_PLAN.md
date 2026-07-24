@@ -14,7 +14,7 @@ The household already plans meals with a naive grid: free-text **Dish** and **Gr
 
 ## Solution overview
 
-Replace the home screen (`/`) with a **week plan grid**: a timeless Sat → Fri table plus weekly rows and a dynamic backlog. Persisted in Convex (`weekPlans`); Log and History stay unchanged on `mealPlans`.
+Replace the home screen (`/`) with a **week plan grid**: a timeless Sat → Fri table plus weekly rows, a dynamic backlog, and a separate **Categories** table for named custom rows. Persisted in Convex (`weekPlans`); Log and History stay unchanged on `mealPlans`.
 
 See [CONTEXT.md](../CONTEXT.md) for domain terminology.
 
@@ -26,7 +26,8 @@ See [CONTEXT.md](../CONTEXT.md) for domain terminology.
 | ----------------------- | -------------------------------------------------------------- |
 | Weekday rows            | Freeform per day (often dinner; not enforced)                  |
 | Weekly rows             | Weekly lunch + weekly breakfast                                |
-| Backlog                 | Dynamic idea rows (add/remove); **3 empty rows on first load** |
+| Backlog                 | Dynamic idea rows (add/remove); **1 empty row on first load** |
+| Custom categories       | Separate table below main grid; named rows with Category + Dish + Grocery; own Clear categories + Add row |
 | Columns                 | **Dish** + **Grocery List** — free text only                   |
 | Calendar tie-in         | **None** — timeless Sat–Fri labels (no dates on rows)          |
 | Week navigation         | **None**                                                       |
@@ -51,9 +52,13 @@ See [CONTEXT.md](../CONTEXT.md) for domain terminology.
 Fixed sections (top to bottom):
 
 1. **Weekdays** — Saturday, Sunday, Monday, Tuesday, Wednesday, Thursday, Friday
-2. **Backlog** — undated idea rows (dynamic count; add/remove)
-3. **Weekly lunch**
-4. **Weekly breakfast**
+2. **Weekly lunch**
+3. **Weekly breakfast**
+4. **Backlog** — undated idea rows (dynamic count; add/remove)
+
+Below the main grid:
+
+5. **Categories** — user-named rows (e.g. baking projects, dinner with friends) with Dish and Grocery columns
 
 Weekday rows are **freeform** — one cell may hold multiple dishes (e.g. a Sunday spread), grocery may exist without a dish, and dish may exist without grocery. Informal text (`?`, rough units) is expected.
 
@@ -78,6 +83,12 @@ interface WeekPlanCell {
   grocery: string;
 }
 
+interface CustomCategoryRow {
+  category: string;
+  dish: string;
+  grocery: string;
+}
+
 type WeekdayKey =
   | "saturday"
   | "sunday"
@@ -92,6 +103,7 @@ interface WeekPlan {
   weeklyLunch: WeekPlanCell;
   weeklyBreakfast: WeekPlanCell;
   backlog: WeekPlanCell[];
+  customCategories: CustomCategoryRow[];
 }
 ```
 
