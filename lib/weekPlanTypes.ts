@@ -38,9 +38,10 @@ export interface WeekPlan {
 	customPlan: CustomPlanRow[];
 }
 
-/** Week plan as stored in Convex before custom plan rows were added */
+/** Week plan as stored in Convex — may include legacy `customCategories` field */
 export type StoredWeekPlan = Omit<WeekPlan, "customPlan"> & {
 	customPlan?: CustomPlanRow[];
+	customCategories?: CustomPlanRow[];
 };
 
 export const WEEKDAY_LABELS: Record<WeekdayKey, string> = {
