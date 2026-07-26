@@ -111,14 +111,11 @@ export function normalizeWeekPlan(plan: StoredWeekPlan | null): WeekPlan {
 	const customPlan =
 		plan.customPlan !== undefined && plan.customPlan.length > 0
 			? plan.customPlan
-			: plan.customCategories !== undefined && plan.customCategories.length > 0
-				? plan.customCategories
-				: Array.from({ length: DEFAULT_CUSTOM_PLAN_ROW_COUNT }, () =>
-						createEmptyCustomPlanRow(),
-					);
+			: Array.from({ length: DEFAULT_CUSTOM_PLAN_ROW_COUNT }, () =>
+					createEmptyCustomPlanRow(),
+				);
 
-	const { customPlan: _cp, customCategories: _cc, ...rest } = plan;
-	return { ...rest, customPlan };
+	return { ...plan, customPlan };
 }
 
 /**

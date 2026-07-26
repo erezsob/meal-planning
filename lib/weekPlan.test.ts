@@ -47,25 +47,6 @@ describe("weekPlan", () => {
 		expect(normalized.customPlan).toHaveLength(DEFAULT_CUSTOM_PLAN_ROW_COUNT);
 	});
 
-	it("normalizeWeekPlan migrates legacy customCategories field", () => {
-		const legacy = {
-			...createDefaultWeekPlan(),
-			customCategories: [
-				{ category: "Baking", dish: "Sourdough", grocery: "Flour" },
-			],
-		};
-		delete (legacy as { customPlan?: unknown }).customPlan;
-
-		const normalized = normalizeWeekPlan(legacy);
-
-		expect(normalized.customPlan).toEqual([
-			{ category: "Baking", dish: "Sourdough", grocery: "Flour" },
-		]);
-		expect(
-			(normalized as { customCategories?: unknown }).customCategories,
-		).toBeUndefined();
-	});
-
 	it("updateCustomPlanCell updates immutably", () => {
 		const plan = createDefaultWeekPlan();
 		const next = updateCustomPlanCell({

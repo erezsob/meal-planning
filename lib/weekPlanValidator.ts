@@ -32,8 +32,6 @@ export const weekPlanValidator = v.object({
 	weeklyBreakfast: weekPlanCellValidator,
 	backlog: v.array(weekPlanCellValidator),
 	customPlan: v.optional(v.array(customPlanRowValidator)),
-	/** Legacy field — kept so existing prod documents pass schema validation */
-	customCategories: v.optional(v.array(customPlanRowValidator)),
 });
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -81,12 +79,6 @@ export function isWeekPlan(value: unknown): value is WeekPlan {
 	if (value.customPlan !== undefined) {
 		if (!Array.isArray(value.customPlan)) return false;
 		if (!value.customPlan.every(isCustomPlanRow)) return false;
-	}
-
-	const legacyCustomPlan = isRecord(value) ? value.customCategories : undefined;
-	if (legacyCustomPlan !== undefined) {
-		if (!Array.isArray(legacyCustomPlan)) return false;
-		if (!legacyCustomPlan.every(isCustomPlanRow)) return false;
 	}
 
 	return true;
