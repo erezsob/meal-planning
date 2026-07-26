@@ -19,7 +19,7 @@ echo "==> Deploying Convex and Cloudflare Workers in parallel..."
 
 status=0
 
-pnpm exec convex deploy &
+pnpm exec convex deploy --yes &
 convex_pid=$!
 
 pnpm run deploy &

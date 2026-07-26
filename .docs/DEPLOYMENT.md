@@ -33,7 +33,7 @@ This runs, in order:
 1. **Pre-deploy checks** — Biome, TypeScript, Knip (`pnpm check:full`)
 2. **Frontend build** — `pnpm build` (loads `.env.production`)
 3. **Parallel deploy** — Convex and Cloudflare Workers at the same time
-   - `convex deploy` — schema and server functions
+   - `convex deploy --yes` — schema and server functions (skips prod confirmation prompt)
    - `wrangler deploy` — Workers frontend
 
 Both deploy steps must succeed; if either fails, the script exits with an error.
