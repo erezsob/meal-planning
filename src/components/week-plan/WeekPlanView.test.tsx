@@ -52,6 +52,14 @@ describe("WeekPlanView", () => {
 		vi.useRealTimers();
 	});
 
+	it("renders the page heading", () => {
+		renderView();
+
+		expect(
+			screen.getByRole("heading", { level: 1, name: "Weekly plan" }),
+		).toBeInTheDocument();
+	});
+
 	it("renders weekday rows and weekly rows", () => {
 		renderView();
 

@@ -27,7 +27,7 @@ export function WeekPlanView() {
 	return (
 		<div className="space-y-6">
 			<header>
-				<h1 className="text-2xl font-bold text-foreground">Week plan</h1>
+				<h1 className="text-2xl font-bold text-foreground">Weekly plan</h1>
 				<p className="mt-1 text-sm text-muted-foreground">
 					Plan what to cook and what to buy — free text, no rules.
 				</p>
