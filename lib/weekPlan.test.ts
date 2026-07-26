@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vitest";
 import {
 	addBacklogRow,
-	addCustomCategoryRow,
-	clearCustomCategories,
+	addCustomPlanRow,
+	clearCustomPlan,
 	normalizeWeekPlan,
 	removeBacklogRow,
-	removeCustomCategoryRow,
-	updateCustomCategoryCell,
+	removeCustomPlanRow,
+	updateCustomPlanCell,
 	updateWeekPlanCell,
 } from "./weekPlan";
 import {
 	createDefaultWeekPlan,
 	DEFAULT_BACKLOG_ROW_COUNT,
-	DEFAULT_CUSTOM_CATEGORY_ROW_COUNT,
+	DEFAULT_CUSTOM_PLAN_ROW_COUNT,
 } from "./weekPlanTypes";
 
 describe("weekPlan", () => {
@@ -38,51 +38,45 @@ describe("weekPlan", () => {
 		expect(withoutRow.backlog).toHaveLength(DEFAULT_BACKLOG_ROW_COUNT);
 	});
 
-	it("normalizeWeekPlan fills missing customCategories", () => {
+	it("normalizeWeekPlan fills missing customPlan", () => {
 		const plan = createDefaultWeekPlan();
-		const { customCategories: _, ...withoutCategories } = plan;
+		const { customPlan: _, ...withoutCustomPlan } = plan;
 
-		const normalized = normalizeWeekPlan(withoutCategories as typeof plan);
+		const normalized = normalizeWeekPlan(withoutCustomPlan as typeof plan);
 
-		expect(normalized.customCategories).toHaveLength(
-			DEFAULT_CUSTOM_CATEGORY_ROW_COUNT,
-		);
+		expect(normalized.customPlan).toHaveLength(DEFAULT_CUSTOM_PLAN_ROW_COUNT);
 	});
 
-	it("updateCustomCategoryCell updates immutably", () => {
+	it("updateCustomPlanCell updates immutably", () => {
 		const plan = createDefaultWeekPlan();
-		const next = updateCustomCategoryCell({
+		const next = updateCustomPlanCell({
 			plan,
 			index: 0,
 			field: "category",
 			value: "Baking projects",
 		});
 
-		expect(next.customCategories[0].category).toBe("Baking projects");
-		expect(plan.customCategories[0].category).toBe("");
+		expect(next.customPlan[0].category).toBe("Baking projects");
+		expect(plan.customPlan[0].category).toBe("");
 	});
 
-	it("addCustomCategoryRow, removeCustomCategoryRow, and clearCustomCategories", () => {
+	it("addCustomPlanRow, removeCustomPlanRow, and clearCustomPlan", () => {
 		const plan = createDefaultWeekPlan();
-		const withRow = addCustomCategoryRow(plan);
-		expect(withRow.customCategories).toHaveLength(
-			DEFAULT_CUSTOM_CATEGORY_ROW_COUNT + 1,
-		);
+		const withRow = addCustomPlanRow(plan);
+		expect(withRow.customPlan).toHaveLength(DEFAULT_CUSTOM_PLAN_ROW_COUNT + 1);
 
-		const withoutRow = removeCustomCategoryRow(withRow, 0);
-		expect(withoutRow.customCategories).toHaveLength(
-			DEFAULT_CUSTOM_CATEGORY_ROW_COUNT,
-		);
+		const withoutRow = removeCustomPlanRow(withRow, 0);
+		expect(withoutRow.customPlan).toHaveLength(DEFAULT_CUSTOM_PLAN_ROW_COUNT);
 
-		const cleared = clearCustomCategories(
-			updateCustomCategoryCell({
+		const cleared = clearCustomPlan(
+			updateCustomPlanCell({
 				plan: createDefaultWeekPlan(),
 				index: 0,
 				field: "dish",
 				value: "Sourdough",
 			}),
 		);
-		expect(cleared.customCategories).toEqual([
+		expect(cleared.customPlan).toEqual([
 			{ category: "", dish: "", grocery: "" },
 		]);
 	});

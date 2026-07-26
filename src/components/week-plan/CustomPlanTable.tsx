@@ -1,11 +1,11 @@
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/lib/components/button";
 import { cn } from "@/lib/utils";
-import type { CustomCategoryField } from "@/lib/weekPlan";
-import type { CustomCategoryRow } from "@/lib/weekPlanTypes";
+import type { CustomPlanField } from "@/lib/weekPlan";
+import type { CustomPlanRow } from "@/lib/weekPlanTypes";
 import { WeekPlanCellEditor } from "./WeekPlanCellEditor";
 
-export interface CustomCategoryRowDescriptor {
+export interface CustomPlanRowDescriptor {
 	id: string;
 	index: number;
 	category: string;
@@ -13,12 +13,12 @@ export interface CustomCategoryRowDescriptor {
 	grocery: string;
 }
 
-/** Build row descriptors for custom category rendering */
-export function buildCustomCategoryRows(
-	rows: CustomCategoryRow[],
-): CustomCategoryRowDescriptor[] {
+/** Build row descriptors for custom plan rendering */
+export function buildCustomPlanRows(
+	rows: CustomPlanRow[],
+): CustomPlanRowDescriptor[] {
 	return rows.map((row, index) => ({
-		id: `custom-category-${index}`,
+		id: `custom-plan-${index}`,
 		index,
 		category: row.category,
 		dish: row.dish,
@@ -26,11 +26,11 @@ export function buildCustomCategoryRows(
 	}));
 }
 
-interface CustomCategoriesTableProps {
-	rows: CustomCategoryRowDescriptor[];
+interface CustomPlanTableProps {
+	rows: CustomPlanRowDescriptor[];
 	onCellChange: (args: {
 		index: number;
-		field: CustomCategoryField;
+		field: CustomPlanField;
 		value: string;
 	}) => void;
 	onRemoveRow: (index: number) => void;
@@ -40,19 +40,19 @@ interface CustomCategoriesTableProps {
 const cellBorder = "border border-border";
 const cellPadding = "px-3 py-2";
 
-function rowLabel(row: CustomCategoryRowDescriptor): string {
-	return row.category.trim() || "Category";
+function rowLabel(row: CustomPlanRowDescriptor): string {
+	return row.category.trim() || "Custom plan";
 }
 
 /**
- * Desktop custom categories table — Category | Dish | Grocery List
+ * Desktop custom plan table — Name | Dish | Grocery List
  */
-export function CustomCategoriesTable({
+export function CustomPlanTable({
 	rows,
 	onCellChange,
 	onRemoveRow,
 	onAddRow,
-}: CustomCategoriesTableProps) {
+}: CustomPlanTableProps) {
 	return (
 		<div className="space-y-3">
 			<div className="overflow-x-auto">
@@ -66,7 +66,7 @@ export function CustomCategoriesTable({
 									cellPadding,
 								)}
 							>
-								Category
+								Name
 							</th>
 							<th
 								className={cn(
@@ -138,7 +138,7 @@ export function CustomCategoriesTable({
 										type="button"
 										variant="ghost"
 										size="icon"
-										aria-label="Remove category row"
+										aria-label="Remove custom plan row"
 										onClick={() => onRemoveRow(row.index)}
 									>
 										<Trash2 size={16} />

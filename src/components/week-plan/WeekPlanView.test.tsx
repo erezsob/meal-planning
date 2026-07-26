@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	createDefaultWeekPlan,
 	DEFAULT_BACKLOG_ROW_COUNT,
-	DEFAULT_CUSTOM_CATEGORY_ROW_COUNT,
+	DEFAULT_CUSTOM_PLAN_ROW_COUNT,
 	WEEK_PLAN_SAVE_DEBOUNCE_MS,
 } from "@/lib/weekPlanTypes";
 import { TestWrapper } from "@/test/utils";
@@ -92,60 +92,60 @@ describe("WeekPlanView", () => {
 		);
 	});
 
-	it("renders custom categories section", () => {
+	it("renders custom plan section", () => {
 		renderView();
 
 		expect(
-			screen.getByRole("heading", { name: /Categories/i }),
+			screen.getByRole("heading", { name: /Custom plan/i }),
 		).toBeInTheDocument();
 		expect(
-			screen.getAllByRole("button", { name: /Category name/i }).length,
-		).toBeGreaterThanOrEqual(DEFAULT_CUSTOM_CATEGORY_ROW_COUNT);
+			screen.getAllByRole("button", { name: /Custom plan name/i }).length,
+		).toBeGreaterThanOrEqual(DEFAULT_CUSTOM_PLAN_ROW_COUNT);
 	});
 
-	it("adds a custom category row", () => {
+	it("adds a custom plan row", () => {
 		renderView();
 		const addButtons = screen.getAllByRole("button", { name: /^Add row$/i });
 		fireEvent.click(addButtons[addButtons.length - 1]);
 
 		expect(
-			screen.getAllByRole("button", { name: /Category name/i }).length,
-		).toBeGreaterThanOrEqual(DEFAULT_CUSTOM_CATEGORY_ROW_COUNT + 1);
+			screen.getAllByRole("button", { name: /Custom plan name/i }).length,
+		).toBeGreaterThanOrEqual(DEFAULT_CUSTOM_PLAN_ROW_COUNT + 1);
 	});
 
-	it("opens clear categories confirmation", () => {
+	it("opens clear custom plan confirmation", () => {
 		renderView();
-		fireEvent.click(screen.getByRole("button", { name: /Clear categories/i }));
+		fireEvent.click(screen.getByRole("button", { name: /Clear custom plan/i }));
 
 		expect(
 			screen.getByRole("heading", { name: /Are you sure\?/i }),
 		).toBeInTheDocument();
 	});
 
-	it("clears custom categories without clearing main plan", () => {
+	it("clears custom plan without clearing main plan", () => {
 		renderView();
 
-		const categoryDishButtons = screen.getAllByRole("button", {
-			name: /Category dish/i,
+		const customPlanDishButtons = screen.getAllByRole("button", {
+			name: /Custom plan dish/i,
 		});
-		fireEvent.click(categoryDishButtons[0]);
-		fireEvent.change(screen.getAllByLabelText(/Category dish/i)[0], {
+		fireEvent.click(customPlanDishButtons[0]);
+		fireEvent.change(screen.getAllByLabelText(/Custom plan dish/i)[0], {
 			target: { value: "Sourdough" },
 		});
 
 		mockSave.mockClear();
 
-		fireEvent.click(screen.getByRole("button", { name: /Clear categories/i }));
+		fireEvent.click(screen.getByRole("button", { name: /Clear custom plan/i }));
 		fireEvent.click(
 			within(screen.getByRole("dialog")).getByRole("button", {
-				name: /Clear categories/i,
+				name: /Clear custom plan/i,
 			}),
 		);
 
 		expect(mockSave).toHaveBeenCalledWith({
 			householdId: "household-1",
 			plan: expect.objectContaining({
-				customCategories: [{ category: "", dish: "", grocery: "" }],
+				customPlan: [{ category: "", dish: "", grocery: "" }],
 				weekdays: expect.objectContaining({
 					saturday: { dish: "", grocery: "" },
 				}),

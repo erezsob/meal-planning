@@ -6,13 +6,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { HOUSEHOLD_ID } from "@/lib/constants";
 import {
 	addBacklogRow,
-	addCustomCategoryRow,
-	type CustomCategoryField,
-	clearCustomCategories,
+	addCustomPlanRow,
+	type CustomPlanField,
 	normalizeWeekPlan,
 	removeBacklogRow,
-	removeCustomCategoryRow,
-	updateCustomCategoryCell,
+	removeCustomPlanRow,
+	clearCustomPlan as resetCustomPlanRows,
+	updateCustomPlanCell,
 	updateWeekPlanCell,
 	type WeekPlanCellLocation,
 } from "@/lib/weekPlan";
@@ -32,7 +32,7 @@ function planFromRemote(remotePlan: WeekPlan | null): WeekPlan {
  * Local edits overlay the remote plan until saved; when not editing, remote
  * subscription updates apply automatically without a sync effect.
  *
- * @returns Plan state, cell/backlog/custom category actions, and save error message (if any).
+ * @returns Plan state, cell/backlog/custom plan actions, and save error message (if any).
  */
 export function useWeekPlan() {
 	const { data: remotePlan } = useSuspenseQuery(
@@ -150,35 +150,35 @@ export function useWeekPlan() {
 		[setPlan],
 	);
 
-	const updateCustomCategory = useCallback(
+	const updateCustomPlan = useCallback(
 		({
 			index,
 			field,
 			value,
 		}: {
 			index: number;
-			field: CustomCategoryField;
+			field: CustomPlanField;
 			value: string;
 		}) => {
 			setPlan((prev) =>
-				updateCustomCategoryCell({ plan: prev, index, field, value }),
+				updateCustomPlanCell({ plan: prev, index, field, value }),
 			);
 		},
 		[setPlan],
 	);
 
-	const addCustomCategory = useCallback(() => {
-		setPlan((prev) => addCustomCategoryRow(prev));
+	const addCustomPlan = useCallback(() => {
+		setPlan((prev) => addCustomPlanRow(prev));
 	}, [setPlan]);
 
-	const removeCustomCategory = useCallback(
+	const removeCustomPlan = useCallback(
 		(index: number) => {
-			setPlan((prev) => removeCustomCategoryRow(prev, index));
+			setPlan((prev) => removeCustomPlanRow(prev, index));
 		},
 		[setPlan],
 	);
 
-	const clearCategories = useCallback(async () => {
+	const clearCustomPlan = useCallback(async () => {
 		if (saveTimerRef.current) {
 			clearTimeout(saveTimerRef.current);
 		}
@@ -187,7 +187,7 @@ export function useWeekPlan() {
 		setSaveError(null);
 		setPendingPlan((prevPending) => {
 			const base = prevPending ?? getBasePlan();
-			const next = clearCustomCategories(base);
+			const next = resetCustomPlanRows(base);
 			void commitSave(next, generationAtSaveStart);
 			return next;
 		});
@@ -200,9 +200,9 @@ export function useWeekPlan() {
 		clearPlan,
 		addBacklog,
 		removeBacklog,
-		updateCustomCategory,
-		addCustomCategory,
-		removeCustomCategory,
-		clearCategories,
+		updateCustomPlan,
+		addCustomPlan,
+		removeCustomPlan,
+		clearCustomPlan,
 	};
 }

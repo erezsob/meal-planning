@@ -10,16 +10,14 @@ import {
 	DialogTitle,
 } from "@/lib/components/dialog";
 
-interface CustomCategoriesToolbarProps {
+interface CustomPlanToolbarProps {
 	onClear: () => void;
 }
 
 /**
- * Custom categories actions — clear with confirmation
+ * Custom plan actions — clear with confirmation
  */
-export function CustomCategoriesToolbar({
-	onClear,
-}: CustomCategoriesToolbarProps) {
+export function CustomPlanToolbar({ onClear }: CustomPlanToolbarProps) {
 	const [clearOpen, setClearOpen] = useState(false);
 
 	return (
@@ -32,7 +30,7 @@ export function CustomCategoriesToolbar({
 					onClick={() => setClearOpen(true)}
 				>
 					<Eraser size={16} />
-					Clear categories
+					Clear custom plan
 				</Button>
 			</div>
 
@@ -41,7 +39,7 @@ export function CustomCategoriesToolbar({
 					<DialogHeader>
 						<DialogTitle>Are you sure?</DialogTitle>
 						<DialogDescription>
-							This will remove all category rows and reset to one empty row.
+							This will remove all custom plan rows and reset to one empty row.
 							This cannot be undone.
 						</DialogDescription>
 					</DialogHeader>
@@ -61,7 +59,7 @@ export function CustomCategoriesToolbar({
 								setClearOpen(false);
 							}}
 						>
-							Clear categories
+							Clear custom plan
 						</Button>
 					</DialogFooter>
 				</DialogContent>

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { CustomCategoriesSection } from "./CustomCategoriesSection";
+import { CustomPlanSection } from "./CustomPlanSection";
 import { useWeekPlan } from "./useWeekPlan";
 import { WeekPlanCardList } from "./WeekPlanCardList";
 import { buildWeekPlanRows, WeekPlanTable } from "./WeekPlanTable";
@@ -16,10 +16,10 @@ export function WeekPlanView() {
 		clearPlan,
 		addBacklog,
 		removeBacklog,
-		updateCustomCategory,
-		addCustomCategory,
-		removeCustomCategory,
-		clearCategories,
+		updateCustomPlan,
+		addCustomPlan,
+		removeCustomPlan,
+		clearCustomPlan,
 	} = useWeekPlan();
 
 	const rows = useMemo(() => buildWeekPlanRows(plan), [plan]);
@@ -59,12 +59,12 @@ export function WeekPlanView() {
 				/>
 			</div>
 
-			<CustomCategoriesSection
-				rows={plan.customCategories}
-				onCellChange={updateCustomCategory}
-				onRemoveRow={removeCustomCategory}
-				onAddRow={addCustomCategory}
-				onClear={() => void clearCategories()}
+			<CustomPlanSection
+				rows={plan.customPlan}
+				onCellChange={updateCustomPlan}
+				onRemoveRow={removeCustomPlan}
+				onAddRow={addCustomPlan}
+				onClear={() => void clearCustomPlan()}
 			/>
 		</div>
 	);

@@ -1,8 +1,8 @@
 /** Empty backlog rows on first load */
 export const DEFAULT_BACKLOG_ROW_COUNT = 1;
 
-/** Empty custom category rows on first load and after clear */
-export const DEFAULT_CUSTOM_CATEGORY_ROW_COUNT = 1;
+/** Empty custom plan rows on first load and after clear */
+export const DEFAULT_CUSTOM_PLAN_ROW_COUNT = 1;
 
 /** Debounced auto-save delay (ms) */
 export const WEEK_PLAN_SAVE_DEBOUNCE_MS = 300;
@@ -24,7 +24,7 @@ export interface WeekPlanCell {
 	grocery: string;
 }
 
-export interface CustomCategoryRow {
+export interface CustomPlanRow {
 	category: string;
 	dish: string;
 	grocery: string;
@@ -35,12 +35,12 @@ export interface WeekPlan {
 	weeklyLunch: WeekPlanCell;
 	weeklyBreakfast: WeekPlanCell;
 	backlog: WeekPlanCell[];
-	customCategories: CustomCategoryRow[];
+	customPlan: CustomPlanRow[];
 }
 
-/** Week plan as stored in Convex before custom categories were added */
-export type StoredWeekPlan = Omit<WeekPlan, "customCategories"> & {
-	customCategories?: CustomCategoryRow[];
+/** Week plan as stored in Convex before custom plan rows were added */
+export type StoredWeekPlan = Omit<WeekPlan, "customPlan"> & {
+	customPlan?: CustomPlanRow[];
 };
 
 export const WEEKDAY_LABELS: Record<WeekdayKey, string> = {
@@ -58,8 +58,8 @@ export function createEmptyCell(): WeekPlanCell {
 	return { dish: "", grocery: "" };
 }
 
-/** Creates an empty custom category row */
-export function createEmptyCustomCategoryRow(): CustomCategoryRow {
+/** Creates an empty custom plan row */
+export function createEmptyCustomPlanRow(): CustomPlanRow {
 	return { category: "", dish: "", grocery: "" };
 }
 
@@ -76,9 +76,8 @@ export function createDefaultWeekPlan(): WeekPlan {
 		backlog: Array.from({ length: DEFAULT_BACKLOG_ROW_COUNT }, () =>
 			createEmptyCell(),
 		),
-		customCategories: Array.from(
-			{ length: DEFAULT_CUSTOM_CATEGORY_ROW_COUNT },
-			() => createEmptyCustomCategoryRow(),
+		customPlan: Array.from({ length: DEFAULT_CUSTOM_PLAN_ROW_COUNT }, () =>
+			createEmptyCustomPlanRow(),
 		),
 	};
 }

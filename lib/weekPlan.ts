@@ -1,9 +1,9 @@
 import {
-	type CustomCategoryRow,
+	type CustomPlanRow,
 	createDefaultWeekPlan,
 	createEmptyCell,
-	createEmptyCustomCategoryRow,
-	DEFAULT_CUSTOM_CATEGORY_ROW_COUNT,
+	createEmptyCustomPlanRow,
+	DEFAULT_CUSTOM_PLAN_ROW_COUNT,
 	type StoredWeekPlan,
 	type WEEKDAY_KEYS,
 	type WeekPlan,
@@ -95,31 +95,31 @@ export function removeBacklogRow(plan: WeekPlan, index: number): WeekPlan {
 	};
 }
 
-export type CustomCategoryField = keyof CustomCategoryRow;
+export type CustomPlanField = keyof CustomPlanRow;
 
 /**
- * Normalize a week plan from remote storage — fills missing custom categories.
+ * Normalize a week plan from remote storage — fills missing custom plan rows.
  *
  * @param plan - Remote plan or null
- * @returns Plan with guaranteed customCategories array
+ * @returns Plan with guaranteed customPlan array
  */
 export function normalizeWeekPlan(plan: StoredWeekPlan | null): WeekPlan {
 	if (!plan) {
 		return createDefaultWeekPlan();
 	}
 
-	const customCategories =
-		plan.customCategories !== undefined && plan.customCategories.length > 0
-			? plan.customCategories
-			: Array.from({ length: DEFAULT_CUSTOM_CATEGORY_ROW_COUNT }, () =>
-					createEmptyCustomCategoryRow(),
+	const customPlan =
+		plan.customPlan !== undefined && plan.customPlan.length > 0
+			? plan.customPlan
+			: Array.from({ length: DEFAULT_CUSTOM_PLAN_ROW_COUNT }, () =>
+					createEmptyCustomPlanRow(),
 				);
 
-	return { ...plan, customCategories };
+	return { ...plan, customPlan };
 }
 
 /**
- * Update a single custom category cell field immutably.
+ * Update a single custom plan cell field immutably.
  *
  * @param params.plan - Current week plan
  * @param params.index - Row index to update
@@ -127,7 +127,7 @@ export function normalizeWeekPlan(plan: StoredWeekPlan | null): WeekPlan {
  * @param params.value - New field value
  * @returns New week plan with the row updated
  */
-export function updateCustomCategoryCell({
+export function updateCustomPlanCell({
 	plan,
 	index,
 	field,
@@ -135,62 +135,55 @@ export function updateCustomCategoryCell({
 }: {
 	plan: WeekPlan;
 	index: number;
-	field: CustomCategoryField;
+	field: CustomPlanField;
 	value: string;
 }): WeekPlan {
 	return {
 		...plan,
-		customCategories: plan.customCategories.map((row, i) =>
+		customPlan: plan.customPlan.map((row, i) =>
 			i === index ? { ...row, [field]: value } : row,
 		),
 	};
 }
 
 /**
- * Add an empty custom category row.
+ * Add an empty custom plan row.
  *
  * @param plan - Current week plan
- * @returns New week plan with one additional empty custom category row
+ * @returns New week plan with one additional empty custom plan row
  */
-export function addCustomCategoryRow(plan: WeekPlan): WeekPlan {
+export function addCustomPlanRow(plan: WeekPlan): WeekPlan {
 	return {
 		...plan,
-		customCategories: [
-			...plan.customCategories,
-			createEmptyCustomCategoryRow(),
-		],
+		customPlan: [...plan.customPlan, createEmptyCustomPlanRow()],
 	};
 }
 
 /**
- * Remove a custom category row by index.
+ * Remove a custom plan row by index.
  *
  * @param plan - Current week plan
- * @param index - Custom category row index to remove
+ * @param index - Custom plan row index to remove
  * @returns New week plan without the row at index
  */
-export function removeCustomCategoryRow(
-	plan: WeekPlan,
-	index: number,
-): WeekPlan {
+export function removeCustomPlanRow(plan: WeekPlan, index: number): WeekPlan {
 	return {
 		...plan,
-		customCategories: plan.customCategories.filter((_, i) => i !== index),
+		customPlan: plan.customPlan.filter((_, i) => i !== index),
 	};
 }
 
 /**
- * Reset custom categories to the default empty row count.
+ * Reset custom plan rows to the default empty row count.
  *
  * @param plan - Current week plan
- * @returns New week plan with custom categories cleared
+ * @returns New week plan with custom plan rows cleared
  */
-export function clearCustomCategories(plan: WeekPlan): WeekPlan {
+export function clearCustomPlan(plan: WeekPlan): WeekPlan {
 	return {
 		...plan,
-		customCategories: Array.from(
-			{ length: DEFAULT_CUSTOM_CATEGORY_ROW_COUNT },
-			() => createEmptyCustomCategoryRow(),
+		customPlan: Array.from({ length: DEFAULT_CUSTOM_PLAN_ROW_COUNT }, () =>
+			createEmptyCustomPlanRow(),
 		),
 	};
 }

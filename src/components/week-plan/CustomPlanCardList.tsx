@@ -1,33 +1,33 @@
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/lib/components/button";
-import type { CustomCategoryField } from "@/lib/weekPlan";
-import type { CustomCategoryRowDescriptor } from "./CustomCategoriesTable";
+import type { CustomPlanField } from "@/lib/weekPlan";
+import type { CustomPlanRowDescriptor } from "./CustomPlanTable";
 import { WeekPlanCellEditor } from "./WeekPlanCellEditor";
 
-interface CustomCategoriesCardListProps {
-	rows: CustomCategoryRowDescriptor[];
+interface CustomPlanCardListProps {
+	rows: CustomPlanRowDescriptor[];
 	onCellChange: (args: {
 		index: number;
-		field: CustomCategoryField;
+		field: CustomPlanField;
 		value: string;
 	}) => void;
 	onRemoveRow: (index: number) => void;
 	onAddRow: () => void;
 }
 
-function rowLabel(row: CustomCategoryRowDescriptor): string {
-	return row.category.trim() || "Category";
+function rowLabel(row: CustomPlanRowDescriptor): string {
+	return row.category.trim() || "Custom plan";
 }
 
 /**
- * Mobile custom categories — stacked card per row
+ * Mobile custom plan — stacked card per row
  */
-export function CustomCategoriesCardList({
+export function CustomPlanCardList({
 	rows,
 	onCellChange,
 	onRemoveRow,
 	onAddRow,
-}: CustomCategoriesCardListProps) {
+}: CustomPlanCardListProps) {
 	return (
 		<div className="space-y-3">
 			{rows.map((row) => (
@@ -54,7 +54,7 @@ export function CustomCategoriesCardList({
 							type="button"
 							variant="ghost"
 							size="icon"
-							aria-label="Remove category row"
+							aria-label="Remove custom plan row"
 							onClick={() => onRemoveRow(row.index)}
 						>
 							<Trash2 size={16} />
