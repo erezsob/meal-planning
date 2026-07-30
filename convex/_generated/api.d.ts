@@ -10,6 +10,7 @@
 
 import type * as dishes from "../dishes.js";
 import type * as mealPlans from "../mealPlans.js";
+import type * as planSections from "../planSections.js";
 import type * as seed from "../seed.js";
 import type * as shoppingList from "../shoppingList.js";
 import type * as weekPlans from "../weekPlans.js";
@@ -23,6 +24,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   dishes: typeof dishes;
   mealPlans: typeof mealPlans;
+  planSections: typeof planSections;
   seed: typeof seed;
   shoppingList: typeof shoppingList;
   weekPlans: typeof weekPlans;

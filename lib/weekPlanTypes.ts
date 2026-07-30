@@ -30,11 +30,20 @@ export interface CustomPlanRow {
 	grocery: string;
 }
 
-export interface WeekPlan {
+/** Main grid scratch pad — weekdays, weekly rows, backlog (no custom plan rows) */
+export interface MainGridContent {
 	weekdays: Record<WeekdayKey, WeekPlanCell>;
 	weeklyLunch: WeekPlanCell;
 	weeklyBreakfast: WeekPlanCell;
 	backlog: WeekPlanCell[];
+}
+
+/** Custom plans section — named category rows */
+export interface CustomPlansContent {
+	rows: CustomPlanRow[];
+}
+
+export interface WeekPlan extends MainGridContent {
 	customPlan: CustomPlanRow[];
 }
 
@@ -63,8 +72,8 @@ export function createEmptyCustomPlanRow(): CustomPlanRow {
 	return { category: "", dish: "", grocery: "" };
 }
 
-/** Creates a week plan with empty weekdays, weekly rows, and default backlog */
-export function createDefaultWeekPlan(): WeekPlan {
+/** Creates empty main grid content with default backlog rows */
+export function createDefaultMainGridContent(): MainGridContent {
 	const weekdays = Object.fromEntries(
 		WEEKDAY_KEYS.map((key) => [key, createEmptyCell()]),
 	) as Record<WeekdayKey, WeekPlanCell>;
@@ -76,8 +85,22 @@ export function createDefaultWeekPlan(): WeekPlan {
 		backlog: Array.from({ length: DEFAULT_BACKLOG_ROW_COUNT }, () =>
 			createEmptyCell(),
 		),
-		customPlan: Array.from({ length: DEFAULT_CUSTOM_PLAN_ROW_COUNT }, () =>
+	};
+}
+
+/** Creates empty custom plans content with default row count */
+export function createDefaultCustomPlansContent(): CustomPlansContent {
+	return {
+		rows: Array.from({ length: DEFAULT_CUSTOM_PLAN_ROW_COUNT }, () =>
 			createEmptyCustomPlanRow(),
 		),
+	};
+}
+
+/** Creates a week plan with empty weekdays, weekly rows, and default backlog */
+export function createDefaultWeekPlan(): WeekPlan {
+	return {
+		...createDefaultMainGridContent(),
+		customPlan: createDefaultCustomPlansContent().rows,
 	};
 }

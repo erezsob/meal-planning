@@ -1,6 +1,10 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-import { weekPlanValidator } from "../lib/weekPlanValidator";
+import {
+	customPlansContentValidator,
+	mainGridContentValidator,
+	weekPlanValidator,
+} from "../lib/weekPlanValidator";
 
 export default defineSchema({
 	dishes: defineTable({
@@ -63,4 +67,20 @@ export default defineSchema({
 		plan: weekPlanValidator,
 		updatedAt: v.number(),
 	}).index("by_householdId", ["householdId"]),
+
+	planSections: defineTable({
+		householdId: v.string(),
+		section: v.union(v.literal("main"), v.literal("custom-plans")),
+		content: v.union(mainGridContentValidator, customPlansContentValidator),
+		status: v.union(v.literal("active"), v.literal("archived")),
+		stackRank: v.optional(v.union(v.literal(0), v.literal(1))),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_household_section_status", ["householdId", "section", "status"])
+		.index("by_household_section_stackRank", [
+			"householdId",
+			"section",
+			"stackRank",
+		]),
 });
