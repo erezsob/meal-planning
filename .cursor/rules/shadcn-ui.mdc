@@ -1,0 +1,15 @@
+---
+description: Use shadcn/ui components for all user-facing UI
+alwaysApply: true
+---
+
+# shadcn UI
+
+Use shadcn primitives from `lib/components/` for buttons, inputs, labels, cards, badges, dialogs, and other standard controls. Read `docs/CODE_STANDARDS.md` §11 before editing UI.
+
+- Import from `lib/components/*`; merge classes with `cn()` from `lib/utils`
+- Compose domain components in `src/components/` and routes from these primitives — no raw `<button>` / `<input>` with bespoke Tailwind
+- Router links styled as buttons: `buttonVariants` + TanStack `Link` (see `Header.tsx`)
+- Theme: `next-themes` + semantic tokens (`bg-background`, `text-foreground`, `border-border`) — no custom color CSS variables
+- Icons: `@remixicon/react` (not lucide) for new code
+- Missing primitive: `pnpm dlx shadcn@latest add <component>` — do not hand-roll

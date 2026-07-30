@@ -26,6 +26,11 @@
 - No `any` types without justification
 - Proper interface definitions for data structures
 - Type-safe function signatures
+- Type casting - i.e. `as` operator - should be avoided at all times (minor exceptions only after careful consideration).
+  - Exceptions:
+  - `as const` for literal values and objects.
+  - `as unknown as` for type assertions that are not safe.
+  - Type casting in test related code.
 
 ## 5. Documentation
 - JSDoc comments for all public functions and hooks

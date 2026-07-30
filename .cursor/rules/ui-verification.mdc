@@ -1,0 +1,50 @@
+---
+description: Verify UI changes in the browser before marking work complete
+globs: src/routes/**,src/components/**,lib/components/**,src/styles.css
+alwaysApply: false
+---
+
+# UI verification
+
+After changing routes, components, or global styles, verify the result in the browser yourself. Do not ask the user to manually check unless you are blocked.
+
+## Prerequisites
+
+Run in order when any step is missing:
+
+1. **Dependencies** — `pnpm install`
+2. **Environment** — ensure `VITE_CONVEX_URL` is available; `pnpm dev` starts Convex and supplies it during local development
+3. **Seed data** — run `pnpm seed` when the dish library needs sample data; if the script needs its required argument, use `pnpm exec convex run seed:seedDishes '{"householdId":"household-1"}'`
+4. **Dev server** — `pnpm dev` → http://localhost:3000
+
+## Browser workflow
+
+Use the `user-chrome-devtools` MCP:
+
+1. Confirm the dev server is reachable at http://localhost:3000
+2. Open every route affected by the change
+3. Take a browser snapshot (`take_snapshot`) for structure and accessibility
+4. Take a screenshot (`take_screenshot`) for visual confirmation
+5. If layout or spacing changed, check a narrow viewport (~390px width)
+6. The app currently uses a dark theme; if theming changed, verify the dark root/document styling and re-screenshot
+
+## Routes
+
+Verify the relevant pages:
+
+- `/` — week plan grid, backlog, weekly lines, and custom categories
+- `/library` — dish library, search/filtering, and dish management
+- `/shopping` — derived shopping list and ingredient checkboxes
+- `/history` — logged meals grouped by date
+
+Also verify navigation and shared header changes from at least one route.
+
+## Completion report
+
+Before finishing UI work, state:
+
+- Routes checked
+- Pass or fail against the task intent
+- Any visual issues found (with a screenshot if useful)
+
+If verification fails, fix and re-run the loop. Only escalate to the user when blocked, such as a server startup failure or missing environment/household configuration.

@@ -1,0 +1,33 @@
+---
+description: Follow docs/CODE_STANDARDS.md for all code changes
+alwaysApply: true
+---
+
+# Code Standards
+
+Before editing files for any code change (feature, fix, refactor, or test update), read and follow `docs/CODE_STANDARDS.md`.
+
+When standards conflict with ad-hoc preferences, **CODE_STANDARDS.md wins**.
+
+## Required workflow
+
+1. Read relevant sections of `docs/CODE_STANDARDS.md` before changing files.
+2. For `lib/` and `src/` changes: read §9 and apply `@/lib/fp` patterns.
+3. Apply standards while writing — not as a post-hoc cleanup.
+4. Before finishing, verify against the **Code Review Checklist** at the bottom of the doc.
+
+## Key areas (see doc for full detail)
+
+- **Constants** — no magic numbers/strings; extract to constants files
+- **Organization** — named exports, single responsibility, hooks for reusable logic
+- **Types** — full TypeScript coverage; no `any` without justification
+- **Docs** — JSDoc on public functions/hooks
+- **Paradigm** — functional, declarative, immutable; use `lib/fp.ts` Result utilities
+- **UI** — shadcn from `lib/components/ui/` (see also `shadcn-ui.mdc`)
+- **Testing** — follow §12 when adding or updating tests
+
+## Do not
+
+- Skip the standards doc because the change seems small
+- Introduce patterns that contradict documented conventions
+- Mark work complete without checking the review checklist
