@@ -72,11 +72,26 @@ export function createEmptyCustomPlanRow(): CustomPlanRow {
 	return { category: "", dish: "", grocery: "" };
 }
 
+function isCompleteWeekdays(
+	value: Partial<Record<WeekdayKey, WeekPlanCell>>,
+): value is Record<WeekdayKey, WeekPlanCell> {
+	return WEEKDAY_KEYS.every((key) => value[key] !== undefined);
+}
+
+function createEmptyWeekdays(): Record<WeekdayKey, WeekPlanCell> {
+	const weekdays: Partial<Record<WeekdayKey, WeekPlanCell>> = {};
+	for (const key of WEEKDAY_KEYS) {
+		weekdays[key] = createEmptyCell();
+	}
+	if (!isCompleteWeekdays(weekdays)) {
+		throw new Error("Failed to initialize weekdays");
+	}
+	return weekdays;
+}
+
 /** Creates empty main grid content with default backlog rows */
 export function createDefaultMainGridContent(): MainGridContent {
-	const weekdays = Object.fromEntries(
-		WEEKDAY_KEYS.map((key) => [key, createEmptyCell()]),
-	) as Record<WeekdayKey, WeekPlanCell>;
+	const weekdays = createEmptyWeekdays();
 
 	return {
 		weekdays,

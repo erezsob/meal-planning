@@ -1,8 +1,6 @@
-import { useMemo } from "react";
 import { CustomPlanSection } from "./CustomPlanSection";
+import { MainGridSection } from "./MainGridSection";
 import { useWeekPlan } from "./useWeekPlan";
-import { WeekPlanCardList } from "./WeekPlanCardList";
-import { buildWeekPlanRows, WeekPlanTable } from "./WeekPlanTable";
 import { WeekPlanToolbar } from "./WeekPlanToolbar";
 
 /**
@@ -10,19 +8,20 @@ import { WeekPlanToolbar } from "./WeekPlanToolbar";
  */
 export function WeekPlanView() {
 	const {
-		plan,
+		mainGrids,
+		customPlanRows,
 		saveError,
 		updateCell,
-		clearPlan,
+		clearTopPlan,
 		addBacklog,
 		removeBacklog,
 		updateCustomPlan,
 		addCustomPlan,
 		removeCustomPlan,
 		clearCustomPlan,
+		newWeeklyPlan,
+		newCustomPlan,
 	} = useWeekPlan();
-
-	const rows = useMemo(() => buildWeekPlanRows(plan), [plan]);
 
 	return (
 		<div className="space-y-6">
@@ -39,32 +38,28 @@ export function WeekPlanView() {
 				</p>
 			)}
 
-			<WeekPlanToolbar onClear={() => void clearPlan()} />
+			<WeekPlanToolbar
+				onClear={() => void clearTopPlan()}
+				onNewWeeklyPlan={() => void newWeeklyPlan()}
+			/>
 
-			<div className="hidden md:block">
-				<WeekPlanTable
-					rows={rows}
+			{mainGrids.map((grid) => (
+				<MainGridSection
+					key={grid.id ?? grid.label}
+					grid={grid}
 					onCellChange={updateCell}
 					onRemoveBacklog={removeBacklog}
 					onAddBacklog={addBacklog}
 				/>
-			</div>
-
-			<div className="md:hidden">
-				<WeekPlanCardList
-					rows={rows}
-					onCellChange={updateCell}
-					onRemoveBacklog={removeBacklog}
-					onAddBacklog={addBacklog}
-				/>
-			</div>
+			))}
 
 			<CustomPlanSection
-				rows={plan.customPlan}
+				rows={customPlanRows}
 				onCellChange={updateCustomPlan}
 				onRemoveRow={removeCustomPlan}
 				onAddRow={addCustomPlan}
 				onClear={() => void clearCustomPlan()}
+				onNewCustomPlan={() => void newCustomPlan()}
 			/>
 		</div>
 	);

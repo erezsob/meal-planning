@@ -1,3 +1,4 @@
+import { isRecord } from "./typeGuards";
 import {
 	type CustomPlanRow,
 	type CustomPlansContent,
@@ -109,13 +110,13 @@ export function joinWeekPlan(
 /**
  * Normalize main grid content from remote storage.
  *
- * @param content - Remote main grid or null
+ * @param content - Remote main grid, null, or unknown value from Convex
  * @returns Main grid with guaranteed backlog rows
  */
 export function normalizeMainGridContent(
-	content: MainGridContent | null,
+	content: MainGridContent | null | unknown,
 ): MainGridContent {
-	if (!content) {
+	if (!isMainGridContent(content)) {
 		return createDefaultMainGridContent();
 	}
 	return content;
@@ -124,13 +125,13 @@ export function normalizeMainGridContent(
 /**
  * Normalize custom plans content from remote storage.
  *
- * @param content - Remote custom plans or null
+ * @param content - Remote custom plans, null, or unknown value from Convex
  * @returns Custom plans with guaranteed row count
  */
 export function normalizeCustomPlansContent(
-	content: CustomPlansContent | null,
+	content: CustomPlansContent | null | unknown,
 ): CustomPlansContent {
-	if (!content) {
+	if (!isCustomPlansContent(content)) {
 		return createDefaultCustomPlansContent();
 	}
 
@@ -142,6 +143,34 @@ export function normalizeCustomPlansContent(
 				);
 
 	return { rows };
+}
+
+/**
+ * Type guard for main grid content loaded from Convex planSections rows.
+ *
+ * @param value - Raw content from storage
+ * @returns Whether value is valid MainGridContent
+ */
+export function isMainGridContent(value: unknown): value is MainGridContent {
+	return (
+		isRecord(value) &&
+		"weekdays" in value &&
+		"weeklyLunch" in value &&
+		"weeklyBreakfast" in value &&
+		Array.isArray(value.backlog)
+	);
+}
+
+/**
+ * Type guard for custom plans content loaded from Convex planSections rows.
+ *
+ * @param value - Raw content from storage
+ * @returns Whether value is valid CustomPlansContent
+ */
+export function isCustomPlansContent(
+	value: unknown,
+): value is CustomPlansContent {
+	return isRecord(value) && "rows" in value && Array.isArray(value.rows);
 }
 
 /**

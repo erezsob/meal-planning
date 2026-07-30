@@ -196,6 +196,33 @@ export const SHOPPING_CHECKED_KEY_PREFIX = "shopping-checked";
 /** Delay before showing the week-plan link hover tooltip */
 export const LINK_TOOLTIP_DELAY_MS = 400;
 
+/** planSections.section discriminator for the main week grid */
+export const MAIN_PLAN_SECTION = "main" as const;
+
+/** planSections.section discriminator for custom plan rows */
+export const CUSTOM_PLANS_SECTION = "custom-plans" as const;
+
+/** stackRank for the upper "This week" main grid on home */
+export const MAIN_STACK_RANK_THIS_WEEK = 0 as const;
+
+/** stackRank for the lower "Previous week" main grid on home */
+export const MAIN_STACK_RANK_PREVIOUS_WEEK = 1 as const;
+
+/** Labels for stacked main-grid sections on the home page */
+export const MAIN_PLAN_LABELS = {
+	THIS_WEEK: "This week",
+	PREVIOUS_WEEK: "Previous week",
+} as const;
+
+/** User-facing error when a plan section save fails */
+export const PLAN_SECTION_SAVE_ERROR = "Could not save plan";
+
+/** User-facing error when "New weekly plan" fails */
+export const NEW_WEEKLY_PLAN_ERROR = "Could not create weekly plan";
+
+/** User-facing error when "New custom plan" fails */
+export const NEW_CUSTOM_PLAN_ERROR = "Could not create custom plan";
+
 /**
  * Stable key for a shopping list item (for checkbox persistence)
  */
