@@ -1,9 +1,25 @@
-import { type KeyboardEvent, type MouseEvent, useState } from "react";
+import {
+	type ClipboardEvent,
+	type KeyboardEvent,
+	type MouseEvent,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import { Textarea } from "@/lib/components/textarea";
-import { parseLinkifiedSegments } from "@/lib/linkify";
+import { LINK_TOOLTIP_DELAY_MS } from "@/lib/constants";
+import {
+	parseLinkifiedSegments,
+	type TextSegment,
+	wrapSelectionAsMarkdownLink,
+} from "@/lib/linkify";
 import { cn } from "@/lib/utils";
+import { WeekPlanLinkDialog } from "./WeekPlanLinkDialog";
+import { WeekPlanLinkTooltip } from "./WeekPlanLinkTooltip";
 
 const WEEK_PLAN_CELL_SELECTOR = "[data-week-plan-cell]";
+
+type LinkSegment = Extract<TextSegment, { type: "link" }>;
 
 interface WeekPlanCellEditorProps {
 	/** Accessible label for the field */
@@ -76,6 +92,38 @@ const focusNextTableCell = ({
 	next.focus();
 };
 
+const applyLinkWrap = ({
+	text,
+	selectionStart,
+	selectionEnd,
+	url,
+	onChange,
+	textarea,
+}: {
+	text: string;
+	selectionStart: number;
+	selectionEnd: number;
+	url: string;
+	onChange: (value: string) => void;
+	textarea: HTMLTextAreaElement | null;
+}) => {
+	const result = wrapSelectionAsMarkdownLink({
+		text,
+		selectionStart,
+		selectionEnd,
+		url,
+	});
+	if (!result) return false;
+
+	onChange(result.text);
+	if (textarea) {
+		requestAnimationFrame(() => {
+			textarea.setSelectionRange(result.cursor, result.cursor);
+		});
+	}
+	return true;
+};
+
 /**
  * Editable week plan cell — display mode with linkified URLs, edit mode with textarea.
  */
@@ -88,42 +136,124 @@ export function WeekPlanCellEditor({
 	embedded = false,
 }: WeekPlanCellEditorProps) {
 	const [isEditing, setIsEditing] = useState(false);
+	const [activeLinkStart, setActiveLinkStart] = useState<number | null>(null);
+	const [linkSelection, setLinkSelection] = useState<{
+		start: number;
+		end: number;
+	} | null>(null);
+	const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-	const startEditing = () => setIsEditing(true);
-	const stopEditing = () => setIsEditing(false);
+	const startEditing = () => {
+		setActiveLinkStart(null);
+		setIsEditing(true);
+	};
+	const stopEditing = () => {
+		setLinkSelection(null);
+		setIsEditing(false);
+	};
 
-	const handleBlur = () => {
-		stopEditing();
+	useEffect(() => {
+		return () => {
+			if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+		};
+	}, []);
+
+	const clearHoverTimer = () => {
+		if (hoverTimerRef.current) {
+			clearTimeout(hoverTimerRef.current);
+			hoverTimerRef.current = null;
+		}
+	};
+
+	const scheduleTooltip = (segment: LinkSegment) => {
+		clearHoverTimer();
+		hoverTimerRef.current = setTimeout(() => {
+			setActiveLinkStart(segment.start);
+		}, LINK_TOOLTIP_DELAY_MS);
+	};
+
+	const hideTooltipSoon = () => {
+		clearHoverTimer();
+		hoverTimerRef.current = setTimeout(() => {
+			setActiveLinkStart(null);
+		}, LINK_TOOLTIP_DELAY_MS);
+	};
+
+	const handlePaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
+		const pasted = event.clipboardData.getData("text");
+		const applied = applyLinkWrap({
+			text: value,
+			selectionStart: event.currentTarget.selectionStart,
+			selectionEnd: event.currentTarget.selectionEnd,
+			url: pasted,
+			onChange,
+			textarea: event.currentTarget,
+		});
+		if (applied) event.preventDefault();
 	};
 
 	const handleTextareaKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-		if (event.key === "Tab" && embedded) {
+		if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+			event.preventDefault();
+			const { selectionStart, selectionEnd } = event.currentTarget;
+			if (selectionStart === selectionEnd) return;
+			setLinkSelection({ start: selectionStart, end: selectionEnd });
+			return;
+		}
+
+		if (event.key === "Tab" && embedded && !linkSelection) {
 			focusNextTableCell({ event, onClose: stopEditing });
 		}
 	};
 
+	const handleLinkDialogSubmit = (url: string) => {
+		if (!linkSelection) return;
+		applyLinkWrap({
+			text: value,
+			selectionStart: linkSelection.start,
+			selectionEnd: linkSelection.end,
+			url,
+			onChange,
+			textarea: textareaRef.current,
+		});
+		setLinkSelection(null);
+	};
+
 	if (isEditing) {
 		return (
-			<Textarea
-				data-week-plan-cell
-				aria-label={label}
-				value={value}
-				onChange={(event) => onChange(event.target.value)}
-				onBlur={handleBlur}
-				onKeyDown={handleTextareaKeyDown}
-				autoFocus
-				rows={minRows}
-				className={textareaClassName(embedded, className)}
-			/>
+			<div className="relative">
+				<Textarea
+					ref={(node) => {
+						textareaRef.current = node;
+					}}
+					data-week-plan-cell
+					aria-label={label}
+					value={value}
+					onChange={(event) => onChange(event.target.value)}
+					onBlur={() => {
+						if (linkSelection) return;
+						stopEditing();
+					}}
+					onPaste={handlePaste}
+					onKeyDown={handleTextareaKeyDown}
+					autoFocus
+					rows={minRows}
+					className={textareaClassName(embedded, className)}
+				/>
+				{linkSelection && (
+					<WeekPlanLinkDialog
+						onSubmit={handleLinkDialogSubmit}
+						onCancel={() => setLinkSelection(null)}
+					/>
+				)}
+			</div>
 		);
 	}
 
 	const segments = parseLinkifiedSegments(value);
 	const ariaLabel = `${label}${value ? "" : " (empty)"}`;
-	const hasLinks =
-		!embedded && segments.some((segment) => segment.type === "link");
-
-	const focusDisplayProps = embedded ? { onFocus: startEditing } : undefined;
+	const hasLinks = segments.some((segment) => segment.type === "link");
 
 	if (!hasLinks) {
 		return (
@@ -132,7 +262,7 @@ export function WeekPlanCellEditor({
 				data-week-plan-cell
 				aria-label={ariaLabel}
 				onClick={startEditing}
-				{...focusDisplayProps}
+				onFocus={embedded ? startEditing : undefined}
 				className={displayClassName(embedded, Boolean(value), className)}
 			>
 				{segments.length === 0 ? (
@@ -151,19 +281,45 @@ export function WeekPlanCellEditor({
 		startEditing();
 	};
 
+	const handleLinkClick = (event: MouseEvent<HTMLAnchorElement>) => {
+		event.stopPropagation();
+	};
+
 	return (
-		<div className={displayClassName(embedded, Boolean(value), className)}>
+		<div
+			className={cn(
+				displayClassName(embedded, Boolean(value), className),
+				"relative",
+			)}
+		>
 			{segments.map((segment, index) =>
 				segment.type === "link" ? (
-					<a
-						key={`link-${segment.value}-${index}`}
-						href={segment.value}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="text-primary underline underline-offset-2"
+					<span
+						key={`link-${segment.start}-${segment.raw}-${index}`}
+						className="relative inline"
 					>
-						{segment.value}
-					</a>
+						<a
+							href={segment.href}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="text-primary underline underline-offset-2"
+							onClick={handleLinkClick}
+							onMouseEnter={() => scheduleTooltip(segment)}
+							onMouseLeave={hideTooltipSoon}
+						>
+							{segment.value}
+						</a>
+						{activeLinkStart === segment.start && (
+							<WeekPlanLinkTooltip
+								segment={segment}
+								cellValue={value}
+								onChange={onChange}
+								onClose={() => setActiveLinkStart(null)}
+								onKeepOpen={clearHoverTimer}
+								onRequestClose={hideTooltipSoon}
+							/>
+						)}
+					</span>
 				) : (
 					<button
 						key={`text-${segment.value}-${index}`}
@@ -176,7 +332,13 @@ export function WeekPlanCellEditor({
 					</button>
 				),
 			)}
-			<button type="button" className="sr-only" onClick={startEditing}>
+			<button
+				type="button"
+				data-week-plan-cell
+				className="sr-only"
+				onClick={startEditing}
+				onFocus={embedded ? startEditing : undefined}
+			>
 				Edit {label}
 			</button>
 		</div>

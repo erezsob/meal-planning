@@ -193,6 +193,9 @@ export const getWeekDates = (weekStart: Date): Date[] => {
  */
 export const SHOPPING_CHECKED_KEY_PREFIX = "shopping-checked";
 
+/** Delay before showing the week-plan link hover tooltip */
+export const LINK_TOOLTIP_DELAY_MS = 400;
+
 /**
  * Stable key for a shopping list item (for checkbox persistence)
  */
