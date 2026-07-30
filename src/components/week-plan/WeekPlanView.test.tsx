@@ -21,6 +21,7 @@ import { WeekPlanView } from "./WeekPlanView";
 
 const mockEnsureHome = vi.fn();
 const mockSaveMain = vi.fn().mockResolvedValue(undefined);
+const mockClearMainTop = vi.fn().mockResolvedValue(undefined);
 const mockSaveCustomPlans = vi.fn().mockResolvedValue(undefined);
 const mockArchiveAndCreateNewMain = vi.fn();
 const mockArchiveAndCreateNewCustomPlans = vi.fn();
@@ -81,6 +82,7 @@ vi.mock("convex/_generated/api", () => ({
 		planSections: {
 			ensureHome: "planSections:ensureHome",
 			saveMain: "planSections:saveMain",
+			clearMainTop: "planSections:clearMainTop",
 			saveCustomPlans: "planSections:saveCustomPlans",
 			archiveAndCreateNewMain: "planSections:archiveAndCreateNewMain",
 			archiveAndCreateNewCustomPlans:
@@ -141,6 +143,9 @@ describe("WeekPlanView", () => {
 			}
 			if (reference === "planSections:saveMain") {
 				return mockSaveMain;
+			}
+			if (reference === "planSections:clearMainTop") {
+				return mockClearMainTop;
 			}
 			if (reference === "planSections:saveCustomPlans") {
 				return mockSaveCustomPlans;
@@ -277,9 +282,8 @@ describe("WeekPlanView", () => {
 		);
 
 		await waitFor(() => {
-			expect(mockSaveMain).toHaveBeenCalledWith({
-				id: mainId,
-				content: createDefaultMainGridContent(),
+			expect(mockClearMainTop).toHaveBeenCalledWith({
+				householdId: "household-1",
 			});
 		});
 		expect(mockSaveCustomPlans).not.toHaveBeenCalled();
@@ -336,7 +340,7 @@ describe("WeekPlanView", () => {
 	});
 
 	it("shows an error when save fails", async () => {
-		mockSaveMain.mockRejectedValue(new Error("Network error"));
+		mockClearMainTop.mockRejectedValue(new Error("Network error"));
 		renderView();
 
 		fireEvent.click(screen.getByRole("button", { name: /Clear plan/i }));
@@ -361,6 +365,32 @@ describe("WeekPlanView", () => {
 		).toBeInTheDocument();
 		expect(screen.getByText("Jan 1, 2025")).toBeInTheDocument();
 		expect(screen.getByText("Nov 14, 2023")).toBeInTheDocument();
+	});
+
+	it("clears only the upper grid when two grids are stacked", async () => {
+		(useSuspenseQuery as Mock).mockReturnValue({ data: stackedGridHome });
+		renderView();
+
+		fireEvent.click(screen.getByRole("button", { name: /Clear plan/i }));
+		fireEvent.click(
+			within(screen.getByRole("dialog")).getByRole("button", {
+				name: /Clear plan/i,
+			}),
+		);
+
+		await waitFor(() => {
+			expect(mockClearMainTop).toHaveBeenCalledWith({
+				householdId: "household-1",
+			});
+		});
+		expect(mockSaveMain).not.toHaveBeenCalled();
+		expect(
+			within(
+				screen
+					.getByRole("heading", { name: "Previous week" })
+					.closest("section") as HTMLElement,
+			).getAllByText("Old ribs").length,
+		).toBeGreaterThan(0);
 	});
 
 	it("calls archiveAndCreateNewMain when confirming new weekly plan", async () => {

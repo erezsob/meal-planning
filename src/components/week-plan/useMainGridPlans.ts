@@ -3,7 +3,11 @@ import type { Id } from "convex/_generated/dataModel";
 import type { HomePlanSections } from "convex/planSections";
 import { useMutation } from "convex/react";
 import { useCallback, useMemo, useRef } from "react";
-import { HOUSEHOLD_ID, NEW_WEEKLY_PLAN_ERROR } from "@/lib/constants";
+import {
+	CLEAR_MAIN_PLAN_ERROR,
+	HOUSEHOLD_ID,
+	NEW_WEEKLY_PLAN_ERROR,
+} from "@/lib/constants";
 import {
 	addBacklogRow,
 	joinWeekPlan,
@@ -15,7 +19,6 @@ import {
 } from "@/lib/weekPlan";
 import {
 	createDefaultCustomPlansContent,
-	createDefaultMainGridContent,
 	type MainGridContent,
 	WEEK_PLAN_SAVE_DEBOUNCE_MS,
 } from "@/lib/weekPlanTypes";
@@ -47,6 +50,7 @@ export function useMainGridPlans({
 	onClearError,
 }: UseMainGridPlansArgs) {
 	const saveMainMutation = useMutation(api.planSections.saveMain);
+	const clearMainTopMutation = useMutation(api.planSections.clearMainTop);
 	const archiveAndCreateNewMainMutation = useMutation(
 		api.planSections.archiveAndCreateNewMain,
 	);
@@ -73,9 +77,9 @@ export function useMainGridPlans({
 	const {
 		pendingByKey,
 		updateForKey,
-		flushForKey,
 		flushAll,
 		reset: resetPending,
+		resetForKey,
 	} = useDebouncedKeyedSectionSave<MainGridContent, Id<"planSections">>({
 		debounceMs: WEEK_PLAN_SAVE_DEBOUNCE_MS,
 		onSave: saveMain,
@@ -154,16 +158,28 @@ export function useMainGridPlans({
 		[setMainForGrid],
 	);
 
-	const clearTopPlan = useCallback(async () => {
-		const topGrid = remoteHomeRef.current?.mainGrids[0];
-		const topId = topGrid?.id;
-		if (!topId) {
-			return;
+	const clearMainTop = useCallback(async () => {
+		onClearError();
+		const topGridId = remoteHomeRef.current?.mainGrids[0]?.id;
+		if (topGridId) {
+			resetForKey(topGridId);
 		}
 
-		onClearError();
-		await flushForKey(topId, createDefaultMainGridContent());
-	}, [flushForKey, onClearError]);
+		try {
+			await clearMainTopMutation({ householdId: HOUSEHOLD_ID });
+			onSaveSuccess();
+		} catch (error) {
+			onSaveError(
+				error instanceof Error ? error.message : CLEAR_MAIN_PLAN_ERROR,
+			);
+		}
+	}, [
+		clearMainTopMutation,
+		onClearError,
+		onSaveError,
+		onSaveSuccess,
+		resetForKey,
+	]);
 
 	const addBacklog = useCallback(
 		({ gridId }: { gridId: Id<"planSections"> }) => {
@@ -208,7 +224,7 @@ export function useMainGridPlans({
 	return {
 		mainGrids,
 		updateCell,
-		clearTopPlan,
+		clearMainTop,
 		addBacklog,
 		removeBacklog,
 		newWeeklyPlan,

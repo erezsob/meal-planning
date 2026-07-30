@@ -220,6 +220,9 @@ export const PLAN_SECTION_SAVE_ERROR = "Could not save plan";
 /** User-facing error when "New weekly plan" fails */
 export const NEW_WEEKLY_PLAN_ERROR = "Could not create weekly plan";
 
+/** User-facing error when clearing the upper weekly plan fails */
+export const CLEAR_MAIN_PLAN_ERROR = "Could not clear weekly plan";
+
 /** User-facing error when "New custom plan" fails */
 export const NEW_CUSTOM_PLAN_ERROR = "Could not create custom plan";
 

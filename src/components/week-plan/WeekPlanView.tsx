@@ -12,7 +12,7 @@ export function WeekPlanView() {
 		customPlanRows,
 		saveError,
 		updateCell,
-		clearTopPlan,
+		clearMainTop,
 		addBacklog,
 		removeBacklog,
 		updateCustomPlan,
@@ -39,7 +39,7 @@ export function WeekPlanView() {
 			)}
 
 			<WeekPlanToolbar
-				onClear={() => void clearTopPlan()}
+				onClear={() => void clearMainTop()}
 				onNewWeeklyPlan={() => void newWeeklyPlan()}
 			/>
 
