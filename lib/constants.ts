@@ -202,6 +202,9 @@ export const MAIN_PLAN_SECTION = "main" as const;
 /** planSections.section discriminator for custom plan rows */
 export const CUSTOM_PLANS_SECTION = "custom-plans" as const;
 
+/** planSections.status discriminator for archived rows */
+export const ARCHIVED_PLAN_STATUS = "archived" as const;
+
 /** stackRank for the upper "This week" main grid on home */
 export const MAIN_STACK_RANK_THIS_WEEK = 0 as const;
 
@@ -225,6 +228,21 @@ export const CLEAR_MAIN_PLAN_ERROR = "Could not clear weekly plan";
 
 /** User-facing error when "New custom plan" fails */
 export const NEW_CUSTOM_PLAN_ERROR = "Could not create custom plan";
+
+/** Labels used by the archived plans list and detail views */
+export const ARCHIVED_PLAN_LABELS = {
+	pastPlans: "Past plans",
+	weeklyPlan: "Weekly plan",
+	customPlan: "Custom plan",
+	readOnlyArchive: "Read-only archive",
+	backToPastPlans: "Back to past plans",
+} as const;
+
+/** Empty-state messages used by archived plan tabs */
+export const ARCHIVED_PLAN_EMPTY_MESSAGES = {
+	weekly: "No archived weekly plans.",
+	custom: "No archived custom plans.",
+} as const;
 
 /**
  * Stable key for a shopping list item (for checkbox persistence)

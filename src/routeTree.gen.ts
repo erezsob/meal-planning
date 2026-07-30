@@ -13,6 +13,8 @@ import { Route as ShoppingRouteImport } from './routes/shopping'
 import { Route as LibraryRouteImport } from './routes/library'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PlansArchiveRouteImport } from './routes/plans.archive'
+import { Route as PlansArchiveIdRouteImport } from './routes/plans.archive.$id'
 
 const ShoppingRoute = ShoppingRouteImport.update({
   id: '/shopping',
@@ -34,18 +36,32 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlansArchiveRoute = PlansArchiveRouteImport.update({
+  id: '/plans/archive',
+  path: '/plans/archive',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlansArchiveIdRoute = PlansArchiveIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => PlansArchiveRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/history': typeof HistoryRoute
   '/library': typeof LibraryRoute
   '/shopping': typeof ShoppingRoute
+  '/plans/archive': typeof PlansArchiveRouteWithChildren
+  '/plans/archive/$id': typeof PlansArchiveIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/history': typeof HistoryRoute
   '/library': typeof LibraryRoute
   '/shopping': typeof ShoppingRoute
+  '/plans/archive': typeof PlansArchiveRouteWithChildren
+  '/plans/archive/$id': typeof PlansArchiveIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +69,34 @@ export interface FileRoutesById {
   '/history': typeof HistoryRoute
   '/library': typeof LibraryRoute
   '/shopping': typeof ShoppingRoute
+  '/plans/archive': typeof PlansArchiveRouteWithChildren
+  '/plans/archive/$id': typeof PlansArchiveIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/history' | '/library' | '/shopping'
+  fullPaths:
+    | '/'
+    | '/history'
+    | '/library'
+    | '/shopping'
+    | '/plans/archive'
+    | '/plans/archive/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/history' | '/library' | '/shopping'
-  id: '__root__' | '/' | '/history' | '/library' | '/shopping'
+  to:
+    | '/'
+    | '/history'
+    | '/library'
+    | '/shopping'
+    | '/plans/archive'
+    | '/plans/archive/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/history'
+    | '/library'
+    | '/shopping'
+    | '/plans/archive'
+    | '/plans/archive/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +104,7 @@ export interface RootRouteChildren {
   HistoryRoute: typeof HistoryRoute
   LibraryRoute: typeof LibraryRoute
   ShoppingRoute: typeof ShoppingRoute
+  PlansArchiveRoute: typeof PlansArchiveRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -99,14 +137,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/plans/archive': {
+      id: '/plans/archive'
+      path: '/plans/archive'
+      fullPath: '/plans/archive'
+      preLoaderRoute: typeof PlansArchiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plans/archive/$id': {
+      id: '/plans/archive/$id'
+      path: '/$id'
+      fullPath: '/plans/archive/$id'
+      preLoaderRoute: typeof PlansArchiveIdRouteImport
+      parentRoute: typeof PlansArchiveRoute
+    }
   }
 }
+
+interface PlansArchiveRouteChildren {
+  PlansArchiveIdRoute: typeof PlansArchiveIdRoute
+}
+
+const PlansArchiveRouteChildren: PlansArchiveRouteChildren = {
+  PlansArchiveIdRoute: PlansArchiveIdRoute,
+}
+
+const PlansArchiveRouteWithChildren = PlansArchiveRoute._addFileChildren(
+  PlansArchiveRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HistoryRoute: HistoryRoute,
   LibraryRoute: LibraryRoute,
   ShoppingRoute: ShoppingRoute,
+  PlansArchiveRoute: PlansArchiveRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

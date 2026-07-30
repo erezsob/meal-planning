@@ -77,6 +77,16 @@ vi.mock("convex/react", () => ({
 	useMutation: vi.fn(),
 }));
 
+vi.mock("@tanstack/react-router", () => ({
+	Link: ({
+		children,
+		...props
+	}: {
+		children: React.ReactNode;
+		[key: string]: unknown;
+	}) => <a {...props}>{children}</a>,
+}));
+
 vi.mock("convex/_generated/api", () => ({
 	api: {
 		planSections: {
