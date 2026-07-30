@@ -4,6 +4,8 @@ import {
 	addCustomPlanRow,
 	clearCustomPlan,
 	clearCustomPlansContent,
+	isCustomPlansContent,
+	isMainGridContent,
 	joinWeekPlan,
 	normalizeCustomPlansContent,
 	normalizeMainGridContent,
@@ -47,6 +49,22 @@ describe("weekPlan", () => {
 		);
 	});
 
+	it("normalizeMainGridContent rejects unknown values", () => {
+		expect(isMainGridContent(null)).toBe(false);
+		expect(isMainGridContent({ invalid: true })).toBe(false);
+		expect(normalizeMainGridContent({ invalid: true }).backlog).toHaveLength(
+			DEFAULT_BACKLOG_ROW_COUNT,
+		);
+	});
+
+	it("normalizeCustomPlansContent rejects unknown values", () => {
+		expect(isCustomPlansContent(null)).toBe(false);
+		expect(isCustomPlansContent({ invalid: true })).toBe(false);
+		expect(normalizeCustomPlansContent({ invalid: true }).rows).toHaveLength(
+			DEFAULT_CUSTOM_PLAN_ROW_COUNT,
+		);
+	});
+
 	it("clearCustomPlansContent resets rows", () => {
 		const content = createDefaultCustomPlansContent();
 		content.rows[0].dish = "Sourdough";
@@ -82,7 +100,7 @@ describe("weekPlan", () => {
 		const plan = createDefaultWeekPlan();
 		const { customPlan: _, ...withoutCustomPlan } = plan;
 
-		const normalized = normalizeWeekPlan(withoutCustomPlan as typeof plan);
+		const normalized = normalizeWeekPlan(withoutCustomPlan);
 
 		expect(normalized.customPlan).toHaveLength(DEFAULT_CUSTOM_PLAN_ROW_COUNT);
 	});

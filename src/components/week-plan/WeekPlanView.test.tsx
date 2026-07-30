@@ -15,6 +15,7 @@ import {
 	DEFAULT_CUSTOM_PLAN_ROW_COUNT,
 	WEEK_PLAN_SAVE_DEBOUNCE_MS,
 } from "@/lib/weekPlanTypes";
+import { mockPlanSectionId } from "@/test/mocks/convex";
 import { TestWrapper } from "@/test/utils";
 import { WeekPlanView } from "./WeekPlanView";
 
@@ -24,9 +25,9 @@ const mockSaveCustomPlans = vi.fn().mockResolvedValue(undefined);
 const mockArchiveAndCreateNewMain = vi.fn();
 const mockArchiveAndCreateNewCustomPlans = vi.fn();
 
-const mainId = "plan-main-1" as never;
-const previousMainId = "plan-main-2" as never;
-const customPlansId = "plan-custom-plans-1" as never;
+const mainId = mockPlanSectionId("plan-main-1");
+const previousMainId = mockPlanSectionId("plan-main-2");
+const customPlansId = mockPlanSectionId("plan-custom-plans-1");
 
 const singleGridHome = {
 	mainGrids: [
@@ -127,7 +128,7 @@ describe("WeekPlanView", () => {
 		mockArchiveAndCreateNewCustomPlans.mockResolvedValue({
 			...singleGridHome,
 			customPlans: {
-				id: "plan-custom-plans-2" as never,
+				id: mockPlanSectionId("plan-custom-plans-2"),
 				content: createDefaultCustomPlansContent(),
 				createdAt: 1_735_689_600_000,
 				updatedAt: 1_735_689_600_000,
@@ -506,7 +507,7 @@ describe("WeekPlanView", () => {
 			data: {
 				mainGrids: [
 					{
-						id: "plan-main-3" as never,
+						id: mockPlanSectionId("plan-main-3"),
 						content: createDefaultMainGridContent(),
 						createdAt: 1_740_000_000_000,
 						updatedAt: 1_740_000_000_000,

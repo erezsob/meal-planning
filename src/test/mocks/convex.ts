@@ -2,6 +2,15 @@ import type { Doc, Id } from "convex/_generated/dataModel";
 import type { MealWithDish } from "@/lib/mealPlanTypes";
 
 /**
+ * Mock factory for planSections document ids in tests.
+ */
+export function mockPlanSectionId(
+	id: string = "plan-section-1",
+): Id<"planSections"> {
+	return id as Id<"planSections">;
+}
+
+/**
  * Mock factory for Dish documents
  */
 export function createMockDish(

@@ -9,6 +9,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/lib/components/dialog";
+import { MAIN_PLAN_LABELS } from "@/lib/constants";
 
 interface WeekPlanToolbarProps {
 	onClear: () => void;
@@ -53,9 +54,10 @@ export function WeekPlanToolbar({
 					<DialogHeader>
 						<DialogTitle>Start a new weekly plan?</DialogTitle>
 						<DialogDescription>
-							This creates a fresh grid at the top as &ldquo;This week&rdquo;
-							and moves your current plan to &ldquo;Previous week&rdquo; below.
-							Your current content is kept — nothing is deleted.
+							This creates a fresh grid at the top as &ldquo;
+							{MAIN_PLAN_LABELS.THIS_WEEK}&rdquo; and moves your current plan to
+							&ldquo;{MAIN_PLAN_LABELS.PREVIOUS_WEEK}&rdquo; below. Your current
+							content is kept — nothing is deleted.
 						</DialogDescription>
 					</DialogHeader>
 					<DialogFooter>
@@ -85,8 +87,8 @@ export function WeekPlanToolbar({
 						<DialogTitle>Clear plan?</DialogTitle>
 						<DialogDescription>
 							This will remove all dishes and grocery lists from the upper
-							&ldquo;This week&rdquo; grid only. The plan below is not affected.
-							This cannot be undone.
+							&ldquo;{MAIN_PLAN_LABELS.THIS_WEEK}&rdquo; grid only. The plan
+							below is not affected. This cannot be undone.
 						</DialogDescription>
 					</DialogHeader>
 					<DialogFooter>

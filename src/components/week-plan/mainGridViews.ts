@@ -1,5 +1,6 @@
 import type { Id } from "convex/_generated/dataModel";
-import { formatPlanCreatedAt, MAIN_PLAN_LABELS } from "@/lib/constants";
+import { MAIN_PLAN_LABELS } from "@/lib/constants";
+import { formatPlanCreatedAt } from "@/lib/planSectionDisplay";
 import type { MainGridContent } from "@/lib/weekPlanTypes";
 
 export type MainGridView = {
@@ -11,6 +12,10 @@ export type MainGridView = {
 
 /**
  * Build view models for stacked main grids from remote home data and pending edits.
+ *
+ * @param args.mainGrids - Remote main grid sections ordered by stack rank
+ * @param args.pendingById - Local pending edits keyed by section id
+ * @returns View models with labels, formatted dates, and merged content
  */
 export function buildMainGridViews({
 	mainGrids,

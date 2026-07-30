@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { isRecord } from "./typeGuards";
 import {
 	type CustomPlanRow,
 	WEEKDAY_KEYS,
@@ -54,10 +55,6 @@ export const weekPlanValidator = v.object({
 	backlog: v.array(weekPlanCellValidator),
 	customPlan: v.optional(v.array(customPlanRowValidator)),
 });
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-	return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 function isWeekPlanCell(value: unknown): value is WeekPlanCell {
 	return (
