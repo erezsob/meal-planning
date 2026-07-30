@@ -19,6 +19,8 @@ import type { Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
 
+const CUSTOM_PLANS_SECTION = "custom-plans" as const;
+
 export type HomePlanSection<TContent> = {
 	id?: Id<"planSections">;
 	content: TContent;
@@ -27,10 +29,38 @@ export type HomePlanSection<TContent> = {
 };
 
 export type HomePlanSections = {
-	main: HomePlanSection<MainGridContent>;
+	mainGrids: HomePlanSection<MainGridContent>[];
 	customPlans: HomePlanSection<CustomPlansContent>;
 	needsEnsure: boolean;
 };
+
+function toMainGridSection(row: {
+	_id: Id<"planSections">;
+	content: unknown;
+	createdAt: number;
+	updatedAt: number;
+}): HomePlanSection<MainGridContent> {
+	return {
+		id: row._id,
+		content: normalizeMainGridContent(row.content as MainGridContent),
+		createdAt: row.createdAt,
+		updatedAt: row.updatedAt,
+	};
+}
+
+function toCustomPlansSection(row: {
+	_id: Id<"planSections">;
+	content: unknown;
+	createdAt: number;
+	updatedAt: number;
+}): HomePlanSection<CustomPlansContent> {
+	return {
+		id: row._id,
+		content: normalizeCustomPlansContent(row.content as CustomPlansContent),
+		createdAt: row.createdAt,
+		updatedAt: row.updatedAt,
+	};
+}
 
 async function isMigrationComplete(
 	ctx: QueryCtx | MutationCtx,
@@ -48,7 +78,7 @@ async function isMigrationComplete(
 		.withIndex("by_household_section_status", (q) =>
 			q
 				.eq("householdId", householdId)
-				.eq("section", "custom-plans")
+				.eq("section", CUSTOM_PLANS_SECTION)
 				.eq("status", "active"),
 		)
 		.first();
@@ -89,7 +119,7 @@ async function migrateLegacyWeekPlan(
 
 	await ctx.db.insert("planSections", {
 		householdId,
-		section: "custom-plans",
+		section: CUSTOM_PLANS_SECTION,
 		content: customPlans,
 		status: "active",
 		createdAt: timestamp,
@@ -128,7 +158,7 @@ async function ensureDefaultHomeRows(
 		.withIndex("by_household_section_status", (q) =>
 			q
 				.eq("householdId", householdId)
-				.eq("section", "custom-plans")
+				.eq("section", CUSTOM_PLANS_SECTION)
 				.eq("status", "active"),
 		)
 		.first();
@@ -137,7 +167,7 @@ async function ensureDefaultHomeRows(
 		const now = Date.now();
 		await ctx.db.insert("planSections", {
 			householdId,
-			section: "custom-plans",
+			section: CUSTOM_PLANS_SECTION,
 			content: createDefaultCustomPlansContent(),
 			status: "active",
 			createdAt: now,
@@ -146,46 +176,60 @@ async function ensureDefaultHomeRows(
 	}
 }
 
+async function loadActiveMainGrids(
+	ctx: QueryCtx | MutationCtx,
+	householdId: string,
+): Promise<HomePlanSection<MainGridContent>[]> {
+	const [rank0, rank1] = await Promise.all([
+		ctx.db
+			.query("planSections")
+			.withIndex("by_household_section_stackRank", (q) =>
+				q
+					.eq("householdId", householdId)
+					.eq("section", "main")
+					.eq("stackRank", 0),
+			)
+			.first(),
+		ctx.db
+			.query("planSections")
+			.withIndex("by_household_section_stackRank", (q) =>
+				q
+					.eq("householdId", householdId)
+					.eq("section", "main")
+					.eq("stackRank", 1),
+			)
+			.first(),
+	]);
+
+	return [rank0, rank1]
+		.filter((row): row is NonNullable<typeof row> => row != null)
+		.map(toMainGridSection);
+}
+
 async function loadActiveHomeSections(
 	ctx: QueryCtx | MutationCtx,
 	householdId: string,
 ): Promise<HomePlanSections | null> {
-	const activeMain = await ctx.db
-		.query("planSections")
-		.withIndex("by_household_section_stackRank", (q) =>
-			q.eq("householdId", householdId).eq("section", "main").eq("stackRank", 0),
-		)
-		.first();
+	const [mainGrids, activeCustomPlans] = await Promise.all([
+		loadActiveMainGrids(ctx, householdId),
+		ctx.db
+			.query("planSections")
+			.withIndex("by_household_section_status", (q) =>
+				q
+					.eq("householdId", householdId)
+					.eq("section", CUSTOM_PLANS_SECTION)
+					.eq("status", "active"),
+			)
+			.first(),
+	]);
 
-	const activeCustomPlans = await ctx.db
-		.query("planSections")
-		.withIndex("by_household_section_status", (q) =>
-			q
-				.eq("householdId", householdId)
-				.eq("section", "custom-plans")
-				.eq("status", "active"),
-		)
-		.first();
-
-	if (!activeMain || !activeCustomPlans) {
+	if (mainGrids.length === 0 || !activeCustomPlans) {
 		return null;
 	}
 
 	return {
-		main: {
-			id: activeMain._id,
-			content: normalizeMainGridContent(activeMain.content as MainGridContent),
-			createdAt: activeMain.createdAt,
-			updatedAt: activeMain.updatedAt,
-		},
-		customPlans: {
-			id: activeCustomPlans._id,
-			content: normalizeCustomPlansContent(
-				activeCustomPlans.content as CustomPlansContent,
-			),
-			createdAt: activeCustomPlans.createdAt,
-			updatedAt: activeCustomPlans.updatedAt,
-		},
+		mainGrids,
+		customPlans: toCustomPlansSection(activeCustomPlans),
 		needsEnsure: false,
 	};
 }
@@ -197,11 +241,13 @@ function homeFromLegacyWeekPlan(
 	const { main, customPlans } = splitWeekPlan(plan);
 
 	return {
-		main: {
-			content: main,
-			createdAt: timestamp,
-			updatedAt: timestamp,
-		},
+		mainGrids: [
+			{
+				content: main,
+				createdAt: timestamp,
+				updatedAt: timestamp,
+			},
+		],
 		customPlans: {
 			content: customPlans,
 			createdAt: timestamp,
@@ -212,7 +258,7 @@ function homeFromLegacyWeekPlan(
 }
 
 /**
- * Load active main grid (rank 0) and custom plans for the home page.
+ * Load active main grids (stack ranks 0–1) and custom plans for the home page.
  * Synthesizes a read-only view from legacy weekPlans when not yet migrated.
  */
 export const getHome = query({
@@ -290,7 +336,7 @@ export const saveCustomPlans = mutation({
 	},
 	handler: async (ctx, args) => {
 		const row = await ctx.db.get(args.id);
-		if (!row || row.section !== "custom-plans") {
+		if (!row || row.section !== CUSTOM_PLANS_SECTION) {
 			throw new Error("Custom plans section not found");
 		}
 
@@ -299,5 +345,118 @@ export const saveCustomPlans = mutation({
 
 		await ctx.db.patch(args.id, { content, updatedAt });
 		return args.id;
+	},
+});
+
+/**
+ * Stack cascade for "New weekly plan": archive former rank-1, demote rank-0
+ * to rank-1, insert fresh rank-0.
+ */
+export const archiveAndCreateNewMain = mutation({
+	args: { householdId: v.string() },
+	handler: async (ctx, args) => {
+		await migrateLegacyWeekPlan(ctx, args.householdId);
+		await ensureDefaultHomeRows(ctx, args.householdId);
+
+		const now = Date.now();
+
+		const [rank0, rank1] = await Promise.all([
+			ctx.db
+				.query("planSections")
+				.withIndex("by_household_section_stackRank", (q) =>
+					q
+						.eq("householdId", args.householdId)
+						.eq("section", "main")
+						.eq("stackRank", 0),
+				)
+				.first(),
+			ctx.db
+				.query("planSections")
+				.withIndex("by_household_section_stackRank", (q) =>
+					q
+						.eq("householdId", args.householdId)
+						.eq("section", "main")
+						.eq("stackRank", 1),
+				)
+				.first(),
+		]);
+
+		await ctx.db.insert("planSections", {
+			householdId: args.householdId,
+			section: "main",
+			content: createDefaultMainGridContent(),
+			status: "active",
+			stackRank: 0,
+			createdAt: now,
+			updatedAt: now,
+		});
+
+		if (rank0) {
+			await ctx.db.patch(rank0._id, {
+				stackRank: 1,
+				updatedAt: now,
+			});
+		}
+
+		if (rank1) {
+			await ctx.db.patch(rank1._id, {
+				status: "archived",
+				stackRank: undefined,
+				updatedAt: now,
+			});
+		}
+
+		const home = await loadActiveHomeSections(ctx, args.householdId);
+		if (!home) {
+			throw new Error("Failed to load home plan sections");
+		}
+
+		return home;
+	},
+});
+
+/**
+ * Archive the active custom-plans row and insert a fresh active row.
+ */
+export const archiveAndCreateNewCustomPlans = mutation({
+	args: { householdId: v.string() },
+	handler: async (ctx, args) => {
+		await migrateLegacyWeekPlan(ctx, args.householdId);
+		await ensureDefaultHomeRows(ctx, args.householdId);
+
+		const now = Date.now();
+
+		const activeCustomPlans = await ctx.db
+			.query("planSections")
+			.withIndex("by_household_section_status", (q) =>
+				q
+					.eq("householdId", args.householdId)
+					.eq("section", CUSTOM_PLANS_SECTION)
+					.eq("status", "active"),
+			)
+			.first();
+
+		if (activeCustomPlans) {
+			await ctx.db.patch(activeCustomPlans._id, {
+				status: "archived",
+				updatedAt: now,
+			});
+		}
+
+		await ctx.db.insert("planSections", {
+			householdId: args.householdId,
+			section: CUSTOM_PLANS_SECTION,
+			content: createDefaultCustomPlansContent(),
+			status: "active",
+			createdAt: now,
+			updatedAt: now,
+		});
+
+		const home = await loadActiveHomeSections(ctx, args.householdId);
+		if (!home) {
+			throw new Error("Failed to load home plan sections");
+		}
+
+		return home;
 	},
 });

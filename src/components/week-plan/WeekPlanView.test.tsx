@@ -21,23 +21,53 @@ import { WeekPlanView } from "./WeekPlanView";
 const mockEnsureHome = vi.fn();
 const mockSaveMain = vi.fn().mockResolvedValue(undefined);
 const mockSaveCustomPlans = vi.fn().mockResolvedValue(undefined);
+const mockArchiveAndCreateNewMain = vi.fn();
+const mockArchiveAndCreateNewCustomPlans = vi.fn();
 
 const mainId = "plan-main-1" as never;
+const previousMainId = "plan-main-2" as never;
 const customPlansId = "plan-custom-plans-1" as never;
 
-const migrationShapedHome = {
-	main: {
-		id: mainId,
-		content: createDefaultMainGridContent(),
-		createdAt: 1_700_000_000_000,
-		updatedAt: 1_700_000_000_000,
-	},
+const singleGridHome = {
+	mainGrids: [
+		{
+			id: mainId,
+			content: createDefaultMainGridContent(),
+			createdAt: 1_700_000_000_000,
+			updatedAt: 1_700_000_000_000,
+		},
+	],
 	customPlans: {
 		id: customPlansId,
 		content: createDefaultCustomPlansContent(),
 		createdAt: 1_700_000_000_000,
 		updatedAt: 1_700_000_000_000,
 	},
+	needsEnsure: false,
+};
+
+const stackedGridHome = {
+	mainGrids: [
+		{
+			id: mainId,
+			content: createDefaultMainGridContent(),
+			createdAt: 1_735_689_600_000,
+			updatedAt: 1_735_689_600_000,
+		},
+		{
+			id: previousMainId,
+			content: {
+				...createDefaultMainGridContent(),
+				weekdays: {
+					...createDefaultMainGridContent().weekdays,
+					saturday: { dish: "Old ribs", grocery: "" },
+				},
+			},
+			createdAt: 1_700_000_000_000,
+			updatedAt: 1_700_000_000_000,
+		},
+	],
+	customPlans: singleGridHome.customPlans,
 	needsEnsure: false,
 };
 
@@ -51,6 +81,9 @@ vi.mock("convex/_generated/api", () => ({
 			ensureHome: "planSections:ensureHome",
 			saveMain: "planSections:saveMain",
 			saveCustomPlans: "planSections:saveCustomPlans",
+			archiveAndCreateNewMain: "planSections:archiveAndCreateNewMain",
+			archiveAndCreateNewCustomPlans:
+				"planSections:archiveAndCreateNewCustomPlans",
 		},
 	},
 }));
@@ -58,7 +91,7 @@ vi.mock("convex/_generated/api", () => ({
 vi.mock("@convex-dev/react-query", () => ({
 	convexQuery: vi.fn(() => ({
 		queryKey: ["planSections", "getHome"],
-		queryFn: async () => migrationShapedHome,
+		queryFn: async () => singleGridHome,
 	})),
 }));
 
@@ -67,7 +100,7 @@ vi.mock("@tanstack/react-query", async () => {
 	return {
 		...actual,
 		useSuspenseQuery: vi.fn(() => ({
-			data: migrationShapedHome,
+			data: singleGridHome,
 		})),
 	};
 });
@@ -87,10 +120,20 @@ const renderView = () =>
 describe("WeekPlanView", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		mockEnsureHome.mockResolvedValue(migrationShapedHome);
+		mockEnsureHome.mockResolvedValue(singleGridHome);
 		mockSaveMain.mockResolvedValue(undefined);
 		mockSaveCustomPlans.mockResolvedValue(undefined);
-		(useSuspenseQuery as Mock).mockReturnValue({ data: migrationShapedHome });
+		mockArchiveAndCreateNewMain.mockResolvedValue(stackedGridHome);
+		mockArchiveAndCreateNewCustomPlans.mockResolvedValue({
+			...singleGridHome,
+			customPlans: {
+				id: "plan-custom-plans-2" as never,
+				content: createDefaultCustomPlansContent(),
+				createdAt: 1_735_689_600_000,
+				updatedAt: 1_735_689_600_000,
+			},
+		});
+		(useSuspenseQuery as Mock).mockReturnValue({ data: singleGridHome });
 		(useMutation as Mock).mockImplementation((reference: string) => {
 			if (reference === "planSections:ensureHome") {
 				return mockEnsureHome;
@@ -100,6 +143,12 @@ describe("WeekPlanView", () => {
 			}
 			if (reference === "planSections:saveCustomPlans") {
 				return mockSaveCustomPlans;
+			}
+			if (reference === "planSections:archiveAndCreateNewMain") {
+				return mockArchiveAndCreateNewMain;
+			}
+			if (reference === "planSections:archiveAndCreateNewCustomPlans") {
+				return mockArchiveAndCreateNewCustomPlans;
 			}
 			return vi.fn();
 		});
@@ -217,7 +266,7 @@ describe("WeekPlanView", () => {
 		).toBeInTheDocument();
 	});
 
-	it("saves cleared main plan to Convex", async () => {
+	it("saves cleared top main plan to Convex", async () => {
 		renderView();
 		fireEvent.click(screen.getByRole("button", { name: /Clear plan/i }));
 		fireEvent.click(
@@ -238,10 +287,14 @@ describe("WeekPlanView", () => {
 	it("calls ensureHome when legacy data needs migration", async () => {
 		(useSuspenseQuery as Mock).mockReturnValue({
 			data: {
-				...migrationShapedHome,
+				...singleGridHome,
 				needsEnsure: true,
-				main: { ...migrationShapedHome.main, id: undefined },
-				customPlans: { ...migrationShapedHome.customPlans, id: undefined },
+				mainGrids: [
+					{
+						...singleGridHome.mainGrids[0],
+						id: undefined,
+					},
+				],
 			},
 		});
 
@@ -293,5 +346,191 @@ describe("WeekPlanView", () => {
 		);
 
 		expect(await screen.findByRole("alert")).toHaveTextContent("Network error");
+	});
+
+	it("renders two stacked main grids with headings and dates", () => {
+		(useSuspenseQuery as Mock).mockReturnValue({ data: stackedGridHome });
+		renderView();
+
+		expect(
+			screen.getByRole("heading", { name: "This week" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", { name: "Previous week" }),
+		).toBeInTheDocument();
+		expect(screen.getByText("Jan 1, 2025")).toBeInTheDocument();
+		expect(screen.getByText("Nov 14, 2023")).toBeInTheDocument();
+	});
+
+	it("calls archiveAndCreateNewMain when confirming new weekly plan", async () => {
+		renderView();
+
+		fireEvent.click(screen.getByRole("button", { name: /^New weekly plan$/i }));
+		fireEvent.click(
+			within(screen.getByRole("dialog")).getByRole("button", {
+				name: /New weekly plan/i,
+			}),
+		);
+
+		await waitFor(() => {
+			expect(mockArchiveAndCreateNewMain).toHaveBeenCalledWith({
+				householdId: "household-1",
+			});
+		});
+	});
+
+	it("calls archiveAndCreateNewCustomPlans when confirming new custom plan", async () => {
+		renderView();
+
+		const newCustomPlanButtons = screen.getAllByRole("button", {
+			name: /^New custom plan$/i,
+		});
+		fireEvent.click(newCustomPlanButtons[newCustomPlanButtons.length - 1]);
+		fireEvent.click(
+			within(screen.getByRole("dialog")).getByRole("button", {
+				name: /New custom plan/i,
+			}),
+		);
+
+		await waitFor(() => {
+			expect(mockArchiveAndCreateNewCustomPlans).toHaveBeenCalledWith({
+				householdId: "household-1",
+			});
+		});
+	});
+
+	it("adds backlog rows independently in stacked grids", () => {
+		(useSuspenseQuery as Mock).mockReturnValue({ data: stackedGridHome });
+		renderView();
+
+		const previousWeekSection = screen
+			.getByRole("heading", { name: "Previous week" })
+			.closest("section");
+
+		const addButtons = within(previousWeekSection as HTMLElement).getAllByRole(
+			"button",
+			{ name: /^Add row$/i },
+		);
+		fireEvent.click(addButtons[0]);
+
+		const backlogEditors = within(
+			previousWeekSection as HTMLElement,
+		).getAllByRole("button", { name: /Backlog dish/i });
+		expect(backlogEditors.length).toBeGreaterThanOrEqual(
+			DEFAULT_BACKLOG_ROW_COUNT + 1,
+		);
+	});
+
+	it("saves edits to stacked grids independently", async () => {
+		vi.useFakeTimers();
+		(useSuspenseQuery as Mock).mockReturnValue({ data: stackedGridHome });
+		renderView();
+
+		const thisWeekSection = screen
+			.getByRole("heading", { name: "This week" })
+			.closest("section");
+		const previousWeekSection = screen
+			.getByRole("heading", { name: "Previous week" })
+			.closest("section");
+
+		expect(thisWeekSection).not.toBeNull();
+		expect(previousWeekSection).not.toBeNull();
+
+		const topSaturdayButton = within(
+			thisWeekSection as HTMLElement,
+		).getAllByRole("button", { name: /Saturday dish/i })[0];
+		fireEvent.click(topSaturdayButton);
+		fireEvent.change(
+			within(thisWeekSection as HTMLElement).getAllByLabelText(
+				"Saturday dish",
+			)[0],
+			{ target: { value: "New ribs" } },
+		);
+
+		await vi.advanceTimersByTimeAsync(WEEK_PLAN_SAVE_DEBOUNCE_MS);
+
+		expect(mockSaveMain).toHaveBeenCalledWith({
+			id: mainId,
+			content: expect.objectContaining({
+				weekdays: expect.objectContaining({
+					saturday: { dish: "New ribs", grocery: "" },
+				}),
+			}),
+		});
+
+		mockSaveMain.mockClear();
+
+		const previousSaturdayButton = within(
+			previousWeekSection as HTMLElement,
+		).getAllByRole("button", { name: /Saturday dish/i })[0];
+		fireEvent.click(previousSaturdayButton);
+		fireEvent.change(
+			within(previousWeekSection as HTMLElement).getAllByLabelText(
+				"Saturday dish",
+			)[0],
+			{ target: { value: "Updated old ribs" } },
+		);
+
+		await vi.advanceTimersByTimeAsync(WEEK_PLAN_SAVE_DEBOUNCE_MS);
+
+		expect(mockSaveMain).toHaveBeenCalledWith({
+			id: previousMainId,
+			content: expect.objectContaining({
+				weekdays: expect.objectContaining({
+					saturday: { dish: "Updated old ribs", grocery: "" },
+				}),
+			}),
+		});
+	});
+
+	it("archives oldest grid on third new weekly plan", async () => {
+		(useSuspenseQuery as Mock).mockReturnValue({ data: stackedGridHome });
+		const { unmount } = renderView();
+
+		fireEvent.click(screen.getByRole("button", { name: /^New weekly plan$/i }));
+		fireEvent.click(
+			within(screen.getByRole("dialog")).getByRole("button", {
+				name: /New weekly plan/i,
+			}),
+		);
+
+		await waitFor(() => {
+			expect(mockArchiveAndCreateNewMain).toHaveBeenCalledWith({
+				householdId: "household-1",
+			});
+		});
+
+		unmount();
+
+		(useSuspenseQuery as Mock).mockReturnValue({
+			data: {
+				mainGrids: [
+					{
+						id: "plan-main-3" as never,
+						content: createDefaultMainGridContent(),
+						createdAt: 1_740_000_000_000,
+						updatedAt: 1_740_000_000_000,
+					},
+					{
+						id: mainId,
+						content: createDefaultMainGridContent(),
+						createdAt: 1_735_689_600_000,
+						updatedAt: 1_735_689_600_000,
+					},
+				],
+				customPlans: singleGridHome.customPlans,
+				needsEnsure: false,
+			},
+		});
+
+		renderView();
+
+		expect(screen.getAllByRole("heading", { name: "This week" })).toHaveLength(
+			1,
+		);
+		expect(
+			screen.getAllByRole("heading", { name: "Previous week" }),
+		).toHaveLength(1);
+		expect(screen.queryByText("Old ribs")).not.toBeInTheDocument();
 	});
 });

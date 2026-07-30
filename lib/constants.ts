@@ -196,6 +196,23 @@ export const SHOPPING_CHECKED_KEY_PREFIX = "shopping-checked";
 /** Delay before showing the week-plan link hover tooltip */
 export const LINK_TOOLTIP_DELAY_MS = 400;
 
+/** Labels for stacked main-grid sections on the home page */
+export const MAIN_PLAN_LABELS = {
+	THIS_WEEK: "This week",
+	PREVIOUS_WEEK: "Previous week",
+} as const;
+
+/**
+ * Format a plan section creation timestamp for display under section headings.
+ */
+export function formatPlanCreatedAt(timestamp: number): string {
+	return new Date(timestamp).toLocaleDateString(undefined, {
+		month: "short",
+		day: "numeric",
+		year: "numeric",
+	});
+}
+
 /**
  * Stable key for a shopping list item (for checkbox persistence)
  */

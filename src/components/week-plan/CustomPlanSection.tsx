@@ -15,6 +15,7 @@ interface CustomPlanSectionProps {
 	onRemoveRow: (index: number) => void;
 	onAddRow: () => void;
 	onClear: () => void;
+	onNewCustomPlan: () => void;
 }
 
 /**
@@ -26,6 +27,7 @@ export function CustomPlanSection({
 	onRemoveRow,
 	onAddRow,
 	onClear,
+	onNewCustomPlan,
 }: CustomPlanSectionProps) {
 	const headingId = useId();
 	const rowDescriptors = useMemo(() => buildCustomPlanRows(rows), [rows]);
@@ -36,7 +38,7 @@ export function CustomPlanSection({
 				Custom plan
 			</h2>
 
-			<CustomPlanToolbar onClear={onClear} />
+			<CustomPlanToolbar onClear={onClear} onNewCustomPlan={onNewCustomPlan} />
 
 			<div className="hidden md:block">
 				<CustomPlanTable

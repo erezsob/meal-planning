@@ -3,7 +3,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { api } from "convex/_generated/api";
 import type { Id } from "convex/_generated/dataModel";
 import { useMutation } from "convex/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HOUSEHOLD_ID } from "@/lib/constants";
 import {
 	addBacklogRow,
@@ -25,21 +25,16 @@ import {
 	createDefaultMainGridContent,
 	type MainGridContent,
 	WEEK_PLAN_SAVE_DEBOUNCE_MS,
-	type WeekPlan,
 } from "@/lib/weekPlanTypes";
-
-type SectionIds = {
-	main: Id<"planSections">;
-	customPlans: Id<"planSections">;
-};
+import { buildMainGridViews, type MainGridView } from "./mainGridViews";
 
 /**
- * Manage week plan state with debounced Convex persistence per section.
+ * Manage stacked week plan state with debounced Convex persistence per section.
  *
- * Local edits overlay remote main grid and custom plans until saved; when not
+ * Local edits overlay remote main grids and custom plans until saved; when not
  * editing, remote subscription updates apply automatically without a sync effect.
  *
- * @returns Plan state, cell/backlog/custom plan actions, and save error message (if any).
+ * @returns Plan state, per-grid cell/backlog actions, lifecycle actions, and save error.
  */
 export function useWeekPlan() {
 	const { data: remoteHome } = useSuspenseQuery(
@@ -49,40 +44,59 @@ export function useWeekPlan() {
 	const ensureHomeMutation = useMutation(api.planSections.ensureHome);
 	const saveMainMutation = useMutation(api.planSections.saveMain);
 	const saveCustomPlansMutation = useMutation(api.planSections.saveCustomPlans);
+	const archiveAndCreateNewMainMutation = useMutation(
+		api.planSections.archiveAndCreateNewMain,
+	);
+	const archiveAndCreateNewCustomPlansMutation = useMutation(
+		api.planSections.archiveAndCreateNewCustomPlans,
+	);
 
-	const [pendingMain, setPendingMain] = useState<MainGridContent | null>(null);
+	const [pendingMainById, setPendingMainById] = useState<
+		Record<string, MainGridContent>
+	>({});
 	const [pendingCustomPlans, setPendingCustomPlans] =
 		useState<CustomPlansContent | null>(null);
 	const [saveError, setSaveError] = useState<string | null>(null);
 
-	const mainGenerationRef = useRef(0);
+	const mainGenerationByIdRef = useRef<Map<string, number>>(new Map());
 	const customPlansGenerationRef = useRef(0);
 	const remoteHomeRef = useRef(remoteHome);
-	const sectionIdsRef = useRef<Partial<SectionIds>>({});
-	const mainSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const customPlansIdRef = useRef<Id<"planSections"> | undefined>(undefined);
+	const mainSaveTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+		new Map(),
+	);
 	const customPlansSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
 		null,
 	);
 
 	remoteHomeRef.current = remoteHome;
-	sectionIdsRef.current = {
-		main: remoteHome?.main.id,
-		customPlans: remoteHome?.customPlans.id,
-	};
+	customPlansIdRef.current = remoteHome?.customPlans.id;
 
-	const remoteMain = remoteHome
-		? normalizeMainGridContent(remoteHome.main.content)
-		: null;
 	const remoteCustomPlans = remoteHome
 		? normalizeCustomPlansContent(remoteHome.customPlans.content)
 		: null;
 
-	const main = pendingMain ?? remoteMain ?? createDefaultMainGridContent();
 	const customPlans =
 		pendingCustomPlans ??
 		remoteCustomPlans ??
 		createDefaultCustomPlansContent();
-	const plan: WeekPlan = joinWeekPlan(main, customPlans);
+
+	const mainGrids: MainGridView[] = useMemo(() => {
+		if (!remoteHome) {
+			return [];
+		}
+
+		return buildMainGridViews({
+			mainGrids: remoteHome.mainGrids.map((grid) => ({
+				id: grid.id,
+				content: normalizeMainGridContent(grid.content),
+				createdAt: grid.createdAt,
+			})),
+			pendingById: pendingMainById,
+		});
+	}, [remoteHome, pendingMainById]);
+
+	const customPlanRows = customPlans.rows;
 
 	useEffect(() => {
 		if (remoteHome?.needsEnsure) {
@@ -92,8 +106,8 @@ export function useWeekPlan() {
 
 	useEffect(() => {
 		return () => {
-			if (mainSaveTimerRef.current) {
-				clearTimeout(mainSaveTimerRef.current);
+			for (const timer of mainSaveTimersRef.current.values()) {
+				clearTimeout(timer);
 			}
 			if (customPlansSaveTimerRef.current) {
 				clearTimeout(customPlansSaveTimerRef.current);
@@ -101,13 +115,19 @@ export function useWeekPlan() {
 		};
 	}, []);
 
-	const getBaseMain = useCallback(
-		() =>
-			normalizeMainGridContent(
-				pendingMain ??
-					(remoteHomeRef.current ? remoteHomeRef.current.main.content : null),
-			),
-		[pendingMain],
+	const getBaseMainForId = useCallback(
+		(gridId: Id<"planSections">) => {
+			const pending = pendingMainById[gridId];
+			if (pending) {
+				return normalizeMainGridContent(pending);
+			}
+
+			const remoteGrid = remoteHomeRef.current?.mainGrids.find(
+				(grid) => grid.id === gridId,
+			);
+			return normalizeMainGridContent(remoteGrid?.content ?? null);
+		},
+		[pendingMainById],
 	);
 
 	const getBaseCustomPlans = useCallback(
@@ -121,37 +141,50 @@ export function useWeekPlan() {
 		[pendingCustomPlans],
 	);
 
-	const resolveSectionIds = useCallback(async (): Promise<SectionIds> => {
-		const cached = sectionIdsRef.current;
-		if (cached.main && cached.customPlans) {
-			return { main: cached.main, customPlans: cached.customPlans };
+	const resolveCustomPlansId = useCallback(async (): Promise<
+		Id<"planSections">
+	> => {
+		const cached = customPlansIdRef.current;
+		if (cached) {
+			return cached;
 		}
 
 		const home = await ensureHomeMutation({ householdId: HOUSEHOLD_ID });
-		const ids = {
-			main: home.main.id,
-			customPlans: home.customPlans.id,
-		};
-
-		if (!ids.main || !ids.customPlans) {
-			throw new Error("Plan sections are missing ids");
+		const id = home.customPlans.id;
+		if (!id) {
+			throw new Error("Custom plans section is missing id");
 		}
 
-		sectionIdsRef.current = ids;
-		return { main: ids.main, customPlans: ids.customPlans };
+		customPlansIdRef.current = id;
+		return id;
 	}, [ensureHomeMutation]);
 
 	const commitSaveMain = useCallback(
-		async (next: MainGridContent, generationAtSaveStart: number) => {
+		async ({
+			gridId,
+			next,
+			generationAtSaveStart,
+		}: {
+			gridId: Id<"planSections">;
+			next: MainGridContent;
+			generationAtSaveStart: number;
+		}) => {
 			try {
-				const ids = await resolveSectionIds();
 				await saveMainMutation({
-					id: ids.main,
+					id: gridId,
 					content: normalizeMainGridContent(next),
 				});
 				setSaveError(null);
-				if (mainGenerationRef.current === generationAtSaveStart) {
-					setPendingMain(null);
+				if (
+					mainGenerationByIdRef.current.get(gridId) === generationAtSaveStart
+				) {
+					setPendingMainById((prev) => {
+						if (!(gridId in prev)) {
+							return prev;
+						}
+						const { [gridId]: _removed, ...rest } = prev;
+						return rest;
+					});
 				}
 			} catch (error) {
 				setSaveError(
@@ -159,15 +192,15 @@ export function useWeekPlan() {
 				);
 			}
 		},
-		[resolveSectionIds, saveMainMutation],
+		[saveMainMutation],
 	);
 
 	const commitSaveCustomPlans = useCallback(
 		async (next: CustomPlansContent, generationAtSaveStart: number) => {
 			try {
-				const ids = await resolveSectionIds();
+				const id = await resolveCustomPlansId();
 				await saveCustomPlansMutation({
-					id: ids.customPlans,
+					id,
 					content: normalizeCustomPlansContent(next),
 				});
 				setSaveError(null);
@@ -180,18 +213,26 @@ export function useWeekPlan() {
 				);
 			}
 		},
-		[resolveSectionIds, saveCustomPlansMutation],
+		[resolveCustomPlansId, saveCustomPlansMutation],
 	);
 
 	const persistMain = useCallback(
-		(next: MainGridContent) => {
-			if (mainSaveTimerRef.current) {
-				clearTimeout(mainSaveTimerRef.current);
+		(gridId: Id<"planSections">, next: MainGridContent) => {
+			const existingTimer = mainSaveTimersRef.current.get(gridId);
+			if (existingTimer) {
+				clearTimeout(existingTimer);
 			}
-			mainSaveTimerRef.current = setTimeout(() => {
-				const generation = mainGenerationRef.current;
-				void commitSaveMain(next, generation);
+
+			const timer = setTimeout(() => {
+				const generation = mainGenerationByIdRef.current.get(gridId) ?? 0;
+				void commitSaveMain({
+					gridId,
+					next,
+					generationAtSaveStart: generation,
+				});
 			}, WEEK_PLAN_SAVE_DEBOUNCE_MS);
+
+			mainSaveTimersRef.current.set(gridId, timer);
 		},
 		[commitSaveMain],
 	);
@@ -209,20 +250,23 @@ export function useWeekPlan() {
 		[commitSaveCustomPlans],
 	);
 
-	const setMain = useCallback(
+	const setMainForGrid = useCallback(
 		(
+			gridId: Id<"planSections">,
 			updater: MainGridContent | ((prev: MainGridContent) => MainGridContent),
 		) => {
-			mainGenerationRef.current += 1;
+			const nextGeneration =
+				(mainGenerationByIdRef.current.get(gridId) ?? 0) + 1;
+			mainGenerationByIdRef.current.set(gridId, nextGeneration);
 			setSaveError(null);
-			setPendingMain((prevPending) => {
-				const base = prevPending ?? getBaseMain();
+			setPendingMainById((prevPending) => {
+				const base = prevPending[gridId] ?? getBaseMainForId(gridId);
 				const next = typeof updater === "function" ? updater(base) : updater;
-				persistMain(next);
-				return next;
+				persistMain(gridId, next);
+				return { ...prevPending, [gridId]: next };
 			});
 		},
-		[persistMain, getBaseMain],
+		[persistMain, getBaseMainForId],
 	);
 
 	const setCustomPlans = useCallback(
@@ -245,15 +289,17 @@ export function useWeekPlan() {
 
 	const updateCell = useCallback(
 		({
+			gridId,
 			location,
 			field,
 			value,
 		}: {
+			gridId: Id<"planSections">;
 			location: WeekPlanCellLocation;
 			field: "dish" | "grocery";
 			value: string;
 		}) => {
-			setMain((prevMain) => {
+			setMainForGrid(gridId, (prevMain) => {
 				const asPlan = joinWeekPlan(prevMain, getBaseCustomPlans());
 				const nextPlan = updateWeekPlanCell({
 					plan: asPlan,
@@ -264,36 +310,51 @@ export function useWeekPlan() {
 				return splitWeekPlan(nextPlan).main;
 			});
 		},
-		[setMain, getBaseCustomPlans],
+		[setMainForGrid, getBaseCustomPlans],
 	);
 
-	const clearPlan = useCallback(async () => {
-		const emptyMain = createDefaultMainGridContent();
-		if (mainSaveTimerRef.current) {
-			clearTimeout(mainSaveTimerRef.current);
+	const clearTopPlan = useCallback(async () => {
+		const topGrid = remoteHomeRef.current?.mainGrids[0];
+		const topId = topGrid?.id;
+		if (!topId) {
+			return;
 		}
-		mainGenerationRef.current += 1;
-		const generationAtSaveStart = mainGenerationRef.current;
+
+		const emptyMain = createDefaultMainGridContent();
+		const existingTimer = mainSaveTimersRef.current.get(topId);
+		if (existingTimer) {
+			clearTimeout(existingTimer);
+		}
+
+		const nextGeneration = (mainGenerationByIdRef.current.get(topId) ?? 0) + 1;
+		mainGenerationByIdRef.current.set(topId, nextGeneration);
 		setSaveError(null);
-		setPendingMain(emptyMain);
-		await commitSaveMain(emptyMain, generationAtSaveStart);
+		setPendingMainById((prev) => ({ ...prev, [topId]: emptyMain }));
+		await commitSaveMain({
+			gridId: topId,
+			next: emptyMain,
+			generationAtSaveStart: nextGeneration,
+		});
 	}, [commitSaveMain]);
 
-	const addBacklog = useCallback(() => {
-		setMain((prevMain) => {
-			const asPlan = joinWeekPlan(prevMain, getBaseCustomPlans());
-			return splitWeekPlan(addBacklogRow(asPlan)).main;
-		});
-	}, [setMain, getBaseCustomPlans]);
+	const addBacklog = useCallback(
+		({ gridId }: { gridId: Id<"planSections"> }) => {
+			setMainForGrid(gridId, (prevMain) => {
+				const asPlan = joinWeekPlan(prevMain, getBaseCustomPlans());
+				return splitWeekPlan(addBacklogRow(asPlan)).main;
+			});
+		},
+		[setMainForGrid, getBaseCustomPlans],
+	);
 
 	const removeBacklog = useCallback(
-		(index: number) => {
-			setMain((prevMain) => {
+		({ gridId, index }: { gridId: Id<"planSections">; index: number }) => {
+			setMainForGrid(gridId, (prevMain) => {
 				const asPlan = joinWeekPlan(prevMain, getBaseCustomPlans());
 				return splitWeekPlan(removeBacklogRow(asPlan, index)).main;
 			});
 		},
-		[setMain, getBaseCustomPlans],
+		[setMainForGrid, getBaseCustomPlans],
 	);
 
 	const updateCustomPlan = useCallback(
@@ -307,7 +368,8 @@ export function useWeekPlan() {
 			value: string;
 		}) => {
 			setCustomPlans((prevCustomPlans) => {
-				const asPlan = joinWeekPlan(getBaseMain(), prevCustomPlans);
+				const topMain = mainGrids[0]?.content ?? createDefaultMainGridContent();
+				const asPlan = joinWeekPlan(topMain, prevCustomPlans);
 				const nextPlan = updateCustomPlanCell({
 					plan: asPlan,
 					index,
@@ -317,24 +379,26 @@ export function useWeekPlan() {
 				return splitWeekPlan(nextPlan).customPlans;
 			});
 		},
-		[setCustomPlans, getBaseMain],
+		[setCustomPlans, mainGrids],
 	);
 
 	const addCustomPlan = useCallback(() => {
 		setCustomPlans((prevCustomPlans) => {
-			const asPlan = joinWeekPlan(getBaseMain(), prevCustomPlans);
+			const topMain = mainGrids[0]?.content ?? createDefaultMainGridContent();
+			const asPlan = joinWeekPlan(topMain, prevCustomPlans);
 			return splitWeekPlan(addCustomPlanRow(asPlan)).customPlans;
 		});
-	}, [setCustomPlans, getBaseMain]);
+	}, [setCustomPlans, mainGrids]);
 
 	const removeCustomPlan = useCallback(
 		(index: number) => {
 			setCustomPlans((prevCustomPlans) => {
-				const asPlan = joinWeekPlan(getBaseMain(), prevCustomPlans);
+				const topMain = mainGrids[0]?.content ?? createDefaultMainGridContent();
+				const asPlan = joinWeekPlan(topMain, prevCustomPlans);
 				return splitWeekPlan(removeCustomPlanRow(asPlan, index)).customPlans;
 			});
 		},
-		[setCustomPlans, getBaseMain],
+		[setCustomPlans, mainGrids],
 	);
 
 	const clearCustomPlan = useCallback(async () => {
@@ -349,16 +413,57 @@ export function useWeekPlan() {
 		await commitSaveCustomPlans(emptyCustomPlans, generationAtSaveStart);
 	}, [commitSaveCustomPlans]);
 
+	const newWeeklyPlan = useCallback(async () => {
+		setPendingMainById({});
+		mainGenerationByIdRef.current.clear();
+		for (const timer of mainSaveTimersRef.current.values()) {
+			clearTimeout(timer);
+		}
+		mainSaveTimersRef.current.clear();
+
+		try {
+			await archiveAndCreateNewMainMutation({ householdId: HOUSEHOLD_ID });
+			setSaveError(null);
+		} catch (error) {
+			setSaveError(
+				error instanceof Error ? error.message : "Could not create weekly plan",
+			);
+		}
+	}, [archiveAndCreateNewMainMutation]);
+
+	const newCustomPlan = useCallback(async () => {
+		if (customPlansSaveTimerRef.current) {
+			clearTimeout(customPlansSaveTimerRef.current);
+		}
+		customPlansGenerationRef.current += 1;
+		setPendingCustomPlans(null);
+
+		try {
+			const home = await archiveAndCreateNewCustomPlansMutation({
+				householdId: HOUSEHOLD_ID,
+			});
+			customPlansIdRef.current = home.customPlans.id;
+			setSaveError(null);
+		} catch (error) {
+			setSaveError(
+				error instanceof Error ? error.message : "Could not create custom plan",
+			);
+		}
+	}, [archiveAndCreateNewCustomPlansMutation]);
+
 	return {
-		plan,
+		mainGrids,
+		customPlanRows,
 		saveError,
 		updateCell,
-		clearPlan,
+		clearTopPlan,
 		addBacklog,
 		removeBacklog,
 		updateCustomPlan,
 		addCustomPlan,
 		removeCustomPlan,
 		clearCustomPlan,
+		newWeeklyPlan,
+		newCustomPlan,
 	};
 }
