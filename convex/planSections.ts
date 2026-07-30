@@ -19,8 +19,6 @@ import type { Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
 
-const CUSTOM_PLANS_SECTION = "custom-plans" as const;
-
 export type HomePlanSection<TContent> = {
 	id?: Id<"planSections">;
 	content: TContent;
@@ -50,7 +48,7 @@ async function isMigrationComplete(
 		.withIndex("by_household_section_status", (q) =>
 			q
 				.eq("householdId", householdId)
-				.eq("section", CUSTOM_PLANS_SECTION)
+				.eq("section", "custom-plans")
 				.eq("status", "active"),
 		)
 		.first();
@@ -91,7 +89,7 @@ async function migrateLegacyWeekPlan(
 
 	await ctx.db.insert("planSections", {
 		householdId,
-		section: CUSTOM_PLANS_SECTION,
+		section: "custom-plans",
 		content: customPlans,
 		status: "active",
 		createdAt: timestamp,
@@ -130,7 +128,7 @@ async function ensureDefaultHomeRows(
 		.withIndex("by_household_section_status", (q) =>
 			q
 				.eq("householdId", householdId)
-				.eq("section", CUSTOM_PLANS_SECTION)
+				.eq("section", "custom-plans")
 				.eq("status", "active"),
 		)
 		.first();
@@ -139,7 +137,7 @@ async function ensureDefaultHomeRows(
 		const now = Date.now();
 		await ctx.db.insert("planSections", {
 			householdId,
-			section: CUSTOM_PLANS_SECTION,
+			section: "custom-plans",
 			content: createDefaultCustomPlansContent(),
 			status: "active",
 			createdAt: now,
@@ -164,7 +162,7 @@ async function loadActiveHomeSections(
 		.withIndex("by_household_section_status", (q) =>
 			q
 				.eq("householdId", householdId)
-				.eq("section", CUSTOM_PLANS_SECTION)
+				.eq("section", "custom-plans")
 				.eq("status", "active"),
 		)
 		.first();
@@ -292,7 +290,7 @@ export const saveCustomPlans = mutation({
 	},
 	handler: async (ctx, args) => {
 		const row = await ctx.db.get(args.id);
-		if (!row || row.section !== CUSTOM_PLANS_SECTION) {
+		if (!row || row.section !== "custom-plans") {
 			throw new Error("Custom plans section not found");
 		}
 
