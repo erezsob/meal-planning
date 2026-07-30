@@ -19,6 +19,8 @@ import type { Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
 
+const CUSTOM_PLANS_SECTION = "custom-plans" as const;
+
 export type HomePlanSection<TContent> = {
 	id?: Id<"planSections">;
 	content: TContent;
@@ -28,7 +30,7 @@ export type HomePlanSection<TContent> = {
 
 export type HomePlanSections = {
 	main: HomePlanSection<MainGridContent>;
-	categories: HomePlanSection<CustomPlansContent>;
+	customPlans: HomePlanSection<CustomPlansContent>;
 	needsEnsure: boolean;
 };
 
@@ -43,17 +45,17 @@ async function isMigrationComplete(
 		)
 		.first();
 
-	const activeCategories = await ctx.db
+	const activeCustomPlans = await ctx.db
 		.query("planSections")
 		.withIndex("by_household_section_status", (q) =>
 			q
 				.eq("householdId", householdId)
-				.eq("section", "categories")
+				.eq("section", CUSTOM_PLANS_SECTION)
 				.eq("status", "active"),
 		)
 		.first();
 
-	return activeMain != null && activeCategories != null;
+	return activeMain != null && activeCustomPlans != null;
 }
 
 async function migrateLegacyWeekPlan(
@@ -74,7 +76,7 @@ async function migrateLegacyWeekPlan(
 	}
 
 	const plan = normalizeWeekPlan(legacy.plan);
-	const { main, categories } = splitWeekPlan(plan);
+	const { main, customPlans } = splitWeekPlan(plan);
 	const timestamp = legacy.updatedAt;
 
 	await ctx.db.insert("planSections", {
@@ -89,8 +91,8 @@ async function migrateLegacyWeekPlan(
 
 	await ctx.db.insert("planSections", {
 		householdId,
-		section: "categories",
-		content: categories,
+		section: CUSTOM_PLANS_SECTION,
+		content: customPlans,
 		status: "active",
 		createdAt: timestamp,
 		updatedAt: timestamp,
@@ -123,21 +125,21 @@ async function ensureDefaultHomeRows(
 		});
 	}
 
-	const activeCategories = await ctx.db
+	const activeCustomPlans = await ctx.db
 		.query("planSections")
 		.withIndex("by_household_section_status", (q) =>
 			q
 				.eq("householdId", householdId)
-				.eq("section", "categories")
+				.eq("section", CUSTOM_PLANS_SECTION)
 				.eq("status", "active"),
 		)
 		.first();
 
-	if (!activeCategories) {
+	if (!activeCustomPlans) {
 		const now = Date.now();
 		await ctx.db.insert("planSections", {
 			householdId,
-			section: "categories",
+			section: CUSTOM_PLANS_SECTION,
 			content: createDefaultCustomPlansContent(),
 			status: "active",
 			createdAt: now,
@@ -157,17 +159,17 @@ async function loadActiveHomeSections(
 		)
 		.first();
 
-	const activeCategories = await ctx.db
+	const activeCustomPlans = await ctx.db
 		.query("planSections")
 		.withIndex("by_household_section_status", (q) =>
 			q
 				.eq("householdId", householdId)
-				.eq("section", "categories")
+				.eq("section", CUSTOM_PLANS_SECTION)
 				.eq("status", "active"),
 		)
 		.first();
 
-	if (!activeMain || !activeCategories) {
+	if (!activeMain || !activeCustomPlans) {
 		return null;
 	}
 
@@ -178,13 +180,13 @@ async function loadActiveHomeSections(
 			createdAt: activeMain.createdAt,
 			updatedAt: activeMain.updatedAt,
 		},
-		categories: {
-			id: activeCategories._id,
+		customPlans: {
+			id: activeCustomPlans._id,
 			content: normalizeCustomPlansContent(
-				activeCategories.content as CustomPlansContent,
+				activeCustomPlans.content as CustomPlansContent,
 			),
-			createdAt: activeCategories.createdAt,
-			updatedAt: activeCategories.updatedAt,
+			createdAt: activeCustomPlans.createdAt,
+			updatedAt: activeCustomPlans.updatedAt,
 		},
 		needsEnsure: false,
 	};
@@ -194,7 +196,7 @@ function homeFromLegacyWeekPlan(
 	plan: ReturnType<typeof normalizeWeekPlan>,
 	timestamp: number,
 ): HomePlanSections {
-	const { main, categories } = splitWeekPlan(plan);
+	const { main, customPlans } = splitWeekPlan(plan);
 
 	return {
 		main: {
@@ -202,8 +204,8 @@ function homeFromLegacyWeekPlan(
 			createdAt: timestamp,
 			updatedAt: timestamp,
 		},
-		categories: {
-			content: categories,
+		customPlans: {
+			content: customPlans,
 			createdAt: timestamp,
 			updatedAt: timestamp,
 		},
@@ -212,7 +214,7 @@ function homeFromLegacyWeekPlan(
 }
 
 /**
- * Load active main grid (rank 0) and categories for the home page.
+ * Load active main grid (rank 0) and custom plans for the home page.
  * Synthesizes a read-only view from legacy weekPlans when not yet migrated.
  */
 export const getHome = query({
@@ -281,17 +283,17 @@ export const saveMain = mutation({
 });
 
 /**
- * Patch the active categories row by id.
+ * Patch the active custom-plans row by id.
  */
-export const saveCategories = mutation({
+export const saveCustomPlans = mutation({
 	args: {
 		id: v.id("planSections"),
 		content: customPlansContentValidator,
 	},
 	handler: async (ctx, args) => {
 		const row = await ctx.db.get(args.id);
-		if (!row || row.section !== "categories") {
-			throw new Error("Categories plan section not found");
+		if (!row || row.section !== CUSTOM_PLANS_SECTION) {
+			throw new Error("Custom plans section not found");
 		}
 
 		const content = normalizeCustomPlansContent(args.content);

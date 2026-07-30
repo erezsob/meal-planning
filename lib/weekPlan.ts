@@ -80,12 +80,12 @@ export type WeekPlanCellLocation =
  */
 export function splitWeekPlan(plan: WeekPlan): {
 	main: MainGridContent;
-	categories: CustomPlansContent;
+	customPlans: CustomPlansContent;
 } {
 	const { customPlan, ...main } = plan;
 	return {
 		main,
-		categories: { rows: customPlan },
+		customPlans: { rows: customPlan },
 	};
 }
 
@@ -93,16 +93,16 @@ export function splitWeekPlan(plan: WeekPlan): {
  * Combine main grid and custom plans content into a full week plan.
  *
  * @param main - Main grid content
- * @param categories - Custom plans content
+ * @param customPlans - Custom plans content
  * @returns Combined week plan for UI and legacy callers
  */
 export function joinWeekPlan(
 	main: MainGridContent,
-	categories: CustomPlansContent,
+	customPlans: CustomPlansContent,
 ): WeekPlan {
 	return {
 		...main,
-		customPlan: categories.rows,
+		customPlan: customPlans.rows,
 	};
 }
 

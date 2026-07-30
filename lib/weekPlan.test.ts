@@ -27,12 +27,12 @@ describe("weekPlan", () => {
 		plan.weekdays.saturday.dish = "Ribs";
 		plan.customPlan[0].dish = "Sourdough";
 
-		const { main, categories } = splitWeekPlan(plan);
-		const restored = joinWeekPlan(main, categories);
+		const { main, customPlans } = splitWeekPlan(plan);
+		const restored = joinWeekPlan(main, customPlans);
 
 		expect(restored).toEqual(plan);
 		expect(main).not.toHaveProperty("customPlan");
-		expect(categories.rows).toEqual(plan.customPlan);
+		expect(customPlans.rows).toEqual(plan.customPlan);
 	});
 
 	it("normalizeMainGridContent and normalizeCustomPlansContent fill defaults", () => {

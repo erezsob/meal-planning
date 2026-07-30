@@ -70,7 +70,7 @@ export default defineSchema({
 
 	planSections: defineTable({
 		householdId: v.string(),
-		section: v.union(v.literal("main"), v.literal("categories")),
+		section: v.union(v.literal("main"), v.literal("custom-plans")),
 		content: v.union(mainGridContentValidator, customPlansContentValidator),
 		status: v.union(v.literal("active"), v.literal("archived")),
 		stackRank: v.optional(v.union(v.literal(0), v.literal(1))),

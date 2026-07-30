@@ -20,10 +20,10 @@ import { WeekPlanView } from "./WeekPlanView";
 
 const mockEnsureHome = vi.fn();
 const mockSaveMain = vi.fn().mockResolvedValue(undefined);
-const mockSaveCategories = vi.fn().mockResolvedValue(undefined);
+const mockSaveCustomPlans = vi.fn().mockResolvedValue(undefined);
 
 const mainId = "plan-main-1" as never;
-const categoriesId = "plan-categories-1" as never;
+const customPlansId = "plan-custom-plans-1" as never;
 
 const migrationShapedHome = {
 	main: {
@@ -32,8 +32,8 @@ const migrationShapedHome = {
 		createdAt: 1_700_000_000_000,
 		updatedAt: 1_700_000_000_000,
 	},
-	categories: {
-		id: categoriesId,
+	customPlans: {
+		id: customPlansId,
 		content: createDefaultCustomPlansContent(),
 		createdAt: 1_700_000_000_000,
 		updatedAt: 1_700_000_000_000,
@@ -50,7 +50,7 @@ vi.mock("convex/_generated/api", () => ({
 		planSections: {
 			ensureHome: "planSections:ensureHome",
 			saveMain: "planSections:saveMain",
-			saveCategories: "planSections:saveCategories",
+			saveCustomPlans: "planSections:saveCustomPlans",
 		},
 	},
 }));
@@ -89,7 +89,7 @@ describe("WeekPlanView", () => {
 		vi.clearAllMocks();
 		mockEnsureHome.mockResolvedValue(migrationShapedHome);
 		mockSaveMain.mockResolvedValue(undefined);
-		mockSaveCategories.mockResolvedValue(undefined);
+		mockSaveCustomPlans.mockResolvedValue(undefined);
 		(useSuspenseQuery as Mock).mockReturnValue({ data: migrationShapedHome });
 		(useMutation as Mock).mockImplementation((reference: string) => {
 			if (reference === "planSections:ensureHome") {
@@ -98,8 +98,8 @@ describe("WeekPlanView", () => {
 			if (reference === "planSections:saveMain") {
 				return mockSaveMain;
 			}
-			if (reference === "planSections:saveCategories") {
-				return mockSaveCategories;
+			if (reference === "planSections:saveCustomPlans") {
+				return mockSaveCustomPlans;
 			}
 			return vi.fn();
 		});
@@ -190,7 +190,7 @@ describe("WeekPlanView", () => {
 			target: { value: "Sourdough" },
 		});
 
-		mockSaveCategories.mockClear();
+		mockSaveCustomPlans.mockClear();
 
 		fireEvent.click(screen.getByRole("button", { name: /Clear custom plan/i }));
 		fireEvent.click(
@@ -200,8 +200,8 @@ describe("WeekPlanView", () => {
 		);
 
 		await waitFor(() => {
-			expect(mockSaveCategories).toHaveBeenCalledWith({
-				id: categoriesId,
+			expect(mockSaveCustomPlans).toHaveBeenCalledWith({
+				id: customPlansId,
 				content: createDefaultCustomPlansContent(),
 			});
 		});
@@ -232,7 +232,7 @@ describe("WeekPlanView", () => {
 				content: createDefaultMainGridContent(),
 			});
 		});
-		expect(mockSaveCategories).not.toHaveBeenCalled();
+		expect(mockSaveCustomPlans).not.toHaveBeenCalled();
 	});
 
 	it("calls ensureHome when legacy data needs migration", async () => {
@@ -241,7 +241,7 @@ describe("WeekPlanView", () => {
 				...migrationShapedHome,
 				needsEnsure: true,
 				main: { ...migrationShapedHome.main, id: undefined },
-				categories: { ...migrationShapedHome.categories, id: undefined },
+				customPlans: { ...migrationShapedHome.customPlans, id: undefined },
 			},
 		});
 
@@ -278,7 +278,7 @@ describe("WeekPlanView", () => {
 				}),
 			}),
 		});
-		expect(mockSaveCategories).not.toHaveBeenCalled();
+		expect(mockSaveCustomPlans).not.toHaveBeenCalled();
 	});
 
 	it("shows an error when save fails", async () => {
