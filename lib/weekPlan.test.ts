@@ -3,19 +3,59 @@ import {
 	addBacklogRow,
 	addCustomPlanRow,
 	clearCustomPlan,
+	clearCustomPlansContent,
+	joinWeekPlan,
+	normalizeCustomPlansContent,
+	normalizeMainGridContent,
 	normalizeWeekPlan,
 	removeBacklogRow,
 	removeCustomPlanRow,
+	splitWeekPlan,
 	updateCustomPlanCell,
 	updateWeekPlanCell,
 } from "./weekPlan";
 import {
+	createDefaultCustomPlansContent,
 	createDefaultWeekPlan,
 	DEFAULT_BACKLOG_ROW_COUNT,
 	DEFAULT_CUSTOM_PLAN_ROW_COUNT,
 } from "./weekPlanTypes";
 
 describe("weekPlan", () => {
+	it("splitWeekPlan and joinWeekPlan round-trip a full plan", () => {
+		const plan = createDefaultWeekPlan();
+		plan.weekdays.saturday.dish = "Ribs";
+		plan.customPlan[0].dish = "Sourdough";
+
+		const { main, categories } = splitWeekPlan(plan);
+		const restored = joinWeekPlan(main, categories);
+
+		expect(restored).toEqual(plan);
+		expect(main).not.toHaveProperty("customPlan");
+		expect(categories.rows).toEqual(plan.customPlan);
+	});
+
+	it("normalizeMainGridContent and normalizeCustomPlansContent fill defaults", () => {
+		expect(normalizeMainGridContent(null).backlog).toHaveLength(
+			DEFAULT_BACKLOG_ROW_COUNT,
+		);
+		expect(normalizeCustomPlansContent(null).rows).toHaveLength(
+			DEFAULT_CUSTOM_PLAN_ROW_COUNT,
+		);
+		expect(normalizeCustomPlansContent({ rows: [] }).rows).toHaveLength(
+			DEFAULT_CUSTOM_PLAN_ROW_COUNT,
+		);
+	});
+
+	it("clearCustomPlansContent resets rows", () => {
+		const content = createDefaultCustomPlansContent();
+		content.rows[0].dish = "Sourdough";
+
+		expect(clearCustomPlansContent(content)).toEqual(
+			createDefaultCustomPlansContent(),
+		);
+	});
+
 	it("updateWeekPlanCell updates weekday immutably", () => {
 		const plan = createDefaultWeekPlan();
 		const next = updateWeekPlanCell({

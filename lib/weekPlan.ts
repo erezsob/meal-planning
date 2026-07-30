@@ -1,9 +1,13 @@
 import {
 	type CustomPlanRow,
+	type CustomPlansContent,
+	createDefaultCustomPlansContent,
+	createDefaultMainGridContent,
 	createDefaultWeekPlan,
 	createEmptyCell,
 	createEmptyCustomPlanRow,
 	DEFAULT_CUSTOM_PLAN_ROW_COUNT,
+	type MainGridContent,
 	type StoredWeekPlan,
 	type WEEKDAY_KEYS,
 	type WeekPlan,
@@ -67,6 +71,78 @@ export type WeekPlanCellLocation =
 	| { type: "weekday"; key: (typeof WEEKDAY_KEYS)[number] }
 	| { type: "weekly"; key: "lunch" | "breakfast" }
 	| { type: "backlog"; index: number };
+
+/**
+ * Split a combined week plan into main grid and custom plans content.
+ *
+ * @param plan - Full week plan
+ * @returns Main grid and custom plans content stored separately
+ */
+export function splitWeekPlan(plan: WeekPlan): {
+	main: MainGridContent;
+	categories: CustomPlansContent;
+} {
+	const { customPlan, ...main } = plan;
+	return {
+		main,
+		categories: { rows: customPlan },
+	};
+}
+
+/**
+ * Combine main grid and custom plans content into a full week plan.
+ *
+ * @param main - Main grid content
+ * @param categories - Custom plans content
+ * @returns Combined week plan for UI and legacy callers
+ */
+export function joinWeekPlan(
+	main: MainGridContent,
+	categories: CustomPlansContent,
+): WeekPlan {
+	return {
+		...main,
+		customPlan: categories.rows,
+	};
+}
+
+/**
+ * Normalize main grid content from remote storage.
+ *
+ * @param content - Remote main grid or null
+ * @returns Main grid with guaranteed backlog rows
+ */
+export function normalizeMainGridContent(
+	content: MainGridContent | null,
+): MainGridContent {
+	if (!content) {
+		return createDefaultMainGridContent();
+	}
+	return content;
+}
+
+/**
+ * Normalize custom plans content from remote storage.
+ *
+ * @param content - Remote custom plans or null
+ * @returns Custom plans with guaranteed row count
+ */
+export function normalizeCustomPlansContent(
+	content: CustomPlansContent | null,
+): CustomPlansContent {
+	if (!content) {
+		return createDefaultCustomPlansContent();
+	}
+
+	const rows =
+		content.rows.length > 0
+			? content.rows
+			: Array.from({ length: DEFAULT_CUSTOM_PLAN_ROW_COUNT }, () =>
+					createEmptyCustomPlanRow(),
+				);
+
+	return { rows };
+}
 
 /**
  * Add an empty backlog row.
@@ -180,10 +256,17 @@ export function removeCustomPlanRow(plan: WeekPlan, index: number): WeekPlan {
  * @returns New week plan with custom plan rows cleared
  */
 export function clearCustomPlan(plan: WeekPlan): WeekPlan {
-	return {
-		...plan,
-		customPlan: Array.from({ length: DEFAULT_CUSTOM_PLAN_ROW_COUNT }, () =>
-			createEmptyCustomPlanRow(),
-		),
-	};
+	return joinWeekPlan(plan, createDefaultCustomPlansContent());
+}
+
+/**
+ * Reset custom plans content to the default empty row count.
+ *
+ * @param content - Current custom plans content
+ * @returns Cleared custom plans content
+ */
+export function clearCustomPlansContent(
+	_content: CustomPlansContent,
+): CustomPlansContent {
+	return createDefaultCustomPlansContent();
 }

@@ -17,6 +17,27 @@ const customPlanRowValidator = v.object({
 	grocery: v.string(),
 });
 
+/** Convex validator for main grid content (no custom plan rows) */
+export const mainGridContentValidator = v.object({
+	weekdays: v.object({
+		saturday: weekPlanCellValidator,
+		sunday: weekPlanCellValidator,
+		monday: weekPlanCellValidator,
+		tuesday: weekPlanCellValidator,
+		wednesday: weekPlanCellValidator,
+		thursday: weekPlanCellValidator,
+		friday: weekPlanCellValidator,
+	}),
+	weeklyLunch: weekPlanCellValidator,
+	weeklyBreakfast: weekPlanCellValidator,
+	backlog: v.array(weekPlanCellValidator),
+});
+
+/** Convex validator for custom plans section content */
+export const customPlansContentValidator = v.object({
+	rows: v.array(customPlanRowValidator),
+});
+
 /** Convex validator for the full week plan document shape */
 export const weekPlanValidator = v.object({
 	weekdays: v.object({

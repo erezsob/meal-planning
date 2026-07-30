@@ -1,8 +1,16 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import {
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+	within,
+} from "@testing-library/react";
 import { Suspense } from "react";
+import type { Mock } from "vitest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-	createDefaultWeekPlan,
+	createDefaultCustomPlansContent,
+	createDefaultMainGridContent,
 	DEFAULT_BACKLOG_ROW_COUNT,
 	DEFAULT_CUSTOM_PLAN_ROW_COUNT,
 	WEEK_PLAN_SAVE_DEBOUNCE_MS,
@@ -10,12 +18,47 @@ import {
 import { TestWrapper } from "@/test/utils";
 import { WeekPlanView } from "./WeekPlanView";
 
-const mockSave = vi.fn().mockResolvedValue(undefined);
+const mockEnsureHome = vi.fn();
+const mockSaveMain = vi.fn().mockResolvedValue(undefined);
+const mockSaveCategories = vi.fn().mockResolvedValue(undefined);
+
+const mainId = "plan-main-1" as never;
+const categoriesId = "plan-categories-1" as never;
+
+const migrationShapedHome = {
+	main: {
+		id: mainId,
+		content: createDefaultMainGridContent(),
+		createdAt: 1_700_000_000_000,
+		updatedAt: 1_700_000_000_000,
+	},
+	categories: {
+		id: categoriesId,
+		content: createDefaultCustomPlansContent(),
+		createdAt: 1_700_000_000_000,
+		updatedAt: 1_700_000_000_000,
+	},
+	needsEnsure: false,
+};
+
+vi.mock("convex/react", () => ({
+	useMutation: vi.fn(),
+}));
+
+vi.mock("convex/_generated/api", () => ({
+	api: {
+		planSections: {
+			ensureHome: "planSections:ensureHome",
+			saveMain: "planSections:saveMain",
+			saveCategories: "planSections:saveCategories",
+		},
+	},
+}));
 
 vi.mock("@convex-dev/react-query", () => ({
 	convexQuery: vi.fn(() => ({
-		queryKey: ["weekPlans", "get"],
-		queryFn: async () => null,
+		queryKey: ["planSections", "getHome"],
+		queryFn: async () => migrationShapedHome,
 	})),
 }));
 
@@ -24,14 +67,13 @@ vi.mock("@tanstack/react-query", async () => {
 	return {
 		...actual,
 		useSuspenseQuery: vi.fn(() => ({
-			data: null,
+			data: migrationShapedHome,
 		})),
 	};
 });
 
-vi.mock("convex/react", () => ({
-	useMutation: vi.fn(() => mockSave),
-}));
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation } from "convex/react";
 
 const renderView = () =>
 	render(
@@ -45,7 +87,22 @@ const renderView = () =>
 describe("WeekPlanView", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		mockSave.mockResolvedValue(undefined);
+		mockEnsureHome.mockResolvedValue(migrationShapedHome);
+		mockSaveMain.mockResolvedValue(undefined);
+		mockSaveCategories.mockResolvedValue(undefined);
+		(useSuspenseQuery as Mock).mockReturnValue({ data: migrationShapedHome });
+		(useMutation as Mock).mockImplementation((reference: string) => {
+			if (reference === "planSections:ensureHome") {
+				return mockEnsureHome;
+			}
+			if (reference === "planSections:saveMain") {
+				return mockSaveMain;
+			}
+			if (reference === "planSections:saveCategories") {
+				return mockSaveCategories;
+			}
+			return vi.fn();
+		});
 	});
 
 	afterEach(() => {
@@ -122,7 +179,7 @@ describe("WeekPlanView", () => {
 		).toBeInTheDocument();
 	});
 
-	it("clears custom plan without clearing main plan", () => {
+	it("clears custom plan without clearing main plan", async () => {
 		renderView();
 
 		const customPlanDishButtons = screen.getAllByRole("button", {
@@ -133,7 +190,7 @@ describe("WeekPlanView", () => {
 			target: { value: "Sourdough" },
 		});
 
-		mockSave.mockClear();
+		mockSaveCategories.mockClear();
 
 		fireEvent.click(screen.getByRole("button", { name: /Clear custom plan/i }));
 		fireEvent.click(
@@ -142,15 +199,13 @@ describe("WeekPlanView", () => {
 			}),
 		);
 
-		expect(mockSave).toHaveBeenCalledWith({
-			householdId: "household-1",
-			plan: expect.objectContaining({
-				customPlan: [{ category: "", dish: "", grocery: "" }],
-				weekdays: expect.objectContaining({
-					saturday: { dish: "", grocery: "" },
-				}),
-			}),
+		await waitFor(() => {
+			expect(mockSaveCategories).toHaveBeenCalledWith({
+				id: categoriesId,
+				content: createDefaultCustomPlansContent(),
+			});
 		});
+		expect(mockSaveMain).not.toHaveBeenCalled();
 	});
 
 	it("opens clear plan confirmation", () => {
@@ -162,7 +217,7 @@ describe("WeekPlanView", () => {
 		).toBeInTheDocument();
 	});
 
-	it("saves cleared plan to Convex", () => {
+	it("saves cleared main plan to Convex", async () => {
 		renderView();
 		fireEvent.click(screen.getByRole("button", { name: /Clear plan/i }));
 		fireEvent.click(
@@ -171,9 +226,31 @@ describe("WeekPlanView", () => {
 			}),
 		);
 
-		expect(mockSave).toHaveBeenCalledWith({
-			householdId: "household-1",
-			plan: createDefaultWeekPlan(),
+		await waitFor(() => {
+			expect(mockSaveMain).toHaveBeenCalledWith({
+				id: mainId,
+				content: createDefaultMainGridContent(),
+			});
+		});
+		expect(mockSaveCategories).not.toHaveBeenCalled();
+	});
+
+	it("calls ensureHome when legacy data needs migration", async () => {
+		(useSuspenseQuery as Mock).mockReturnValue({
+			data: {
+				...migrationShapedHome,
+				needsEnsure: true,
+				main: { ...migrationShapedHome.main, id: undefined },
+				categories: { ...migrationShapedHome.categories, id: undefined },
+			},
+		});
+
+		renderView();
+
+		await waitFor(() => {
+			expect(mockEnsureHome).toHaveBeenCalledWith({
+				householdId: "household-1",
+			});
 		});
 	});
 
@@ -189,22 +266,23 @@ describe("WeekPlanView", () => {
 			target: { value: "Ribs" },
 		});
 
-		expect(mockSave).not.toHaveBeenCalled();
+		expect(mockSaveMain).not.toHaveBeenCalled();
 
 		await vi.advanceTimersByTimeAsync(WEEK_PLAN_SAVE_DEBOUNCE_MS);
 
-		expect(mockSave).toHaveBeenCalledWith({
-			householdId: "household-1",
-			plan: expect.objectContaining({
+		expect(mockSaveMain).toHaveBeenCalledWith({
+			id: mainId,
+			content: expect.objectContaining({
 				weekdays: expect.objectContaining({
 					saturday: { dish: "Ribs", grocery: "" },
 				}),
 			}),
 		});
+		expect(mockSaveCategories).not.toHaveBeenCalled();
 	});
 
 	it("shows an error when save fails", async () => {
-		mockSave.mockRejectedValue(new Error("Network error"));
+		mockSaveMain.mockRejectedValue(new Error("Network error"));
 		renderView();
 
 		fireEvent.click(screen.getByRole("button", { name: /Clear plan/i }));
