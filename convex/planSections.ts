@@ -357,6 +357,38 @@ export const saveMain = mutation({
 });
 
 /**
+ * Clear the rank-0 main grid in place without changing its lifecycle metadata.
+ */
+export const clearMainTop = mutation({
+	args: { householdId: v.string() },
+	handler: async (ctx, args) => {
+		await migrateLegacyWeekPlan(ctx, args.householdId);
+		await ensureDefaultHomeRows(ctx, args.householdId);
+
+		const topGrid = await ctx.db
+			.query("planSections")
+			.withIndex("by_household_section_stackRank", (q) =>
+				q
+					.eq("householdId", args.householdId)
+					.eq("section", MAIN_PLAN_SECTION)
+					.eq("stackRank", MAIN_STACK_RANK_THIS_WEEK),
+			)
+			.first();
+
+		if (!topGrid) {
+			throw new Error("Top main plan section not found");
+		}
+
+		await ctx.db.patch(topGrid._id, {
+			content: createDefaultMainGridContent(),
+			updatedAt: Date.now(),
+		});
+
+		return topGrid._id;
+	},
+});
+
+/**
  * Patch the active custom-plans row by id.
  */
 export const saveCustomPlans = mutation({

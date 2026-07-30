@@ -63,7 +63,7 @@ export function useWeekPlan() {
 		customPlanRows: custom.customPlanRows,
 		saveError,
 		updateCell: main.updateCell,
-		clearTopPlan: main.clearTopPlan,
+		clearMainTop: main.clearMainTop,
 		addBacklog: main.addBacklog,
 		removeBacklog: main.removeBacklog,
 		updateCustomPlan: custom.updateCustomPlan,

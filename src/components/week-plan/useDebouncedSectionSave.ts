@@ -267,6 +267,23 @@ export function useDebouncedKeyedSectionSave<
 		setPendingByKey(new Map());
 	}, []);
 
+	const resetForKey = useCallback((key: TKey) => {
+		const timer = timersByKeyRef.current.get(key);
+		if (timer) {
+			clearTimeout(timer);
+			timersByKeyRef.current.delete(key);
+		}
+		generationByKeyRef.current.delete(key);
+		setPendingByKey((prev) => {
+			if (!prev.has(key)) {
+				return prev;
+			}
+			const next = new Map(prev);
+			next.delete(key);
+			return next;
+		});
+	}, []);
+
 	useEffect(() => {
 		return () => {
 			for (const timer of timersByKeyRef.current.values()) {
@@ -281,5 +298,6 @@ export function useDebouncedKeyedSectionSave<
 		flushForKey,
 		flushAll,
 		reset,
+		resetForKey,
 	};
 }
