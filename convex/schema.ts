@@ -3,7 +3,6 @@ import { v } from "convex/values";
 import {
 	customPlansContentValidator,
 	mainGridContentValidator,
-	weekPlanValidator,
 } from "../lib/weekPlanValidator";
 
 export default defineSchema({
@@ -61,12 +60,6 @@ export default defineSchema({
 		isCompleted: v.boolean(),
 		text: v.string(),
 	}),
-
-	weekPlans: defineTable({
-		householdId: v.string(),
-		plan: weekPlanValidator,
-		updatedAt: v.number(),
-	}).index("by_householdId", ["householdId"]),
 
 	planSections: defineTable({
 		householdId: v.string(),

@@ -1,8 +1,7 @@
 import { convexQuery } from "@convex-dev/react-query";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { api } from "convex/_generated/api";
-import { useMutation } from "convex/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { HOUSEHOLD_ID } from "@/lib/constants";
 import { createDefaultMainGridContent } from "@/lib/weekPlanTypes";
 import { useCustomPlansSection } from "./useCustomPlansSection";
@@ -21,7 +20,6 @@ export function useWeekPlan() {
 		convexQuery(api.planSections.getHome, { householdId: HOUSEHOLD_ID }),
 	);
 
-	const ensureHomeMutation = useMutation(api.planSections.ensureHome);
 	const [saveError, setSaveError] = useState<string | null>(null);
 
 	const onSaveSuccess = useCallback(() => {
@@ -51,12 +49,6 @@ export function useWeekPlan() {
 		onSaveSuccess,
 		onClearError,
 	});
-
-	useEffect(() => {
-		if (remoteHome?.needsEnsure) {
-			void ensureHomeMutation({ householdId: HOUSEHOLD_ID });
-		}
-	}, [remoteHome?.needsEnsure, ensureHomeMutation]);
 
 	return {
 		mainGrids: main.mainGrids,

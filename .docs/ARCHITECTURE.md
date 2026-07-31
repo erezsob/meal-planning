@@ -35,7 +35,7 @@ Meal Planning App - weekly meal planner with a simple week-plan grid, recipe lib
 ┌─────────────────────────────────────────────────────────────┐
 │                    Convex Backend                            │
 │  ┌───────────────┐ ┌───────────────┐ ┌───────────────────┐  │
-│  │    dishes     │ │   mealPlans   │ │    weekPlans      │  │
+│  │    dishes     │ │   mealPlans   │ │   planSections    │  │
 │  │   (queries/   │ │   (queries/   │ │   (queries/       │  │
 │  │   mutations)  │ │   mutations)  │ │    mutations)     │  │
 │  └───────┬───────┘ └───────┬───────┘ └─────────┬─────────┘  │
@@ -49,7 +49,7 @@ Meal Planning App - weekly meal planner with a simple week-plan grid, recipe lib
 │                    │   Document DB │                         │
 │                    │  (dishes,     │                         │
 │                    │   mealPlans,  │                         │
-│                    │   weekPlans,  │                         │
+│                    │   planSections,│                         │
 │                    │   tasks)      │                         │
 │                    └───────────────┘                         │
 └─────────────────────────────────────────────────────────────┘
@@ -63,7 +63,7 @@ Meal Planning App - weekly meal planner with a simple week-plan grid, recipe lib
 │   ├── schema.ts         # Database schema definitions
 │   ├── dishes.ts         # Dish CRUD queries/mutations
 │   ├── mealPlans.ts      # Meal planning queries/mutations
-│   ├── weekPlans.ts      # Week plan scratch pad queries/mutations
+│   ├── planSections.ts   # Plan sections (main grid + custom plans) queries/mutations
 │   ├── shoppingList.ts   # Shopping list aggregation query
 │   └── _generated/       # Auto-generated types
 ├── lib/                  # Shared code
@@ -124,25 +124,30 @@ Meal Planning App - weekly meal planner with a simple week-plan grid, recipe lib
 | sourceMealId  | Id<"mealPlans">?                                    | Original cook event (for leftovers) |
 | householdId   | string                                              | Multi-tenant identifier             |
 
-**weekPlans** - Household week plan scratch pad (timeless grid)
-| Field       | Type      | Description                              |
-| ----------- | --------- | ---------------------------------------- |
-| householdId | string    | Multi-tenant identifier (one plan each)  |
-| plan        | WeekPlan  | Full grid: weekdays, weekly rows, backlog |
-| updatedAt   | number    | Last save timestamp (ms)                 |
+**planSections** - Household plan sections (main grid + custom plans)
+| Field       | Type                                            | Description                              |
+| ----------- | ----------------------------------------------- | ---------------------------------------- |
+| householdId | string                                          | Multi-tenant identifier                  |
+| section     | "main" \| "custom-plans"                        | Section discriminator                   |
+| content     | MainGridContent \| CustomPlansContent            | Section content (weekdays/backlog or custom rows) |
+| status      | "active" \| "archived"                          | Lifecycle state                          |
+| stackRank   | 0 \| 1?                                         | Main-grid stack position (active only)   |
+| createdAt   | number                                          | Creation timestamp (ms)                  |
+| updatedAt   | number                                          | Last save timestamp (ms)                 |
 
 **Indexes:**
 - `dishes.by_householdId` - filter by household
 - `mealPlans.by_householdId` - filter by household
 - `mealPlans.by_day` - query week's meals
 - `mealPlans.by_dishId` - find related meals for leftover tracking
-- `weekPlans.by_householdId` - fetch household week plan
+- `planSections.by_household_section_status` - archive list queries
+- `planSections.by_household_section_stackRank` - home main-grid queries
 
 ## Core Features
 
 ### 1. Week Plan Grid
 - Home route shows a simple free-text planner (Sat-Friday rows, backlog, weekly breakfast/lunch)
-- Convex `weekPlans` persistence with debounced auto-save and clear plan action
+- Convex `planSections` persistence with debounced auto-save and lifecycle actions (new/clear weekly plan, new/clear custom plan)
 - No mandatory linkage between planning notes and meal slot records
 
 ### 2. Meal Logging & History

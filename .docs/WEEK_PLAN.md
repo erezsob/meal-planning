@@ -14,7 +14,7 @@ The household already plans meals with a naive grid: free-text **Dish** and **Gr
 
 ## Solution overview
 
-Replace the home screen (`/`) with a **week plan grid**: a timeless Sat → Fri table plus weekly rows, a dynamic backlog, and a separate **Custom plans** section for named custom rows. Persisted in Convex (`weekPlans`); Log and History stay unchanged on `mealPlans`.
+Replace the home screen (`/`) with a **week plan grid**: a timeless Sat → Fri table plus weekly rows, a dynamic backlog, and a separate **Custom plans** section for named custom rows. Persisted in Convex (`planSections`); Log and History stay unchanged on `mealPlans`.
 
 See [CONTEXT.md](../CONTEXT.md) for domain terminology.
 
@@ -31,7 +31,7 @@ See [CONTEXT.md](../CONTEXT.md) for domain terminology.
 | Columns                 | **Dish** + **Grocery List** — free text only                   |
 | Calendar tie-in         | **None** — timeless Sat–Fri labels (no dates on rows)          |
 | Week navigation         | **None**                                                       |
-| Persistence             | Convex `weekPlans` — one document per household; no multi-week history |
+| Persistence             | Convex `planSections` — stacked main grids + custom plans; archive history |
 | Clear plan              | Button with confirmation — wipes all cells                     |
 | Cross-device            | Automatic via Convex real-time sync                            |
 | Cell editing            | Multiline textarea; debounced auto-save (~300ms)               |
@@ -68,7 +68,7 @@ Weekday rows are **freeform** — one cell may hold multiple dishes (e.g. a Sund
 
 | Surface            | Granularity                                                 | Data                  |
 | ------------------ | ----------------------------------------------------------- | --------------------- |
-| **Week plan grid** | Coarse scratch pad (weekday / backlog / weekly rows)        | `weekPlans` in Convex |
+| **Week plan grid** | Coarse scratch pad (weekday / backlog / weekly rows)        | `planSections` in Convex |
 | **Log / History**  | Day (`YYYY-MM-DD`) + meal type (breakfast / lunch / dinner) | `mealPlans` in Convex |
 
 The grid does not force logging. Logging does not have to match the grid. No sync between the two in v1.
@@ -98,16 +98,19 @@ type WeekdayKey =
   | "thursday"
   | "friday";
 
-interface WeekPlan {
+interface MainGridContent {
   weekdays: Record<WeekdayKey, WeekPlanCell>;
   weeklyLunch: WeekPlanCell;
   weeklyBreakfast: WeekPlanCell;
   backlog: WeekPlanCell[];
-  customPlan: CustomPlanRow[];
+}
+
+interface CustomPlansContent {
+  rows: CustomPlanRow[];
 }
 ```
 
-One `weekPlans` row per household stores the full `WeekPlan` object in a `plan` field. Debounced auto-save (~300ms) on edit; clear plan resets immediately.
+Storage is split across `planSections` rows per household: active main grids (up to two, distinguished by `stackRank` 0/1) and one active custom-plans row. Archived rows keep their content with `status: "archived"`. Debounced auto-save (~300ms) on edit; clear plan resets immediately.
 
 ---
 
@@ -123,7 +126,7 @@ One `weekPlans` row per household stores the full `WeekPlan` object in a `plan` 
 
 ### Phase 2 — Persistence & actions
 
-- `convex/weekPlans.ts` — get/save with debounced client writes
+- `convex/planSections.ts` — get/save with debounced client writes
 - `lib/weekPlan.ts` — cell mutation helpers
 - `lib/linkify.ts` — URL linkification in display mode
 - Clear plan

@@ -39,23 +39,6 @@ export const customPlansContentValidator = v.object({
 	rows: v.array(customPlanRowValidator),
 });
 
-/** Convex validator for the full week plan document shape */
-export const weekPlanValidator = v.object({
-	weekdays: v.object({
-		saturday: weekPlanCellValidator,
-		sunday: weekPlanCellValidator,
-		monday: weekPlanCellValidator,
-		tuesday: weekPlanCellValidator,
-		wednesday: weekPlanCellValidator,
-		thursday: weekPlanCellValidator,
-		friday: weekPlanCellValidator,
-	}),
-	weeklyLunch: weekPlanCellValidator,
-	weeklyBreakfast: weekPlanCellValidator,
-	backlog: v.array(weekPlanCellValidator),
-	customPlan: v.optional(v.array(customPlanRowValidator)),
-});
-
 function isWeekPlanCell(value: unknown): value is WeekPlanCell {
 	return (
 		isRecord(value) &&

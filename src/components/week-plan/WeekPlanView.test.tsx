@@ -46,7 +46,6 @@ const singleGridHome = {
 		createdAt: 1_700_000_000_000,
 		updatedAt: 1_700_000_000_000,
 	},
-	needsEnsure: false,
 };
 
 const stackedGridHome = {
@@ -71,7 +70,6 @@ const stackedGridHome = {
 		},
 	],
 	customPlans: singleGridHome.customPlans,
-	needsEnsure: false,
 };
 
 vi.mock("convex/react", () => ({
@@ -298,29 +296,6 @@ describe("WeekPlanView", () => {
 			});
 		});
 		expect(mockSaveCustomPlans).not.toHaveBeenCalled();
-	});
-
-	it("calls ensureHome when legacy data needs migration", async () => {
-		(useSuspenseQuery as Mock).mockReturnValue({
-			data: {
-				...singleGridHome,
-				needsEnsure: true,
-				mainGrids: [
-					{
-						...singleGridHome.mainGrids[0],
-						id: undefined,
-					},
-				],
-			},
-		});
-
-		renderView();
-
-		await waitFor(() => {
-			expect(mockEnsureHome).toHaveBeenCalledWith({
-				householdId: "household-1",
-			});
-		});
 	});
 
 	it("saves cell edit to Convex after debounce", async () => {
@@ -561,7 +536,6 @@ describe("WeekPlanView", () => {
 					},
 				],
 				customPlans: singleGridHome.customPlans,
-				needsEnsure: false,
 			},
 		});
 
