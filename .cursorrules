@@ -35,7 +35,7 @@ This is a meal planning app built with React, TypeScript, and Convex. The applic
 - `src/routes/` - TanStack file-based routes
 
 ## When Making Changes
-- Update Convex schema → regenerate types with `npx convex dev`
+- Update Convex schema → regenerate types with `pnpm dev:convex`
 - New routes → auto-generated in `src/routeTree.gen.ts`
 - Test co-located with source (`.test.ts` / `.test.tsx`)
 - Run `pnpm types:check` and `pnpm lint` before finishing your work.

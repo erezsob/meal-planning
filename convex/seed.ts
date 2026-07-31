@@ -241,7 +241,7 @@ const SAMPLE_DISHES = [
 
 /**
  * Seed the dishes table with sample data.
- * Run from Convex dashboard or via: npx convex run seed:seedDishes '{"householdId": "your-household-id"}'
+ * Run from Convex dashboard or via: pnpm convex run seed:seedDishes '{"householdId": "your-household-id"}'
  */
 export const seedDishes = mutation({
 	args: { householdId: v.string() },
