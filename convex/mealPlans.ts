@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { DEFAULT_COMPONENT_ROLE, MEAL_TYPE_ORDER } from "../lib/constants";
-import { validateLogMealInput } from "../lib/logMealValidation";
+import { assertLogMealInput } from "../lib/logMealValidation";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
 
@@ -275,7 +275,7 @@ export const logMeal = mutation({
 		customName: v.optional(v.string()),
 	},
 	handler: async (ctx, args) => {
-		validateLogMealInput(args);
+		assertLogMealInput(args);
 
 		const meals = await ctx.db
 			.query("mealPlans")
@@ -325,7 +325,7 @@ export const updateLog = mutation({
 			throw new Error("Only eaten meals can be updated via log edit");
 		}
 
-		validateLogMealInput(args);
+		assertLogMealInput(args);
 
 		return await ctx.db.patch(args.id, {
 			day: args.day,

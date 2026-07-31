@@ -1,0 +1,51 @@
+---
+description: Functional programming — use lib/fp.ts for transforms and error paths
+alwaysApply: true
+---
+
+# Functional programming
+
+Read `.docs/CODE_STANDARDS.md` §9 before editing `lib/`, `convex/`, or data-transform logic.
+
+## Required
+
+- Pure functions for transforms; no mutation — return new values
+- `map` / `filter` / `reduce` over `for` loops for collection transforms
+- `Result<T, E>` from `@/lib/fp` for fallible lib/convex logic — not bare `try/catch` in business logic
+- `tryCatch` / `tryCatchAsync` to wrap fallible sync/async work — prefer over bare `try/catch` everywhere except inside `@/lib/fp` itself
+- `tryCatchAsyncWithMessage` at UI/async boundaries that need a user-facing fallback string
+- `pipe` when chaining >=3 pure steps
+
+## Error handling pattern
+
+```typescript
+// lib/convex — return Result
+export function validateLogMealInput(args): Result<void, MealPlanError> { ... }
+
+// async boundary — tryCatchAsyncWithMessage + explicit branch
+const result = await tryCatchAsyncWithMessage(
+  () => mutation(args),
+  FALLBACK_ERROR,
+);
+if (result.ok) onSuccess();
+else onError(result.error);
+
+// sync I/O — tryCatch + getOrElseResult
+const value = getOrElseResult(
+  tryCatch(() => JSON.parse(raw), () => new Error("invalid")),
+  {},
+);
+```
+
+## Boundaries (unwrap once)
+
+- Convex mutation/query handlers — call `assert*` helpers or branch on `Result`
+- React event handlers / hooks — use `tryCatchAsyncWithMessage`, not bare `try/catch`
+
+## Reference
+
+- Utilities: `@/lib/fp` (`tryCatch`, `tryCatchAsync`, `tryCatchAsyncWithMessage`, `pipe`, `Result`)
+- Golden paths:
+  - `lib/logMealValidation.ts` — `validateLogMealInput`, `assertLogMealInput`
+  - `src/components/week-plan/useDebouncedSectionSave.ts` — `tryCatchAsyncWithMessage` in commit
+  - `src/components/shopping/ShoppingView.tsx` — `tryCatch` + `getOrElseResult` for localStorage

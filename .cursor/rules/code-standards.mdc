@@ -12,7 +12,7 @@ When standards conflict with ad-hoc preferences, **CODE_STANDARDS.md wins**.
 ## Required workflow
 
 1. Read relevant sections of `docs/CODE_STANDARDS.md` before changing files.
-2. For `lib/` and `src/` changes: read §9 and apply `@/lib/fp` patterns.
+2. For `lib/`, `src/` and `convex/` changes: read §9 and apply `@/lib/fp` patterns (see also `fp-paradigm.mdc`).
 3. Apply standards while writing — not as a post-hoc cleanup.
 4. Before finishing, verify against the **Code Review Checklist** at the bottom of the doc.
 

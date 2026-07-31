@@ -35,7 +35,8 @@ export type MealPlanError =
 			readonly day: string;
 			readonly mealType: string;
 	  }
-	| { readonly type: "INVALID_DATE"; readonly message: string };
+	| { readonly type: "INVALID_DATE"; readonly message: string }
+	| { readonly type: "INVALID_LOG_MEAL_INPUT"; readonly message: string };
 
 /**
  * Wait/timeout operation errors
@@ -125,6 +126,14 @@ export const invalidDate = (message: string): MealPlanError => ({
 });
 
 /**
+ * Creates an INVALID_LOG_MEAL_INPUT error
+ */
+export const invalidLogMealInput = (message: string): MealPlanError => ({
+	type: "INVALID_LOG_MEAL_INPUT",
+	message,
+});
+
+/**
  * Creates a CONDITION_TIMEOUT wait error
  */
 export const conditionTimeout = (attempts: number): WaitError => ({
@@ -209,6 +218,7 @@ export const isMealPlanError = (error: unknown): error is MealPlanError =>
 		"INSUFFICIENT_SERVINGS",
 		"MEAL_CONFLICT",
 		"INVALID_DATE",
+		"INVALID_LOG_MEAL_INPUT",
 	].includes((error as { type: string }).type);
 
 /**

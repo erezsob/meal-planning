@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { buildWeekDates } from "../lib/weekDates";
 import type { Id } from "./_generated/dataModel";
 import { query } from "./_generated/server";
 
@@ -20,17 +21,7 @@ export interface GroupedShoppingList {
 export const getWeekShoppingList = query({
 	args: { householdId: v.string(), startDate: v.string() },
 	handler: async (ctx, args) => {
-		const [y, m, d] = args.startDate.split("-").map(Number);
-		const start = new Date(y, m - 1, d);
-		const dates: string[] = [];
-		for (let i = 0; i < 7; i++) {
-			const day = new Date(start);
-			day.setDate(start.getDate() + i);
-			const yy = day.getFullYear();
-			const mm = String(day.getMonth() + 1).padStart(2, "0");
-			const dd = String(day.getDate()).padStart(2, "0");
-			dates.push(`${yy}-${mm}-${dd}`);
-		}
+		const dates = buildWeekDates(args.startDate);
 
 		const meals = await ctx.db
 			.query("mealPlans")

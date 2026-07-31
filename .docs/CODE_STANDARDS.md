@@ -191,7 +191,7 @@ queryClient.setQueriesData(
 | -------------- | --------------------------------------- |
 | `Result<T, E>` | Operation can fail (DB, API, file I/O)  |
 | `Option<T>`    | Value may or may not exist              |
-| `pipe`         | Chaining 3+ transformations             |
+| `pipe`         | Chaining >=3 transformations            |
 | Pure functions | Logic can be tested in isolation        |
 | Recursion      | Iterative operations with backoff/retry |
 
@@ -351,7 +351,9 @@ await waitFor(() => expect(result).toBe(true))
 - [ ] Performance considerations addressed
 - [ ] Code is maintainable and readable
 - [ ] Follows existing patterns and conventions
-- [ ] Functional and declarative approach used
+- [ ] **Fallible lib/convex code returns `Result`** — no try/catch in business logic (unwrap at boundaries only)
+- [ ] **No in-place mutation** — spread/copy for updates
+- [ ] **Collection transforms use HOFs** — not imperative loops (except perf-critical hot paths)
 - [ ] Follow best practices
 - [ ] No direct DOM manipulation (use refs instead)
 - [ ] Named exports used (no default exports)
