@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PLAN_SECTION_SAVE_ERROR } from "@/lib/constants";
+import { tryCatchAsyncWithMessage } from "@/lib/fp";
 
 function applyStateUpdater<TContent extends object>(
 	base: TContent,
@@ -46,16 +47,17 @@ export function useDebouncedSectionSave<TContent extends object>({
 
 	const commit = useCallback(
 		async (next: TContent, generationAtSaveStart: number) => {
-			try {
-				await onSave(next);
+			const result = await tryCatchAsyncWithMessage(
+				() => onSave(next),
+				PLAN_SECTION_SAVE_ERROR,
+			);
+			if (result.ok) {
 				onSaveSuccess?.();
 				if (generationRef.current === generationAtSaveStart) {
 					setPending(null);
 				}
-			} catch (error) {
-				onSaveError(
-					error instanceof Error ? error.message : PLAN_SECTION_SAVE_ERROR,
-				);
+			} else {
+				onSaveError(result.error);
 			}
 		},
 		[onSave, onSaveSuccess, onSaveError],
@@ -162,8 +164,11 @@ export function useDebouncedKeyedSectionSave<
 			next: TContent;
 			generationAtSaveStart: number;
 		}) => {
-			try {
-				await onSave({ key, content: next });
+			const result = await tryCatchAsyncWithMessage(
+				() => onSave({ key, content: next }),
+				PLAN_SECTION_SAVE_ERROR,
+			);
+			if (result.ok) {
 				onSaveSuccess?.();
 				if (generationByKeyRef.current.get(key) === generationAtSaveStart) {
 					setPendingByKey((prev) => {
@@ -175,10 +180,8 @@ export function useDebouncedKeyedSectionSave<
 						return nextPending;
 					});
 				}
-			} catch (error) {
-				onSaveError(
-					error instanceof Error ? error.message : PLAN_SECTION_SAVE_ERROR,
-				);
+			} else {
+				onSaveError(result.error);
 			}
 		},
 		[onSave, onSaveSuccess, onSaveError],

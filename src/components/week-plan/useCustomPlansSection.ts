@@ -4,6 +4,7 @@ import type { HomePlanSections } from "convex/planSections";
 import { useMutation } from "convex/react";
 import { useCallback, useRef } from "react";
 import { HOUSEHOLD_ID, NEW_CUSTOM_PLAN_ERROR } from "@/lib/constants";
+import { tryCatchAsyncWithMessage } from "@/lib/fp";
 import {
 	addCustomPlanRow,
 	type CustomPlanField,
@@ -176,16 +177,18 @@ export function useCustomPlansSection({
 		await flush(customPlans);
 		reset();
 
-		try {
-			const home = await archiveAndCreateNewCustomPlansMutation({
-				householdId: HOUSEHOLD_ID,
-			});
-			customPlansIdRef.current = home.customPlans.id;
+		const result = await tryCatchAsyncWithMessage(
+			() =>
+				archiveAndCreateNewCustomPlansMutation({
+					householdId: HOUSEHOLD_ID,
+				}),
+			NEW_CUSTOM_PLAN_ERROR,
+		);
+		if (result.ok) {
+			customPlansIdRef.current = result.value.customPlans.id;
 			onSaveSuccess();
-		} catch (error) {
-			onSaveError(
-				error instanceof Error ? error.message : NEW_CUSTOM_PLAN_ERROR,
-			);
+		} else {
+			onSaveError(result.error);
 		}
 	}, [
 		flush,

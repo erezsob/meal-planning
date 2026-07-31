@@ -22,6 +22,7 @@ import {
 	some,
 	tryCatch,
 	tryCatchAsync,
+	tryCatchAsyncWithMessage,
 	unwrapResult,
 } from "./fp";
 
@@ -171,6 +172,32 @@ describe("Result type", () => {
 			if (!result.ok) {
 				expect(result.error).toContain("Async error:");
 			}
+		});
+	});
+
+	describe("tryCatchAsyncWithMessage", () => {
+		it("returns ok for successful async function", async () => {
+			const result = await tryCatchAsyncWithMessage(
+				async () => Promise.resolve(42),
+				"fallback",
+			);
+			expect(result).toEqual({ ok: true, value: 42 });
+		});
+
+		it("uses Error message when rejection is an Error", async () => {
+			const result = await tryCatchAsyncWithMessage(
+				async () => Promise.reject(new Error("mutation failed")),
+				"fallback",
+			);
+			expect(result).toEqual({ ok: false, error: "mutation failed" });
+		});
+
+		it("uses fallback when rejection is not an Error", async () => {
+			const result = await tryCatchAsyncWithMessage(
+				async () => Promise.reject("network"),
+				"fallback",
+			);
+			expect(result).toEqual({ ok: false, error: "fallback" });
 		});
 	});
 });

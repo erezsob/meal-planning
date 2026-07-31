@@ -8,6 +8,7 @@ import {
 	HOUSEHOLD_ID,
 	NEW_WEEKLY_PLAN_ERROR,
 } from "@/lib/constants";
+import { tryCatchAsyncWithMessage } from "@/lib/fp";
 import {
 	addBacklogRow,
 	joinWeekPlan,
@@ -165,13 +166,14 @@ export function useMainGridPlans({
 			resetForKey(topGridId);
 		}
 
-		try {
-			await clearMainTopMutation({ householdId: HOUSEHOLD_ID });
+		const result = await tryCatchAsyncWithMessage(
+			() => clearMainTopMutation({ householdId: HOUSEHOLD_ID }),
+			CLEAR_MAIN_PLAN_ERROR,
+		);
+		if (result.ok) {
 			onSaveSuccess();
-		} catch (error) {
-			onSaveError(
-				error instanceof Error ? error.message : CLEAR_MAIN_PLAN_ERROR,
-			);
+		} else {
+			onSaveError(result.error);
 		}
 	}, [
 		clearMainTopMutation,
@@ -205,13 +207,14 @@ export function useMainGridPlans({
 		await flushAll();
 		resetPending();
 
-		try {
-			await archiveAndCreateNewMainMutation({ householdId: HOUSEHOLD_ID });
+		const result = await tryCatchAsyncWithMessage(
+			() => archiveAndCreateNewMainMutation({ householdId: HOUSEHOLD_ID }),
+			NEW_WEEKLY_PLAN_ERROR,
+		);
+		if (result.ok) {
 			onSaveSuccess();
-		} catch (error) {
-			onSaveError(
-				error instanceof Error ? error.message : NEW_WEEKLY_PLAN_ERROR,
-			);
+		} else {
+			onSaveError(result.error);
 		}
 	}, [
 		flushAll,

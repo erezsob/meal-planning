@@ -9,6 +9,7 @@ import {
 } from "@/lib/components/dialog";
 import { useToast } from "@/lib/components/toast";
 import { HOUSEHOLD_ID, MEAL_TYPE_LABELS } from "@/lib/constants";
+import { tryCatchAsyncWithMessage } from "@/lib/fp";
 import type { MealPlanWithDish } from "@/lib/mealPlanTypes";
 import { LogMealForm, type LogMealFormValues } from "./LogMealForm";
 
@@ -28,7 +29,7 @@ export function LogMealModal({ onClose, existingMeal }: LogMealModalProps) {
 	const isEdit = existingMeal !== undefined;
 
 	const handleSubmit = async (values: LogMealFormValues) => {
-		try {
+		const result = await tryCatchAsyncWithMessage(async () => {
 			if (isEdit) {
 				await updateLog({
 					id: existingMeal._id,
@@ -49,10 +50,10 @@ export function LogMealModal({ onClose, existingMeal }: LogMealModalProps) {
 				showToast(`Logged ${MEAL_TYPE_LABELS[values.mealType].toLowerCase()}`);
 			}
 			onClose();
-		} catch (error) {
-			const message =
-				error instanceof Error ? error.message : "Could not save meal";
-			showToast(message);
+		}, "Could not save meal");
+
+		if (!result.ok) {
+			showToast(result.error);
 		}
 	};
 

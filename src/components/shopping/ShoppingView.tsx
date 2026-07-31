@@ -14,6 +14,7 @@ import {
 	INGREDIENT_CATEGORIES,
 	SHOPPING_CHECKED_KEY_PREFIX,
 } from "@/lib/constants";
+import { getOrElseResult, tryCatch } from "@/lib/fp";
 import { WeekHeader } from "./WeekHeader";
 
 /** Format quantity + unit for display (no conversion per spec) */
@@ -147,12 +148,18 @@ export function ShoppingView() {
 	const storageKey = `${SHOPPING_CHECKED_KEY_PREFIX}-${startDateKey}`;
 
 	useEffect(() => {
-		try {
-			const raw = localStorage.getItem(storageKey);
-			setChecked(raw ? JSON.parse(raw) : {});
-		} catch {
-			setChecked({});
-		}
+		setChecked(
+			getOrElseResult(
+				tryCatch(
+					() => {
+						const raw = localStorage.getItem(storageKey);
+						return raw ? JSON.parse(raw) : {};
+					},
+					() => new Error("invalid shopping checked state"),
+				),
+				{},
+			),
+		);
 	}, [storageKey]);
 
 	const { data: grouped } = useSuspenseQuery(
@@ -168,11 +175,10 @@ export function ShoppingView() {
 		(itemKey: string, value: boolean) => {
 			setChecked((prev) => {
 				const next = { ...prev, [itemKey]: value };
-				try {
-					localStorage.setItem(storageKey, JSON.stringify(next));
-				} catch {
-					// ignore quota / private mode
-				}
+				tryCatch(
+					() => localStorage.setItem(storageKey, JSON.stringify(next)),
+					() => new Error("shopping checked storage failed"),
+				);
 				return next;
 			});
 		},

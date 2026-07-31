@@ -143,6 +143,18 @@ export const tryCatchAsync = async <T, E>(
 	}
 };
 
+/**
+ * Async tryCatch that maps failures to a user-facing message string.
+ * Uses the Error message when present; otherwise returns `fallbackMessage`.
+ */
+export const tryCatchAsyncWithMessage = async <T>(
+	fn: () => Promise<T>,
+	fallbackMessage: string,
+): Promise<Result<T, string>> =>
+	tryCatchAsync(fn, (error) =>
+		error instanceof Error ? error.message : fallbackMessage,
+	);
+
 // ============================================================================
 // Option Type - Explicit handling of nullable values (Maybe pattern)
 // ============================================================================
