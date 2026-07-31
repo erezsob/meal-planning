@@ -1,0 +1,256 @@
+# Machine-readable system primitives map.
+# Used by visual-recap (PR classification) and kept in sync with docs/PRIMITIVES.md.
+# Update this file in the same PR when adding or materially reshaping a primitive.
+
+primitives:
+  # --- Surfaces (UI) ---
+
+  - id: shadcn-ui
+    group: surfaces
+    description: shadcn design-system primitives, cn() utility, components.json
+    code:
+      - lib/components/**
+      - lib/utils.ts
+      - components.json
+    neighbors:
+      - domain-ui-shared
+      - toast-feedback
+
+  - id: domain-ui-shared
+    group: surfaces
+    description: Cross-feature reusable UI — header, modals, cards, tags, cell editor
+    code:
+      - src/components/Header.tsx
+      - src/components/DishCard.tsx
+      - src/components/TagBadge.tsx
+      - src/components/log/**
+      - src/components/meal/**
+      - src/components/week-plan/WeekPlanCellEditor.tsx
+      - src/components/shopping/WeekHeader.tsx
+    neighbors:
+      - shadcn-ui
+      - week-plan
+      - log-history
+      - recipe-library
+
+  - id: legacy-ui-candidates
+    group: surfaces
+    description: Shared UI with no or weak production use — do not copy into new code
+    code:
+      - src/components/DishSelector.tsx
+      - src/components/StatusBadge.tsx
+      - src/components/LeftoverBadge.tsx
+    neighbors:
+      - recipe-library
+      - domain-ui-shared
+
+  - id: app-shell
+    group: surfaces
+    description: Root layout, global header, ToastProvider mount point
+    code:
+      - src/routes/__root.tsx
+    neighbors:
+      - tanstack-routing
+      - toast-feedback
+      - domain-ui-shared
+
+  # --- Platform ---
+
+  - id: tanstack-routing
+    group: platform
+    description: TanStack Start file routes, router factory, auto-generated route tree
+    code:
+      - src/routes/**
+      - src/router.tsx
+      - src/routeTree.gen.ts
+    neighbors:
+      - convex-data-access
+      - app-shell
+
+  - id: convex-data-access
+    group: platform
+    description: ConvexProvider, ConvexQueryClient, useSuspenseQuery(convexQuery), useMutation
+    code:
+      - src/router.tsx
+    neighbors:
+      - tanstack-routing
+      - week-plan-api
+      - dishes-api
+      - meal-plans-api
+      - shopping-api
+
+  - id: fp-error-handling
+    group: platform
+    description: Result utilities, domain errors, tryCatchAsyncWithMessage at async boundaries
+    code:
+      - lib/fp.ts
+      - lib/errors.ts
+    neighbors:
+      - meal-plans-api
+      - week-plan-api
+
+  - id: toast-feedback
+    group: platform
+    description: Global toast provider and useToast hook
+    code:
+      - lib/components/toast.tsx
+    neighbors:
+      - app-shell
+      - log-history
+
+  - id: constants-config
+    group: platform
+    description: Domain enums, labels, error strings, HOUSEHOLD_ID, debounce timings
+    code:
+      - lib/constants.ts
+      - lib/weekPlanTypes.ts
+    neighbors:
+      - week-plan-api
+      - meal-plans-api
+
+  - id: testing
+    group: platform
+    description: Vitest setup, test utils, Convex mocks, co-located tests
+    code:
+      - src/test/**
+      - vitest.config.ts
+
+  - id: build-deploy
+    group: platform
+    description: Vite, TanStack Start, Cloudflare Workers SSR, React Compiler
+    code:
+      - vite.config.ts
+      - wrangler.jsonc
+
+  # --- Storage (Convex + shared lib) ---
+
+  - id: convex-schema
+    group: storage
+    description: Convex table schema, generated types, shared validators
+    code:
+      - convex/schema.ts
+      - convex/_generated/**
+      - lib/weekPlanValidator.ts
+    neighbors:
+      - week-plan-api
+      - dishes-api
+      - meal-plans-api
+
+  - id: week-plan-api
+    group: storage
+    description: planSections queries/mutations and week-plan domain transforms
+    code:
+      - convex/planSections.ts
+      - lib/weekPlan.ts
+      - lib/planSectionLifecycle.ts
+      - lib/planSectionDisplay.ts
+      - lib/linkify.ts
+    neighbors:
+      - week-plan
+      - convex-schema
+
+  - id: dishes-api
+    group: storage
+    description: Recipe library Convex CRUD and search
+    code:
+      - convex/dishes.ts
+      - convex/seed.ts
+    neighbors:
+      - recipe-library
+      - convex-schema
+
+  - id: meal-plans-api
+    group: storage
+    description: Calendar meal plans, log/history mutations, leftovers — backend for log/history/shopping; slot UI dormant
+    code:
+      - convex/mealPlans.ts
+      - lib/mealPlanTypes.ts
+      - lib/logMealValidation.ts
+    neighbors:
+      - log-history
+      - shopping-api
+      - convex-schema
+
+  - id: shopping-api
+    group: storage
+    description: Derived shopping list query over mealPlans and dishes
+    code:
+      - convex/shoppingList.ts
+      - lib/weekDates.ts
+    neighbors:
+      - shopping-list
+      - meal-plans-api
+
+  # --- Domain (feature UI) ---
+
+  - id: week-plan
+    group: domain
+    description: Scratch-pad grid, backlog, custom plans, archive views
+    code:
+      - src/components/week-plan/**
+      - src/components/ArchivedPlansView.tsx
+      - src/components/ArchivedPlanDetailView.tsx
+      - src/routes/index.tsx
+      - src/routes/plans.archive.tsx
+      - src/routes/plans.archive_.$id.tsx
+    neighbors:
+      - week-plan-api
+      - domain-ui-shared
+
+  - id: recipe-library
+    group: domain
+    description: Dish browse, create/edit modal, library route
+    code:
+      - src/components/library/**
+      - src/routes/library.tsx
+    neighbors:
+      - dishes-api
+      - domain-ui-shared
+
+  - id: log-history
+    group: domain
+    description: Eaten-meal history view and global log-meal flow
+    code:
+      - src/components/history/**
+      - src/routes/history.tsx
+    neighbors:
+      - meal-plans-api
+      - domain-ui-shared
+      - toast-feedback
+
+  - id: shopping-list
+    group: domain
+    description: Weekly shopping list UI with client-side checkbox persistence
+    code:
+      - src/components/shopping/**
+      - src/routes/shopping.tsx
+    neighbors:
+      - shopping-api
+      - meal-plans-api
+
+invariants:
+  - id: household-scoping-mvp
+    description: All data ops include householdId; MVP uses hardcoded HOUSEHOLD_ID — not authenticated isolation
+    code:
+      - lib/constants.ts
+      - convex/**/*
+
+  - id: schema-content-validation
+    description: Week plan and meal content must pass Convex validators before persist
+    code:
+      - lib/weekPlanValidator.ts
+      - convex/schema.ts
+      - convex/planSections.ts
+
+  - id: log-meal-input-rules
+    description: Log meal requires exactly one of dishId or customName; no future dates
+    code:
+      - lib/logMealValidation.ts
+      - convex/mealPlans.ts
+
+  - id: id-mutation-ownership-gap
+    description: ID-based mutations lack household ownership checks — must be addressed before multi-tenant production
+    code:
+      - convex/planSections.ts
+      - convex/dishes.ts
+      - convex/mealPlans.ts
