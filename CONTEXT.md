@@ -17,7 +17,7 @@ A week plan line with no day label — a meal idea not yet assigned to a weekday
 _Avoid_: Queue item, todo
 
 **Custom category line**:
-A week plan line with a user-defined category name (e.g. "Baking projects") plus dish and grocery columns — lives in the Categories section below the main grid.
+A week plan line with a user-defined category name (e.g. "Baking projects") plus dish and grocery columns — lives in the Custom plans section below the main grid.
 _Avoid_: Tag, label row
 
 **Plan**:

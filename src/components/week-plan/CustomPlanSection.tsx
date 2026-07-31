@@ -1,4 +1,5 @@
 import { useId, useMemo } from "react";
+import { CUSTOM_PLANS_SECTION_HEADING } from "@/lib/constants";
 import type { CustomPlanField } from "@/lib/weekPlan";
 import type { CustomPlanRow } from "@/lib/weekPlanTypes";
 import { CustomPlanCardList } from "./CustomPlanCardList";
@@ -35,7 +36,7 @@ export function CustomPlanSection({
 	return (
 		<section className="space-y-4" aria-labelledby={headingId}>
 			<h2 id={headingId} className="text-xl font-bold text-foreground">
-				Custom plan
+				{CUSTOM_PLANS_SECTION_HEADING}
 			</h2>
 
 			<CustomPlanToolbar onClear={onClear} onNewCustomPlan={onNewCustomPlan} />

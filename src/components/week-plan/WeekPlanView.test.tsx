@@ -8,6 +8,7 @@ import {
 import { Suspense } from "react";
 import type { Mock } from "vitest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { CUSTOM_PLANS_SECTION_HEADING } from "@/lib/constants";
 import {
 	createDefaultCustomPlansContent,
 	createDefaultMainGridContent,
@@ -218,7 +219,7 @@ describe("WeekPlanView", () => {
 		renderView();
 
 		expect(
-			screen.getByRole("heading", { name: /Custom plan/i }),
+			screen.getByRole("heading", { name: CUSTOM_PLANS_SECTION_HEADING }),
 		).toBeInTheDocument();
 		expect(
 			screen.getAllByRole("button", { name: /Custom plan name/i }).length,

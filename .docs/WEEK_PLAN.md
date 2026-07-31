@@ -14,7 +14,7 @@ The household already plans meals with a naive grid: free-text **Dish** and **Gr
 
 ## Solution overview
 
-Replace the home screen (`/`) with a **week plan grid**: a timeless Sat → Fri table plus weekly rows, a dynamic backlog, and a separate **Custom plan** table for named custom rows. Persisted in Convex (`weekPlans`); Log and History stay unchanged on `mealPlans`.
+Replace the home screen (`/`) with a **week plan grid**: a timeless Sat → Fri table plus weekly rows, a dynamic backlog, and a separate **Custom plans** section for named custom rows. Persisted in Convex (`weekPlans`); Log and History stay unchanged on `mealPlans`.
 
 See [CONTEXT.md](../CONTEXT.md) for domain terminology.
 
@@ -27,7 +27,7 @@ See [CONTEXT.md](../CONTEXT.md) for domain terminology.
 | Weekday rows            | Freeform per day (often dinner; not enforced)                  |
 | Weekly rows             | Weekly lunch + weekly breakfast                                |
 | Backlog                 | Dynamic idea rows (add/remove); **1 empty row on first load** |
-| Custom plan             | Separate table below main grid; named rows with Name + Dish + Grocery; own Clear custom plan + Add row |
+| Custom plans            | Separate section below main grid; named rows with Name + Dish + Grocery; own Clear custom plan + Add row |
 | Columns                 | **Dish** + **Grocery List** — free text only                   |
 | Calendar tie-in         | **None** — timeless Sat–Fri labels (no dates on rows)          |
 | Week navigation         | **None**                                                       |
@@ -58,7 +58,7 @@ Fixed sections (top to bottom):
 
 Below the main grid:
 
-5. **Custom plan** — user-named rows (e.g. baking projects, dinner with friends) with Dish and Grocery columns
+5. **Custom plans** — user-named rows (e.g. baking projects, dinner with friends) with Dish and Grocery columns
 
 Weekday rows are **freeform** — one cell may hold multiple dishes (e.g. a Sunday spread), grocery may exist without a dish, and dish may exist without grocery. Informal text (`?`, rough units) is expected.
 

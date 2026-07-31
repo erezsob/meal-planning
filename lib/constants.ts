@@ -217,6 +217,9 @@ export const MAIN_PLAN_LABELS = {
 	PREVIOUS_WEEK: "Previous week",
 } as const;
 
+/** Section heading for the custom plans scratch pad on the home page */
+export const CUSTOM_PLANS_SECTION_HEADING = "Custom plans" as const;
+
 /** User-facing error when a plan section save fails */
 export const PLAN_SECTION_SAVE_ERROR = "Could not save plan";
 
