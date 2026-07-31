@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import {
+	ARCHIVED_PLAN_STATUS,
 	CUSTOM_PLANS_SECTION,
 	MAIN_PLAN_SECTION,
 	MAIN_STACK_RANK_PREVIOUS_WEEK,
@@ -41,6 +42,32 @@ export type HomePlanSections = {
 	customPlans: HomePlanSection<CustomPlansContent>;
 	needsEnsure: boolean;
 };
+
+export type ArchivedPlanSection =
+	| {
+			/** Archived section document id. */
+			id: Id<"planSections">;
+			/** Main weekly-plan section discriminator. */
+			section: typeof MAIN_PLAN_SECTION;
+			/** Normalized archived weekly-plan grid content. */
+			content: MainGridContent;
+			/** Original plan creation timestamp. */
+			createdAt: number;
+			/** Timestamp when the plan was last changed, including archiving. */
+			updatedAt: number;
+	  }
+	| {
+			/** Archived section document id. */
+			id: Id<"planSections">;
+			/** Custom-plan section discriminator. */
+			section: typeof CUSTOM_PLANS_SECTION;
+			/** Normalized archived custom-plan content. */
+			content: CustomPlansContent;
+			/** Original plan creation timestamp. */
+			createdAt: number;
+			/** Timestamp when the plan was last changed, including archiving. */
+			updatedAt: number;
+	  };
 
 function toHomePlanSection<TContent>({
 	row,
@@ -84,6 +111,32 @@ function toCustomPlansSection(row: {
 		row,
 		normalize: normalizeCustomPlansContent,
 	});
+}
+
+function toArchivedPlanSection(row: {
+	_id: Id<"planSections">;
+	section: typeof MAIN_PLAN_SECTION | typeof CUSTOM_PLANS_SECTION;
+	content: unknown;
+	createdAt: number;
+	updatedAt: number;
+}): ArchivedPlanSection {
+	if (row.section === MAIN_PLAN_SECTION) {
+		return {
+			id: row._id,
+			section: MAIN_PLAN_SECTION,
+			content: normalizeMainGridContent(row.content),
+			createdAt: row.createdAt,
+			updatedAt: row.updatedAt,
+		};
+	}
+
+	return {
+		id: row._id,
+		section: CUSTOM_PLANS_SECTION,
+		content: normalizeCustomPlansContent(row.content),
+		createdAt: row.createdAt,
+		updatedAt: row.updatedAt,
+	};
 }
 
 async function isMigrationComplete(
@@ -316,6 +369,58 @@ export const getHome = query({
 });
 
 /**
+ * List archived plan sections, optionally filtered by section, newest first.
+ */
+export const listArchived = query({
+	args: {
+		householdId: v.string(),
+		section: v.optional(
+			v.union(v.literal(MAIN_PLAN_SECTION), v.literal(CUSTOM_PLANS_SECTION)),
+		),
+	},
+	handler: async (ctx, args) => {
+		const { section } = args;
+		const rows = section
+			? await ctx.db
+					.query("planSections")
+					.withIndex("by_household_section_status", (q) =>
+						q
+							.eq("householdId", args.householdId)
+							.eq("section", section)
+							.eq("status", ARCHIVED_PLAN_STATUS),
+					)
+					.collect()
+			: await ctx.db
+					.query("planSections")
+					.withIndex("by_household_section_status", (q) =>
+						q.eq("householdId", args.householdId),
+					)
+					.filter((q) => q.eq(q.field("status"), ARCHIVED_PLAN_STATUS))
+					.collect();
+
+		return rows
+			.slice()
+			.sort((a, b) => b.updatedAt - a.updatedAt)
+			.map(toArchivedPlanSection);
+	},
+});
+
+/**
+ * Load one archived plan section for its read-only detail view.
+ */
+export const getArchived = query({
+	args: { id: v.id("planSections") },
+	handler: async (ctx, args) => {
+		const row = await ctx.db.get(args.id);
+		if (!row || row.status !== ARCHIVED_PLAN_STATUS) {
+			return null;
+		}
+
+		return toArchivedPlanSection(row);
+	},
+});
+
+/**
  * Migrate legacy data and ensure default rows exist.
  * Idempotent — safe to call before saves or on first load.
  */
@@ -471,7 +576,7 @@ export const archiveAndCreateNewMain = mutation({
 			}
 
 			await ctx.db.patch(step.sectionId, {
-				status: "archived",
+				status: ARCHIVED_PLAN_STATUS,
 				stackRank: undefined,
 				updatedAt: now,
 			});
@@ -512,7 +617,7 @@ export const archiveAndCreateNewCustomPlans = mutation({
 		for (const step of steps) {
 			if (step.type === "archive") {
 				await ctx.db.patch(step.sectionId, {
-					status: "archived",
+					status: ARCHIVED_PLAN_STATUS,
 					updatedAt: now,
 				});
 				continue;

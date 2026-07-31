@@ -1,6 +1,7 @@
+import { Link } from "@tanstack/react-router";
 import { Eraser, FilePlus } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/lib/components/button";
+import { Button, buttonVariants } from "@/lib/components/button";
 import {
 	Dialog,
 	DialogContent,
@@ -9,7 +10,8 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/lib/components/dialog";
-import { MAIN_PLAN_LABELS } from "@/lib/constants";
+import { ARCHIVED_PLAN_LABELS, MAIN_PLAN_LABELS } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 
 interface WeekPlanToolbarProps {
 	onClear: () => void;
@@ -29,6 +31,12 @@ export function WeekPlanToolbar({
 	return (
 		<>
 			<div className="flex flex-wrap items-center gap-2">
+				<Link
+					to="/plans/archive"
+					className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+				>
+					{ARCHIVED_PLAN_LABELS.pastPlans}
+				</Link>
 				<Button
 					type="button"
 					variant="outline"
