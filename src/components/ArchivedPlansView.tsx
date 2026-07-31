@@ -36,7 +36,7 @@ function ArchivedPlanLink({ plan }: { plan: ArchivedPlanSection }) {
 					"flex h-auto w-full flex-col items-start gap-1 px-4 py-3",
 				)}
 			>
-				<span>{`${label} — ${formatPlanCreatedAt(plan.updatedAt)}`}</span>
+				<span>{`${label} — ${formatPlanCreatedAt(plan.createdAt)}`}</span>
 			</Link>
 		</li>
 	);
@@ -94,13 +94,13 @@ export function ArchivedPlansView() {
 					<TabsTrigger value={MAIN_PLAN_SECTION}>Weekly plans</TabsTrigger>
 					<TabsTrigger value={CUSTOM_PLANS_SECTION}>Custom plans</TabsTrigger>
 				</TabsList>
-				<TabsContent value={MAIN_PLAN_SECTION} className="pt-4" forceMount>
+				<TabsContent value={MAIN_PLAN_SECTION} className="pt-4">
 					<ArchivedPlanList
 						plans={weeklyPlans}
 						emptyMessage={ARCHIVED_PLAN_EMPTY_MESSAGES.weekly}
 					/>
 				</TabsContent>
-				<TabsContent value={CUSTOM_PLANS_SECTION} className="pt-4" forceMount>
+				<TabsContent value={CUSTOM_PLANS_SECTION} className="pt-4">
 					<ArchivedPlanList
 						plans={customPlans}
 						emptyMessage={ARCHIVED_PLAN_EMPTY_MESSAGES.custom}

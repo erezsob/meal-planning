@@ -9,12 +9,18 @@ import {
 	ArchivedPlanDetailViewSkeleton,
 } from "../components/ArchivedPlanDetailView";
 
-export const Route = createFileRoute("/plans/archive/$id")({
+// File-based routing: the trailing `_` in `archive_` escapes nesting so this
+// route is a root-level sibling of `/plans/archive`, not a child of it. The
+// list route (`plans.archive.tsx`) renders the tabbed view with no <Outlet/>,
+// so a nested child would match navigation but never mount. The `_` is stripped
+// from the URL — the public path is still `/plans/archive/$id` as the spec
+// requires; only the internal route tree shape changes.
+export const Route = createFileRoute("/plans/archive_/$id")({
 	component: ArchivedPlanDetailPage,
 });
 
 function ArchivedPlanDetailPage() {
-	const { id } = useParams({ from: "/plans/archive/$id" });
+	const { id } = useParams({ from: "/plans/archive_/$id" });
 
 	return (
 		<Suspense fallback={<ArchivedPlanDetailViewSkeleton />}>

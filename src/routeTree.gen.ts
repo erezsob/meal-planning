@@ -14,7 +14,7 @@ import { Route as LibraryRouteImport } from './routes/library'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PlansArchiveRouteImport } from './routes/plans.archive'
-import { Route as PlansArchiveIdRouteImport } from './routes/plans.archive.$id'
+import { Route as PlansArchiveIdRouteImport } from './routes/plans.archive_.$id'
 
 const ShoppingRoute = ShoppingRouteImport.update({
   id: '/shopping',
@@ -42,9 +42,9 @@ const PlansArchiveRoute = PlansArchiveRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlansArchiveIdRoute = PlansArchiveIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => PlansArchiveRoute,
+  id: '/plans/archive_/$id',
+  path: '/plans/archive/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -52,7 +52,7 @@ export interface FileRoutesByFullPath {
   '/history': typeof HistoryRoute
   '/library': typeof LibraryRoute
   '/shopping': typeof ShoppingRoute
-  '/plans/archive': typeof PlansArchiveRouteWithChildren
+  '/plans/archive': typeof PlansArchiveRoute
   '/plans/archive/$id': typeof PlansArchiveIdRoute
 }
 export interface FileRoutesByTo {
@@ -60,7 +60,7 @@ export interface FileRoutesByTo {
   '/history': typeof HistoryRoute
   '/library': typeof LibraryRoute
   '/shopping': typeof ShoppingRoute
-  '/plans/archive': typeof PlansArchiveRouteWithChildren
+  '/plans/archive': typeof PlansArchiveRoute
   '/plans/archive/$id': typeof PlansArchiveIdRoute
 }
 export interface FileRoutesById {
@@ -69,8 +69,8 @@ export interface FileRoutesById {
   '/history': typeof HistoryRoute
   '/library': typeof LibraryRoute
   '/shopping': typeof ShoppingRoute
-  '/plans/archive': typeof PlansArchiveRouteWithChildren
-  '/plans/archive/$id': typeof PlansArchiveIdRoute
+  '/plans/archive': typeof PlansArchiveRoute
+  '/plans/archive_/$id': typeof PlansArchiveIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -96,7 +96,7 @@ export interface FileRouteTypes {
     | '/library'
     | '/shopping'
     | '/plans/archive'
-    | '/plans/archive/$id'
+    | '/plans/archive_/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -104,7 +104,8 @@ export interface RootRouteChildren {
   HistoryRoute: typeof HistoryRoute
   LibraryRoute: typeof LibraryRoute
   ShoppingRoute: typeof ShoppingRoute
-  PlansArchiveRoute: typeof PlansArchiveRouteWithChildren
+  PlansArchiveRoute: typeof PlansArchiveRoute
+  PlansArchiveIdRoute: typeof PlansArchiveIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -144,34 +145,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlansArchiveRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/plans/archive/$id': {
-      id: '/plans/archive/$id'
-      path: '/$id'
+    '/plans/archive_/$id': {
+      id: '/plans/archive_/$id'
+      path: '/plans/archive/$id'
       fullPath: '/plans/archive/$id'
       preLoaderRoute: typeof PlansArchiveIdRouteImport
-      parentRoute: typeof PlansArchiveRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
-
-interface PlansArchiveRouteChildren {
-  PlansArchiveIdRoute: typeof PlansArchiveIdRoute
-}
-
-const PlansArchiveRouteChildren: PlansArchiveRouteChildren = {
-  PlansArchiveIdRoute: PlansArchiveIdRoute,
-}
-
-const PlansArchiveRouteWithChildren = PlansArchiveRoute._addFileChildren(
-  PlansArchiveRouteChildren,
-)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HistoryRoute: HistoryRoute,
   LibraryRoute: LibraryRoute,
   ShoppingRoute: ShoppingRoute,
-  PlansArchiveRoute: PlansArchiveRouteWithChildren,
+  PlansArchiveRoute: PlansArchiveRoute,
+  PlansArchiveIdRoute: PlansArchiveIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

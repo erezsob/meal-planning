@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import type { ArchivedPlanSection } from "convex/planSections";
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -36,16 +36,21 @@ vi.mock("@tanstack/react-router", () => ({
 	Link: ({
 		children,
 		to,
+		params,
 		...props
 	}: {
 		children: React.ReactNode;
 		to?: string;
+		params?: Record<string, string>;
 		[key: string]: unknown;
-	}) => (
-		<a href={to ?? "#"} {...props}>
-			{children}
-		</a>
-	),
+	}) => {
+		const href = (to ?? "#").replace("$id", params?.id ?? "missing-id");
+		return (
+			<a href={href} {...props}>
+				{children}
+			</a>
+		);
+	},
 }));
 
 vi.mock("convex/_generated/api", () => ({
@@ -56,24 +61,56 @@ vi.mock("convex/_generated/api", () => ({
 	},
 }));
 
+const weeklyLink = () =>
+	screen.queryByRole("link", { name: "Weekly plan — Nov 14, 2023" });
+const customLink = () =>
+	screen.queryByRole("link", { name: "Custom plan — Jan 1, 2025" });
+
 describe("ArchivedPlansView", () => {
-	it("lists weekly plans and switches to custom plans", async () => {
+	it("shows weekly plans by default and hides custom plans", () => {
 		render(<ArchivedPlansView />);
 
-		expect(
-			screen.getByRole("link", { name: "Weekly plan — Nov 15, 2023" }),
-		).toBeInTheDocument();
-		expect(
-			screen.getByRole("tab", { name: "Weekly plans" }),
-		).toBeInTheDocument();
-		expect(
-			screen.getByRole("tab", { name: "Custom plans" }),
-		).toBeInTheDocument();
-		expect(
-			screen.getByRole("link", {
-				name: "Custom plan — Jan 2, 2025",
-				hidden: true,
-			}),
-		).toBeInTheDocument();
+		expect(screen.getByRole("tab", { name: "Weekly plans" })).toHaveAttribute(
+			"aria-selected",
+			"true",
+		);
+		expect(screen.getByRole("tab", { name: "Custom plans" })).toHaveAttribute(
+			"aria-selected",
+			"false",
+		);
+		expect(weeklyLink()).toBeInTheDocument();
+		expect(customLink()).not.toBeInTheDocument();
+	});
+
+	it("switches tabs and shows only the selected list", () => {
+		render(<ArchivedPlansView />);
+
+		fireEvent.mouseDown(screen.getByRole("tab", { name: "Custom plans" }));
+
+		expect(screen.getByRole("tab", { name: "Custom plans" })).toHaveAttribute(
+			"aria-selected",
+			"true",
+		);
+		expect(screen.getByRole("tab", { name: "Weekly plans" })).toHaveAttribute(
+			"aria-selected",
+			"false",
+		);
+		expect(customLink()).toBeInTheDocument();
+		expect(weeklyLink()).not.toBeInTheDocument();
+
+		fireEvent.mouseDown(screen.getByRole("tab", { name: "Weekly plans" }));
+
+		expect(weeklyLink()).toBeInTheDocument();
+		expect(customLink()).not.toBeInTheDocument();
+	});
+
+	it("links each plan to its archive detail route", () => {
+		render(<ArchivedPlansView />);
+
+		expect(weeklyLink()).toHaveAttribute("href", "/plans/archive/main-1");
+
+		fireEvent.mouseDown(screen.getByRole("tab", { name: "Custom plans" }));
+
+		expect(customLink()).toHaveAttribute("href", "/plans/archive/custom-1");
 	});
 });

@@ -115,7 +115,7 @@ export function ArchivedPlanDetailView({
 			<div className="flex flex-wrap items-center justify-between gap-3">
 				<div>
 					<h1 className="text-2xl font-bold text-foreground">
-						{`${title} — ${formatPlanCreatedAt(plan.updatedAt)}`}
+						{`${title} — ${formatPlanCreatedAt(plan.createdAt)}`}
 					</h1>
 					<p className="mt-1 text-sm text-muted-foreground">
 						{ARCHIVED_PLAN_LABELS.readOnlyArchive}

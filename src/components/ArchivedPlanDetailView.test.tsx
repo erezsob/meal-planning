@@ -37,7 +37,7 @@ describe("ArchivedPlanDetailView", () => {
 
 		expect(
 			screen.getByRole("heading", {
-				name: "Weekly plan — Jan 2, 2025",
+				name: "Weekly plan — Jan 1, 2025",
 			}),
 		).toBeInTheDocument();
 		expect(screen.getByText("Old ribs")).toBeInTheDocument();

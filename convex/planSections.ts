@@ -379,19 +379,26 @@ export const listArchived = query({
 		),
 	},
 	handler: async (ctx, args) => {
-		const rows = await ctx.db
-			.query("planSections")
-			.withIndex("by_household_section_status", (q) =>
-				q.eq("householdId", args.householdId),
-			)
-			.filter((q) => q.eq(q.field("status"), ARCHIVED_PLAN_STATUS))
-			.collect();
+		const { section } = args;
+		const rows = section
+			? await ctx.db
+					.query("planSections")
+					.withIndex("by_household_section_status", (q) =>
+						q
+							.eq("householdId", args.householdId)
+							.eq("section", section)
+							.eq("status", ARCHIVED_PLAN_STATUS),
+					)
+					.collect()
+			: await ctx.db
+					.query("planSections")
+					.withIndex("by_household_section_status", (q) =>
+						q.eq("householdId", args.householdId),
+					)
+					.filter((q) => q.eq(q.field("status"), ARCHIVED_PLAN_STATUS))
+					.collect();
 
-		const filteredRows = args.section
-			? rows.filter((row) => row.section === args.section)
-			: rows;
-
-		return filteredRows
+		return rows
 			.slice()
 			.sort((a, b) => b.updatedAt - a.updatedAt)
 			.map(toArchivedPlanSection);
@@ -405,7 +412,7 @@ export const getArchived = query({
 	args: { id: v.id("planSections") },
 	handler: async (ctx, args) => {
 		const row = await ctx.db.get(args.id);
-		if (!row || row.status !== "archived") {
+		if (!row || row.status !== ARCHIVED_PLAN_STATUS) {
 			return null;
 		}
 
@@ -569,7 +576,7 @@ export const archiveAndCreateNewMain = mutation({
 			}
 
 			await ctx.db.patch(step.sectionId, {
-				status: "archived",
+				status: ARCHIVED_PLAN_STATUS,
 				stackRank: undefined,
 				updatedAt: now,
 			});
@@ -610,7 +617,7 @@ export const archiveAndCreateNewCustomPlans = mutation({
 		for (const step of steps) {
 			if (step.type === "archive") {
 				await ctx.db.patch(step.sectionId, {
-					status: "archived",
+					status: ARCHIVED_PLAN_STATUS,
 					updatedAt: now,
 				});
 				continue;
