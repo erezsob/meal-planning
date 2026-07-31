@@ -13,7 +13,6 @@ import type * as mealPlans from "../mealPlans.js";
 import type * as planSections from "../planSections.js";
 import type * as seed from "../seed.js";
 import type * as shoppingList from "../shoppingList.js";
-import type * as weekPlans from "../weekPlans.js";
 
 import type {
   ApiFromModules,
@@ -27,7 +26,6 @@ declare const fullApi: ApiFromModules<{
   planSections: typeof planSections;
   seed: typeof seed;
   shoppingList: typeof shoppingList;
-  weekPlans: typeof weekPlans;
 }>;
 
 /**

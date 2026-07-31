@@ -13,8 +13,6 @@ import {
 import {
 	normalizeCustomPlansContent,
 	normalizeMainGridContent,
-	normalizeWeekPlan,
-	splitWeekPlan,
 } from "../lib/weekPlan";
 import {
 	type CustomPlansContent,
@@ -40,7 +38,6 @@ export type HomePlanSection<TContent> = {
 export type HomePlanSections = {
 	mainGrids: HomePlanSection<MainGridContent>[];
 	customPlans: HomePlanSection<CustomPlansContent>;
-	needsEnsure: boolean;
 };
 
 export type ArchivedPlanSection =
@@ -137,76 +134,6 @@ function toArchivedPlanSection(row: {
 		createdAt: row.createdAt,
 		updatedAt: row.updatedAt,
 	};
-}
-
-async function isMigrationComplete(
-	ctx: QueryCtx | MutationCtx,
-	householdId: string,
-): Promise<boolean> {
-	const activeMain = await ctx.db
-		.query("planSections")
-		.withIndex("by_household_section_stackRank", (q) =>
-			q
-				.eq("householdId", householdId)
-				.eq("section", MAIN_PLAN_SECTION)
-				.eq("stackRank", MAIN_STACK_RANK_THIS_WEEK),
-		)
-		.first();
-
-	const activeCustomPlans = await ctx.db
-		.query("planSections")
-		.withIndex("by_household_section_status", (q) =>
-			q
-				.eq("householdId", householdId)
-				.eq("section", CUSTOM_PLANS_SECTION)
-				.eq("status", "active"),
-		)
-		.first();
-
-	return activeMain != null && activeCustomPlans != null;
-}
-
-async function migrateLegacyWeekPlan(
-	ctx: MutationCtx,
-	householdId: string,
-): Promise<boolean> {
-	if (await isMigrationComplete(ctx, householdId)) {
-		return false;
-	}
-
-	const legacy = await ctx.db
-		.query("weekPlans")
-		.withIndex("by_householdId", (q) => q.eq("householdId", householdId))
-		.first();
-
-	if (!legacy) {
-		return false;
-	}
-
-	const plan = normalizeWeekPlan(legacy.plan);
-	const { main, customPlans } = splitWeekPlan(plan);
-	const timestamp = legacy.updatedAt;
-
-	await ctx.db.insert("planSections", {
-		householdId,
-		section: MAIN_PLAN_SECTION,
-		content: main,
-		status: "active",
-		stackRank: MAIN_STACK_RANK_THIS_WEEK,
-		createdAt: timestamp,
-		updatedAt: timestamp,
-	});
-
-	await ctx.db.insert("planSections", {
-		householdId,
-		section: CUSTOM_PLANS_SECTION,
-		content: customPlans,
-		status: "active",
-		createdAt: timestamp,
-		updatedAt: timestamp,
-	});
-
-	return true;
 }
 
 async function ensureDefaultHomeRows(
@@ -313,58 +240,17 @@ async function loadActiveHomeSections(
 	return {
 		mainGrids,
 		customPlans: toCustomPlansSection(activeCustomPlans),
-		needsEnsure: false,
-	};
-}
-
-function homeFromLegacyWeekPlan(
-	plan: ReturnType<typeof normalizeWeekPlan>,
-	timestamp: number,
-): HomePlanSections {
-	const { main, customPlans } = splitWeekPlan(plan);
-
-	return {
-		mainGrids: [
-			{
-				content: main,
-				createdAt: timestamp,
-				updatedAt: timestamp,
-			},
-		],
-		customPlans: {
-			content: customPlans,
-			createdAt: timestamp,
-			updatedAt: timestamp,
-		},
-		needsEnsure: true,
 	};
 }
 
 /**
  * Load active main grids (stack ranks 0–1) and custom plans for the home page.
- * Synthesizes a read-only view from legacy weekPlans when not yet migrated.
+ * Returns null for households with no planSections rows yet.
  */
 export const getHome = query({
 	args: { householdId: v.string() },
 	handler: async (ctx, args) => {
-		const existing = await loadActiveHomeSections(ctx, args.householdId);
-		if (existing) {
-			return existing;
-		}
-
-		const legacy = await ctx.db
-			.query("weekPlans")
-			.withIndex("by_householdId", (q) => q.eq("householdId", args.householdId))
-			.first();
-
-		if (legacy) {
-			return homeFromLegacyWeekPlan(
-				normalizeWeekPlan(legacy.plan),
-				legacy.updatedAt,
-			);
-		}
-
-		return null;
+		return await loadActiveHomeSections(ctx, args.householdId);
 	},
 });
 
@@ -421,13 +307,12 @@ export const getArchived = query({
 });
 
 /**
- * Migrate legacy data and ensure default rows exist.
+ * Ensure default rows exist for a brand-new household, then load home state.
  * Idempotent — safe to call before saves or on first load.
  */
 export const ensureHome = mutation({
 	args: { householdId: v.string() },
 	handler: async (ctx, args) => {
-		await migrateLegacyWeekPlan(ctx, args.householdId);
 		await ensureDefaultHomeRows(ctx, args.householdId);
 
 		const home = await loadActiveHomeSections(ctx, args.householdId);
@@ -467,7 +352,6 @@ export const saveMain = mutation({
 export const clearMainTop = mutation({
 	args: { householdId: v.string() },
 	handler: async (ctx, args) => {
-		await migrateLegacyWeekPlan(ctx, args.householdId);
 		await ensureDefaultHomeRows(ctx, args.householdId);
 
 		const topGrid = await ctx.db
@@ -522,7 +406,6 @@ export const saveCustomPlans = mutation({
 export const archiveAndCreateNewMain = mutation({
 	args: { householdId: v.string() },
 	handler: async (ctx, args) => {
-		await migrateLegacyWeekPlan(ctx, args.householdId);
 		await ensureDefaultHomeRows(ctx, args.householdId);
 
 		const now = Date.now();
@@ -597,7 +480,6 @@ export const archiveAndCreateNewMain = mutation({
 export const archiveAndCreateNewCustomPlans = mutation({
 	args: { householdId: v.string() },
 	handler: async (ctx, args) => {
-		await migrateLegacyWeekPlan(ctx, args.householdId);
 		await ensureDefaultHomeRows(ctx, args.householdId);
 
 		const now = Date.now();
