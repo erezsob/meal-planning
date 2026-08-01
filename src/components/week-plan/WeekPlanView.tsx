@@ -1,3 +1,4 @@
+import { MAIN_PLAN_LABELS } from "@/lib/constants";
 import { CustomPlanSection } from "./CustomPlanSection";
 import { MainGridSection } from "./MainGridSection";
 import { useWeekPlan } from "./useWeekPlan";
@@ -20,6 +21,7 @@ export function WeekPlanView() {
 		removeCustomPlan,
 		clearCustomPlan,
 		newWeeklyPlan,
+		archivePreviousWeek,
 		newCustomPlan,
 	} = useWeekPlan();
 
@@ -50,6 +52,11 @@ export function WeekPlanView() {
 					onCellChange={updateCell}
 					onRemoveBacklog={removeBacklog}
 					onAddBacklog={addBacklog}
+					onArchive={
+						grid.label === MAIN_PLAN_LABELS.PREVIOUS_WEEK
+							? () => void archivePreviousWeek()
+							: undefined
+					}
 				/>
 			))}
 

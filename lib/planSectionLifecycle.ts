@@ -16,6 +16,11 @@ export type CustomPlansArchiveStep =
 	| { type: "archive"; sectionId: PlanSectionId }
 	| { type: "insert-active" };
 
+export type PreviousWeekArchiveStep = {
+	type: "archive";
+	sectionId: PlanSectionId;
+};
+
 /**
  * Plan ordered stack cascade steps for "New weekly plan".
  * Order: insert rank-0 → demote former rank-0 → archive former rank-1.
@@ -42,6 +47,22 @@ export function planMainStackCascade({
 	}
 
 	return steps;
+}
+
+/**
+ * Plan steps for manually archiving Previous week only (no insert or demote).
+ *
+ * @param args.rank1Id - Id of the Previous-week main section, if any
+ * @returns Archive step when Previous week exists; otherwise empty
+ */
+export function planPreviousWeekArchive(args?: {
+	rank1Id?: PlanSectionId;
+}): PreviousWeekArchiveStep[] {
+	if (!args?.rank1Id) {
+		return [];
+	}
+
+	return [{ type: "archive", sectionId: args.rank1Id }];
 }
 
 /**

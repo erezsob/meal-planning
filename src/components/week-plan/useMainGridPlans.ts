@@ -4,6 +4,7 @@ import type { HomePlanSections } from "convex/planSections";
 import { useMutation } from "convex/react";
 import { useCallback, useMemo, useRef } from "react";
 import {
+	ARCHIVE_PREVIOUS_WEEK_ERROR,
 	CLEAR_MAIN_PLAN_ERROR,
 	HOUSEHOLD_ID,
 	NEW_WEEKLY_PLAN_ERROR,
@@ -42,7 +43,7 @@ type UseMainGridPlansArgs = {
  * @param args.onSaveError - Reports save failures to the parent hook
  * @param args.onSaveSuccess - Clears save errors after successful persistence
  * @param args.onClearError - Clears save errors when the user resumes editing
- * @returns Main grid views, cell/backlog actions, and new/clear weekly plan handlers
+ * @returns Main grid views, cell/backlog actions, and weekly plan lifecycle handlers
  */
 export function useMainGridPlans({
 	remoteHome,
@@ -54,6 +55,9 @@ export function useMainGridPlans({
 	const clearMainTopMutation = useMutation(api.planSections.clearMainTop);
 	const archiveAndCreateNewMainMutation = useMutation(
 		api.planSections.archiveAndCreateNewMain,
+	);
+	const archivePreviousWeekMainMutation = useMutation(
+		api.planSections.archivePreviousWeekMain,
 	);
 
 	const remoteHomeRef = useRef(remoteHome);
@@ -224,6 +228,30 @@ export function useMainGridPlans({
 		onSaveError,
 	]);
 
+	const archivePreviousWeek = useCallback(async () => {
+		const previousId = remoteHomeRef.current?.mainGrids[1]?.id;
+		await flushAll();
+		if (previousId) {
+			resetForKey(previousId);
+		}
+
+		const result = await tryCatchAsyncWithMessage(
+			() => archivePreviousWeekMainMutation({ householdId: HOUSEHOLD_ID }),
+			ARCHIVE_PREVIOUS_WEEK_ERROR,
+		);
+		if (result.ok) {
+			onSaveSuccess();
+		} else {
+			onSaveError(result.error);
+		}
+	}, [
+		flushAll,
+		resetForKey,
+		archivePreviousWeekMainMutation,
+		onSaveSuccess,
+		onSaveError,
+	]);
+
 	return {
 		mainGrids,
 		updateCell,
@@ -231,5 +259,6 @@ export function useMainGridPlans({
 		addBacklog,
 		removeBacklog,
 		newWeeklyPlan,
+		archivePreviousWeek,
 	};
 }

@@ -229,6 +229,9 @@ export const NEW_WEEKLY_PLAN_ERROR = "Could not create weekly plan";
 /** User-facing error when clearing the upper weekly plan fails */
 export const CLEAR_MAIN_PLAN_ERROR = "Could not clear weekly plan";
 
+/** User-facing error when archiving Previous week fails */
+export const ARCHIVE_PREVIOUS_WEEK_ERROR = "Could not archive previous week";
+
 /** User-facing error when "New custom plan" fails */
 export const NEW_CUSTOM_PLAN_ERROR = "Could not create custom plan";
 
@@ -239,6 +242,16 @@ export const ARCHIVED_PLAN_LABELS = {
 	customPlan: "Custom plan",
 	readOnlyArchive: "Read-only archive",
 	backToPastPlans: "Back to past plans",
+	archive: "Archive",
+} as const;
+
+/** Confirm dialog copy for manually archiving Previous week */
+export const ARCHIVE_PREVIOUS_WEEK_DIALOG = {
+	title: "Archive Previous week?",
+	description:
+		"This moves Previous week to Past plans. This week stays on the page.",
+	confirm: ARCHIVED_PLAN_LABELS.archive,
+	cancel: "Cancel",
 } as const;
 
 /** Empty-state messages used by archived plan tabs */

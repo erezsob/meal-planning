@@ -4,9 +4,21 @@ import { MAIN_STACK_RANK_PREVIOUS_WEEK } from "./constants";
 import {
 	planCustomPlansArchive,
 	planMainStackCascade,
+	planPreviousWeekArchive,
 } from "./planSectionLifecycle";
 
 describe("planSectionLifecycle", () => {
+	it("planPreviousWeekArchive is empty when Previous week is absent", () => {
+		expect(planPreviousWeekArchive()).toEqual([]);
+	});
+
+	it("planPreviousWeekArchive archives only the Previous week section", () => {
+		const rank1Id = mockPlanSectionId("main-1");
+		expect(planPreviousWeekArchive({ rank1Id })).toEqual([
+			{ type: "archive", sectionId: rank1Id },
+		]);
+	});
+
 	it("planMainStackCascade inserts only when home is empty", () => {
 		expect(planMainStackCascade({})).toEqual([{ type: "insert-rank-0" }]);
 	});
