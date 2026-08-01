@@ -8,6 +8,22 @@ Weekly meal planning and consumption tracking for a household — plan what to c
 The household's current meal scratch pad — a simple grid of what you intend to cook or buy this week. Not tied to calendar dates.
 _Avoid_: Calendar, schedule
 
+**This week**:
+The upper active main grid on the week plan — the household's current scratch pad.
+_Avoid_: Current week, active week, rank-0
+
+**Previous week**:
+The lower active main grid on the week plan — the prior This week kept on the page until archived.
+_Avoid_: Last week, old plan, rank-1
+
+**Past plans**:
+Read-only history of archived main grids and custom plans.
+_Avoid_: Archive list, plan history
+
+**Archive**:
+Move an active plan section into Past plans. Does not delete content. Distinct from clearing a grid.
+_Avoid_: Delete, dismiss, remove
+
 **Week plan line**:
 One row in the week plan — a weekday (Saturday through Friday), a backlog entry, a weekly row (weekly lunch, weekly breakfast), or a custom category row.
 _Avoid_: Slot, cell
