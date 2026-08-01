@@ -229,8 +229,11 @@ export function useMainGridPlans({
 	]);
 
 	const archivePreviousWeek = useCallback(async () => {
+		const previousId = remoteHomeRef.current?.mainGrids[1]?.id;
 		await flushAll();
-		resetPending();
+		if (previousId) {
+			resetForKey(previousId);
+		}
 
 		const result = await tryCatchAsyncWithMessage(
 			() => archivePreviousWeekMainMutation({ householdId: HOUSEHOLD_ID }),
@@ -243,7 +246,7 @@ export function useMainGridPlans({
 		}
 	}, [
 		flushAll,
-		resetPending,
+		resetForKey,
 		archivePreviousWeekMainMutation,
 		onSaveSuccess,
 		onSaveError,

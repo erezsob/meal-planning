@@ -31,7 +31,7 @@ interface MainGridSectionProps {
 	}) => void;
 	onAddBacklog: (args: { gridId: NonNullable<MainGridView["id"]> }) => void;
 	/** When set, shows Archive beside the heading (Previous week only). */
-	onArchive?: () => void;
+	onArchive?: () => void | Promise<void>;
 }
 
 /**
@@ -117,8 +117,10 @@ export function MainGridSection({
 							<Button
 								type="button"
 								onClick={() => {
-									onArchive();
-									setArchiveOpen(false);
+									void (async () => {
+										await onArchive();
+										setArchiveOpen(false);
+									})();
 								}}
 							>
 								{ARCHIVE_PREVIOUS_WEEK_DIALOG.confirm}
