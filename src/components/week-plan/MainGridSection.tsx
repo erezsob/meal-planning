@@ -112,7 +112,7 @@ export function MainGridSection({
 								variant="outline"
 								onClick={() => setArchiveOpen(false)}
 							>
-								Cancel
+								{ARCHIVE_PREVIOUS_WEEK_DIALOG.cancel}
 							</Button>
 							<Button
 								type="button"
