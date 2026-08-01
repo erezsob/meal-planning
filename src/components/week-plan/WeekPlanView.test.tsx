@@ -26,6 +26,7 @@ const mockClearMainTop = vi.fn().mockResolvedValue(undefined);
 const mockSaveCustomPlans = vi.fn().mockResolvedValue(undefined);
 const mockArchiveAndCreateNewMain = vi.fn();
 const mockArchiveAndCreateNewCustomPlans = vi.fn();
+const mockArchivePreviousWeekMain = vi.fn();
 
 const mainId = mockPlanSectionId("plan-main-1");
 const previousMainId = mockPlanSectionId("plan-main-2");
@@ -96,6 +97,7 @@ vi.mock("convex/_generated/api", () => ({
 			archiveAndCreateNewMain: "planSections:archiveAndCreateNewMain",
 			archiveAndCreateNewCustomPlans:
 				"planSections:archiveAndCreateNewCustomPlans",
+			archivePreviousWeekMain: "planSections:archivePreviousWeekMain",
 		},
 	},
 }));
@@ -145,6 +147,7 @@ describe("WeekPlanView", () => {
 				updatedAt: 1_735_689_600_000,
 			},
 		});
+		mockArchivePreviousWeekMain.mockResolvedValue(singleGridHome);
 		(useSuspenseQuery as Mock).mockReturnValue({ data: singleGridHome });
 		(useMutation as Mock).mockImplementation((reference: string) => {
 			if (reference === "planSections:ensureHome") {
@@ -164,6 +167,9 @@ describe("WeekPlanView", () => {
 			}
 			if (reference === "planSections:archiveAndCreateNewCustomPlans") {
 				return mockArchiveAndCreateNewCustomPlans;
+			}
+			if (reference === "planSections:archivePreviousWeekMain") {
+				return mockArchivePreviousWeekMain;
 			}
 			return vi.fn();
 		});
@@ -351,6 +357,114 @@ describe("WeekPlanView", () => {
 		).toBeInTheDocument();
 		expect(screen.getByText("Jan 1, 2025")).toBeInTheDocument();
 		expect(screen.getByText("Nov 14, 2023")).toBeInTheDocument();
+	});
+
+	it("hides Archive when Previous week is absent", () => {
+		renderView();
+
+		expect(
+			screen.queryByRole("button", { name: /^Archive$/i }),
+		).not.toBeInTheDocument();
+	});
+
+	it("shows Archive on Previous week when two grids are stacked", () => {
+		(useSuspenseQuery as Mock).mockReturnValue({ data: stackedGridHome });
+		renderView();
+
+		const previousWeekSection = screen
+			.getByRole("heading", { name: "Previous week" })
+			.closest("section") as HTMLElement;
+
+		expect(
+			within(previousWeekSection).getByRole("button", { name: /^Archive$/i }),
+		).toBeInTheDocument();
+		expect(
+			within(
+				screen
+					.getByRole("heading", { name: "This week" })
+					.closest("section") as HTMLElement,
+			).queryByRole("button", { name: /^Archive$/i }),
+		).not.toBeInTheDocument();
+	});
+
+	it("does not archive when Archive confirm is cancelled", async () => {
+		(useSuspenseQuery as Mock).mockReturnValue({ data: stackedGridHome });
+		renderView();
+
+		const previousWeekSection = screen
+			.getByRole("heading", { name: "Previous week" })
+			.closest("section") as HTMLElement;
+
+		fireEvent.click(
+			within(previousWeekSection).getByRole("button", { name: /^Archive$/i }),
+		);
+		fireEvent.click(
+			within(screen.getByRole("dialog")).getByRole("button", {
+				name: /Cancel/i,
+			}),
+		);
+
+		expect(mockArchivePreviousWeekMain).not.toHaveBeenCalled();
+		expect(
+			screen.getByRole("heading", { name: "Previous week" }),
+		).toBeInTheDocument();
+	});
+
+	it("archives Previous week when Archive is confirmed", async () => {
+		(useSuspenseQuery as Mock).mockReturnValue({ data: stackedGridHome });
+		const { unmount } = renderView();
+
+		const previousWeekSection = screen
+			.getByRole("heading", { name: "Previous week" })
+			.closest("section") as HTMLElement;
+
+		fireEvent.click(
+			within(previousWeekSection).getByRole("button", { name: /^Archive$/i }),
+		);
+		fireEvent.click(
+			within(screen.getByRole("dialog")).getByRole("button", {
+				name: /^Archive$/i,
+			}),
+		);
+
+		await waitFor(() => {
+			expect(mockArchivePreviousWeekMain).toHaveBeenCalledWith({
+				householdId: "household-1",
+			});
+		});
+
+		unmount();
+		(useSuspenseQuery as Mock).mockReturnValue({ data: singleGridHome });
+		renderView();
+
+		expect(
+			screen.getByRole("heading", { name: "This week" }),
+		).toBeInTheDocument();
+		expect(
+			screen.queryByRole("heading", { name: "Previous week" }),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("button", { name: /^Archive$/i }),
+		).not.toBeInTheDocument();
+	});
+
+	it("still runs New weekly plan after Previous week was archived", async () => {
+		(useSuspenseQuery as Mock).mockReturnValue({ data: singleGridHome });
+		renderView();
+
+		fireEvent.click(screen.getByRole("button", { name: /^New weekly plan$/i }));
+		fireEvent.click(
+			within(screen.getByRole("dialog")).getByRole("button", {
+				name: /New weekly plan/i,
+			}),
+		);
+
+		await waitFor(() => {
+			expect(mockArchiveAndCreateNewMain).toHaveBeenCalledWith({
+				householdId: "household-1",
+			});
+		});
+		expect(mockArchivePreviousWeekMain).not.toHaveBeenCalled();
 	});
 
 	it("clears only the upper grid when two grids are stacked", async () => {

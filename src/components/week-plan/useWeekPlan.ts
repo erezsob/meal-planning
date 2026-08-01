@@ -63,6 +63,7 @@ export function useWeekPlan() {
 		removeCustomPlan: custom.removeCustomPlan,
 		clearCustomPlan: custom.clearCustomPlan,
 		newWeeklyPlan: main.newWeeklyPlan,
+		archivePreviousWeek: main.archivePreviousWeek,
 		newCustomPlan: custom.newCustomPlan,
 	};
 }

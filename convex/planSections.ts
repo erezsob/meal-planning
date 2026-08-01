@@ -9,6 +9,7 @@ import {
 import {
 	planCustomPlansArchive,
 	planMainStackCascade,
+	planPreviousWeekArchive,
 } from "../lib/planSectionLifecycle";
 import {
 	normalizeCustomPlansContent,
@@ -458,6 +459,45 @@ export const archiveAndCreateNewMain = mutation({
 				continue;
 			}
 
+			await ctx.db.patch(step.sectionId, {
+				status: ARCHIVED_PLAN_STATUS,
+				stackRank: undefined,
+				updatedAt: now,
+			});
+		}
+
+		const home = await loadActiveHomeSections(ctx, args.householdId);
+		if (!home) {
+			throw new Error("Failed to load home plan sections");
+		}
+
+		return home;
+	},
+});
+
+/**
+ * Archive Previous week only — leave This week on the Plan page.
+ */
+export const archivePreviousWeekMain = mutation({
+	args: { householdId: v.string() },
+	handler: async (ctx, args) => {
+		await ensureDefaultHomeRows(ctx, args.householdId);
+
+		const now = Date.now();
+
+		const rank1 = await ctx.db
+			.query("planSections")
+			.withIndex("by_household_section_stackRank", (q) =>
+				q
+					.eq("householdId", args.householdId)
+					.eq("section", MAIN_PLAN_SECTION)
+					.eq("stackRank", MAIN_STACK_RANK_PREVIOUS_WEEK),
+			)
+			.first();
+
+		const steps = planPreviousWeekArchive({ rank1Id: rank1?._id });
+
+		for (const step of steps) {
 			await ctx.db.patch(step.sectionId, {
 				status: ARCHIVED_PLAN_STATUS,
 				stackRank: undefined,
