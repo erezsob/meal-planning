@@ -8,7 +8,10 @@ import {
 import { Suspense } from "react";
 import type { Mock } from "vitest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { CUSTOM_PLANS_SECTION_HEADING } from "@/lib/constants";
+import {
+	CUSTOM_PLANS_SECTION_HEADING,
+	ARCHIVE_PREVIOUS_WEEK_DIALOG,
+} from "@/lib/constants";
 import {
 	createDefaultCustomPlansContent,
 	createDefaultMainGridContent,
@@ -398,9 +401,30 @@ describe("WeekPlanView", () => {
 		fireEvent.click(
 			within(previousWeekSection).getByRole("button", { name: /^Archive$/i }),
 		);
+
+		const dialog = screen.getByRole("dialog");
+		expect(
+			within(dialog).getByRole("heading", {
+				name: ARCHIVE_PREVIOUS_WEEK_DIALOG.title,
+			}),
+		).toBeInTheDocument();
+		expect(
+			within(dialog).getByText(ARCHIVE_PREVIOUS_WEEK_DIALOG.description),
+		).toBeInTheDocument();
+		expect(
+			within(dialog).getByRole("button", {
+				name: ARCHIVE_PREVIOUS_WEEK_DIALOG.confirm,
+			}).className,
+		).toMatch(/bg-primary/);
+		expect(
+			within(dialog).getByRole("button", {
+				name: ARCHIVE_PREVIOUS_WEEK_DIALOG.confirm,
+			}).className,
+		).not.toMatch(/\bbg-destructive\b/);
+
 		fireEvent.click(
-			within(screen.getByRole("dialog")).getByRole("button", {
-				name: /Cancel/i,
+			within(dialog).getByRole("button", {
+				name: ARCHIVE_PREVIOUS_WEEK_DIALOG.cancel,
 			}),
 		);
 
@@ -408,6 +432,51 @@ describe("WeekPlanView", () => {
 		expect(
 			screen.getByRole("heading", { name: "Previous week" }),
 		).toBeInTheDocument();
+	});
+
+	it("flushes pending Previous week edits before archiving", async () => {
+		(useSuspenseQuery as Mock).mockReturnValue({ data: stackedGridHome });
+		renderView();
+
+		const previousWeekSection = screen
+			.getByRole("heading", { name: "Previous week" })
+			.closest("section") as HTMLElement;
+
+		fireEvent.click(
+			within(previousWeekSection).getAllByRole("button", {
+				name: /Saturday dish/i,
+			})[0],
+		);
+		fireEvent.change(
+			within(previousWeekSection).getAllByLabelText("Saturday dish")[0],
+			{ target: { value: "Flushed ribs" } },
+		);
+
+		fireEvent.click(
+			within(previousWeekSection).getByRole("button", { name: /^Archive$/i }),
+		);
+		fireEvent.click(
+			within(screen.getByRole("dialog")).getByRole("button", {
+				name: /^Archive$/i,
+			}),
+		);
+
+		await waitFor(() => {
+			expect(mockSaveMain).toHaveBeenCalledWith({
+				id: previousMainId,
+				content: expect.objectContaining({
+					weekdays: expect.objectContaining({
+						saturday: { dish: "Flushed ribs", grocery: "" },
+					}),
+				}),
+			});
+			expect(mockArchivePreviousWeekMain).toHaveBeenCalledWith({
+				householdId: "household-1",
+			});
+		});
+		expect(mockSaveMain.mock.invocationCallOrder[0]).toBeLessThan(
+			mockArchivePreviousWeekMain.mock.invocationCallOrder[0],
+		);
 	});
 
 	it("archives Previous week when Archive is confirmed", async () => {
@@ -448,7 +517,31 @@ describe("WeekPlanView", () => {
 		).not.toBeInTheDocument();
 	});
 
-	it("still runs New weekly plan after Previous week was archived", async () => {
+	it("runs New weekly plan after confirming Archive on stacked grids", async () => {
+		(useSuspenseQuery as Mock).mockReturnValue({ data: stackedGridHome });
+		const { unmount } = renderView();
+
+		const previousWeekSection = screen
+			.getByRole("heading", { name: "Previous week" })
+			.closest("section") as HTMLElement;
+
+		fireEvent.click(
+			within(previousWeekSection).getByRole("button", { name: /^Archive$/i }),
+		);
+		fireEvent.click(
+			within(screen.getByRole("dialog")).getByRole("button", {
+				name: /^Archive$/i,
+			}),
+		);
+
+		await waitFor(() => {
+			expect(mockArchivePreviousWeekMain).toHaveBeenCalledWith({
+				householdId: "household-1",
+			});
+		});
+
+		unmount();
+		mockArchiveAndCreateNewMain.mockClear();
 		(useSuspenseQuery as Mock).mockReturnValue({ data: singleGridHome });
 		renderView();
 
@@ -464,7 +557,6 @@ describe("WeekPlanView", () => {
 				householdId: "household-1",
 			});
 		});
-		expect(mockArchivePreviousWeekMain).not.toHaveBeenCalled();
 	});
 
 	it("clears only the upper grid when two grids are stacked", async () => {
