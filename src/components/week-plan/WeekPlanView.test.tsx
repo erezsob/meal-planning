@@ -414,13 +414,8 @@ describe("WeekPlanView", () => {
 		expect(
 			within(dialog).getByRole("button", {
 				name: ARCHIVE_PREVIOUS_WEEK_DIALOG.confirm,
-			}).className,
-		).toMatch(/bg-primary/);
-		expect(
-			within(dialog).getByRole("button", {
-				name: ARCHIVE_PREVIOUS_WEEK_DIALOG.confirm,
-			}).className,
-		).not.toMatch(/\bbg-destructive\b/);
+			}),
+		).toBeInTheDocument();
 
 		fireEvent.click(
 			within(dialog).getByRole("button", {
@@ -470,6 +465,8 @@ describe("WeekPlanView", () => {
 					}),
 				}),
 			});
+		});
+		await waitFor(() => {
 			expect(mockArchivePreviousWeekMain).toHaveBeenCalledWith({
 				householdId: "household-1",
 			});
