@@ -9,6 +9,12 @@ export const PWA_MANIFEST_HREF = "/manifest.json";
 /** Public path to the Apple touch icon linked from the root document. */
 export const PWA_APPLE_TOUCH_ICON_HREF = "/apple-touch-icon.png";
 
+/** Chrome install-floor minimum icon width/height (px). */
+export const PWA_ICON_SIZE_192 = 192;
+
+/** Chrome install-floor large icon width/height (px). */
+export const PWA_ICON_SIZE_512 = 512;
+
 /** Display modes Chrome treats as installable (standalone-class). */
 export const PWA_INSTALLABLE_DISPLAY_MODES = [
 	"fullscreen",
@@ -24,8 +30,11 @@ export type PwaInstallableDisplayMode =
  * Root-document install surface: theme chrome + asset links browsers need for A2HS / Install.
  */
 export type DocumentInstallSurface = {
+	/** HTML `theme-color` meta content. */
 	readonly themeColor: string;
+	/** `rel="manifest"` href. */
 	readonly manifestHref: string;
+	/** `rel="apple-touch-icon"` href. */
 	readonly appleTouchIconHref: string;
 };
 
@@ -42,16 +51,27 @@ export const PWA_DOCUMENT_INSTALL_SURFACE: DocumentInstallSurface = {
  * Minimal web app manifest shape needed to judge install-critical fields.
  */
 export type WebAppManifestInstallSurface = {
+	/** App name (either this or short_name is required). */
 	readonly name?: string;
+	/** Short name for home screen (either this or name is required). */
 	readonly short_name?: string;
+	/** Launch URL after install. */
 	readonly start_url?: string;
+	/** Display mode; must be standalone-class for installability. */
 	readonly display?: string;
+	/** Browser / splash chrome color. */
 	readonly theme_color?: string;
+	/** When true, blocks Chrome install promotion. */
 	readonly prefer_related_applications?: boolean;
+	/** Icon entries; must include 192 and 512 sizes. */
 	readonly icons?: ReadonlyArray<{
+		/** Icon file path relative to the manifest. */
 		readonly src: string;
+		/** Space-separated size tokens such as `"192x192"`. */
 		readonly sizes?: string;
+		/** MIME type. */
 		readonly type?: string;
+		/** Icon purpose (`any`, `maskable`, …). */
 		readonly purpose?: string;
 	}>;
 };
@@ -65,6 +85,17 @@ const invalid = (message: string): PwaInstallSurfaceError => ({
 	type: "PWA_INSTALL_SURFACE_INVALID",
 	message,
 });
+
+/**
+ * Type guard for Chrome installable (standalone-class) display modes.
+ */
+export function isPwaInstallableDisplayMode(
+	value: string,
+): value is PwaInstallableDisplayMode {
+	return PWA_INSTALLABLE_DISPLAY_MODES.includes(
+		value as PwaInstallableDisplayMode,
+	);
+}
 
 /**
  * True when an icon entry covers the given pixel size (e.g. `"192x192"`).
@@ -89,8 +120,12 @@ export function hasInstallCriticalIconSizes(
 	if (icons === undefined || icons.length === 0) {
 		return false;
 	}
-	const has192 = icons.some((icon) => iconCoversSize(icon.sizes, 192));
-	const has512 = icons.some((icon) => iconCoversSize(icon.sizes, 512));
+	const has192 = icons.some((icon) =>
+		iconCoversSize(icon.sizes, PWA_ICON_SIZE_192),
+	);
+	const has512 = icons.some((icon) =>
+		iconCoversSize(icon.sizes, PWA_ICON_SIZE_512),
+	);
 	return has192 && has512;
 }
 
@@ -112,10 +147,7 @@ export function validateInstallCriticalManifest(
 	}
 
 	const display = manifest.display;
-	if (
-		display === undefined ||
-		!(PWA_INSTALLABLE_DISPLAY_MODES as readonly string[]).includes(display)
-	) {
+	if (display === undefined || !isPwaInstallableDisplayMode(display)) {
 		return err(
 			invalid(
 				`Manifest display must be one of: ${PWA_INSTALLABLE_DISPLAY_MODES.join(", ")}`,

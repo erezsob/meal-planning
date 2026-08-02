@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
@@ -6,6 +6,8 @@ import {
 	iconCoversSize,
 	PWA_APPLE_TOUCH_ICON_HREF,
 	PWA_DOCUMENT_INSTALL_SURFACE,
+	PWA_ICON_SIZE_192,
+	PWA_ICON_SIZE_512,
 	PWA_MANIFEST_HREF,
 	PWA_THEME_COLOR,
 	validateDocumentInstallLinks,
@@ -25,19 +27,23 @@ function loadRootRouteSource(): string {
 	return readFileSync(resolve(repoRoot, "src/routes/__root.tsx"), "utf8");
 }
 
+function loadPackageJson(): string {
+	return readFileSync(resolve(repoRoot, "package.json"), "utf8");
+}
+
 describe("iconCoversSize", () => {
 	it("matches an exact size token", () => {
-		expect(iconCoversSize("192x192", 192)).toBe(true);
-		expect(iconCoversSize("192x192", 512)).toBe(false);
+		expect(iconCoversSize("192x192", PWA_ICON_SIZE_192)).toBe(true);
+		expect(iconCoversSize("192x192", PWA_ICON_SIZE_512)).toBe(false);
 	});
 
 	it("matches among space-separated sizes", () => {
-		expect(iconCoversSize("64x64 32x32 192x192", 192)).toBe(true);
+		expect(iconCoversSize("64x64 32x32 192x192", PWA_ICON_SIZE_192)).toBe(true);
 	});
 
 	it("rejects missing sizes", () => {
-		expect(iconCoversSize(undefined, 192)).toBe(false);
-		expect(iconCoversSize("", 192)).toBe(false);
+		expect(iconCoversSize(undefined, PWA_ICON_SIZE_192)).toBe(false);
+		expect(iconCoversSize("", PWA_ICON_SIZE_192)).toBe(false);
 	});
 });
 
@@ -45,12 +51,14 @@ describe("hasInstallCriticalIconSizes", () => {
 	it("requires both 192 and 512", () => {
 		expect(
 			hasInstallCriticalIconSizes([
-				{ src: "a.png", sizes: "192x192" },
-				{ src: "b.png", sizes: "512x512" },
+				{ src: "a.png", sizes: `${PWA_ICON_SIZE_192}x${PWA_ICON_SIZE_192}` },
+				{ src: "b.png", sizes: `${PWA_ICON_SIZE_512}x${PWA_ICON_SIZE_512}` },
 			]),
 		).toBe(true);
 		expect(
-			hasInstallCriticalIconSizes([{ src: "a.png", sizes: "192x192" }]),
+			hasInstallCriticalIconSizes([
+				{ src: "a.png", sizes: `${PWA_ICON_SIZE_192}x${PWA_ICON_SIZE_192}` },
+			]),
 		).toBe(false);
 	});
 });
@@ -62,8 +70,14 @@ describe("validateInstallCriticalManifest", () => {
 			start_url: "/",
 			display: "standalone",
 			icons: [
-				{ src: "icon-192.png", sizes: "192x192" },
-				{ src: "icon-512.png", sizes: "512x512" },
+				{
+					src: "icon-192.png",
+					sizes: `${PWA_ICON_SIZE_192}x${PWA_ICON_SIZE_192}`,
+				},
+				{
+					src: "icon-512.png",
+					sizes: `${PWA_ICON_SIZE_512}x${PWA_ICON_SIZE_512}`,
+				},
 			],
 		});
 		expect(result.ok).toBe(true);
@@ -76,8 +90,14 @@ describe("validateInstallCriticalManifest", () => {
 			display: "standalone",
 			prefer_related_applications: true,
 			icons: [
-				{ src: "icon-192.png", sizes: "192x192" },
-				{ src: "icon-512.png", sizes: "512x512" },
+				{
+					src: "icon-192.png",
+					sizes: `${PWA_ICON_SIZE_192}x${PWA_ICON_SIZE_192}`,
+				},
+				{
+					src: "icon-512.png",
+					sizes: `${PWA_ICON_SIZE_512}x${PWA_ICON_SIZE_512}`,
+				},
 			],
 		});
 		expect(result.ok).toBe(false);
@@ -89,8 +109,14 @@ describe("validateInstallCriticalManifest", () => {
 			start_url: "/",
 			display: "browser",
 			icons: [
-				{ src: "icon-192.png", sizes: "192x192" },
-				{ src: "icon-512.png", sizes: "512x512" },
+				{
+					src: "icon-192.png",
+					sizes: `${PWA_ICON_SIZE_192}x${PWA_ICON_SIZE_192}`,
+				},
+				{
+					src: "icon-512.png",
+					sizes: `${PWA_ICON_SIZE_512}x${PWA_ICON_SIZE_512}`,
+				},
 			],
 		});
 		expect(result.ok).toBe(false);
@@ -157,6 +183,28 @@ describe("PWA install surface contract", () => {
 	it("keeps the root document advertising the manifest and Apple touch icon", () => {
 		const links = validateDocumentInstallLinks(PWA_DOCUMENT_INSTALL_SURFACE);
 		expect(links.ok).toBe(true);
+		expect(PWA_DOCUMENT_INSTALL_SURFACE.manifestHref).toBe("/manifest.json");
+		expect(PWA_DOCUMENT_INSTALL_SURFACE.appleTouchIconHref).toBe(
+			"/apple-touch-icon.png",
+		);
+		expect(
+			existsSync(
+				resolve(
+					repoRoot,
+					"public",
+					PWA_DOCUMENT_INSTALL_SURFACE.appleTouchIconHref.replace(/^\//, ""),
+				),
+			),
+		).toBe(true);
+		expect(
+			existsSync(
+				resolve(
+					repoRoot,
+					"public",
+					PWA_DOCUMENT_INSTALL_SURFACE.manifestHref.replace(/^\//, ""),
+				),
+			),
+		).toBe(true);
 
 		const rootSource = loadRootRouteSource();
 		expect(rootSource).toContain("PWA_DOCUMENT_INSTALL_SURFACE");
@@ -175,5 +223,13 @@ describe("PWA install surface contract", () => {
 		const rootSource = loadRootRouteSource();
 		expect(rootSource).not.toMatch(/serviceWorker|navigator\.serviceWorker/i);
 		expect(rootSource).not.toMatch(/workbox|vite-plugin-pwa/i);
+
+		const packageJson = loadPackageJson();
+		expect(packageJson).not.toMatch(/vite-plugin-pwa|workbox-/);
+
+		expect(existsSync(resolve(repoRoot, "public/sw.js"))).toBe(false);
+		expect(existsSync(resolve(repoRoot, "public/service-worker.js"))).toBe(
+			false,
+		);
 	});
 });
