@@ -1,6 +1,6 @@
 ---
 description: Default to extreme concision in all responses
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Concision
