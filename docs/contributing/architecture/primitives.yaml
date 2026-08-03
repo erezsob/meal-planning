@@ -53,8 +53,21 @@ primitives:
       - tanstack-routing
       - toast-feedback
       - domain-ui-shared
+      - pwa-install-surface
 
   # --- Platform ---
+
+  - id: pwa-install-surface
+    group: platform
+    description: Web app manifest, theme-color, and install-surface contract for PWA installability
+    code:
+      - lib/pwaInstallSurface.ts
+      - lib/pwaInstallSurface.test.ts
+      - public/manifest.json
+    neighbors:
+      - app-shell
+      - build-deploy
+      - testing
 
   - id: tanstack-routing
     group: platform
