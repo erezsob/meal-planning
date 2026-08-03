@@ -1,4 +1,4 @@
-# Meal Planner
+# Sick Meals
 
 Weekly meal planning app with a simple week-plan grid, recipe library, and shopping support.
 

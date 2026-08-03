@@ -1,6 +1,6 @@
 {
   "name": "Sick Meals",
-  "short_name": "Meal Planner",
+  "short_name": "Sick Meals",
   "description": "Weekly meal planning app with recipe library and auto-generated shopping lists.",
   "start_url": "/",
   "display": "standalone",

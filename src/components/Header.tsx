@@ -68,7 +68,7 @@ export function Header() {
 					<Link to="/" className="flex items-center gap-2">
 						<span className="text-2xl">🍽️</span>
 						<span className="text-xl font-semibold hidden sm:inline">
-							Meal Planner
+							Sick Meals
 						</span>
 					</Link>
 				</div>
@@ -128,7 +128,7 @@ export function Header() {
 					<SheetHeader className="border-b p-4">
 						<SheetTitle className="flex items-center gap-2">
 							<span className="text-2xl">🍽️</span>
-							<span>Meal Planner</span>
+							<span>Sick Meals</span>
 						</SheetTitle>
 					</SheetHeader>
 
