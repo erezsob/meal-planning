@@ -222,6 +222,16 @@ Compact bounded-context map — inspect `convex/*.ts` for full API; do not treat
 
 **Candidate:** default `TestWrapper` lacks `ConvexProvider`/`ToastProvider`; some tests wire providers ad hoc.
 
+### PWA install surface (Candidate)
+
+| Item | Location | Use when |
+| --- | --- | --- |
+| Install-surface contract | `lib/pwaInstallSurface.ts` | Guarding theme-color parity, install-critical manifest fields, document manifest / Apple touch icon links |
+| Web app manifest | `public/manifest.json` | Changing name, icons, `display`, theme / background colors |
+| Document head wiring | `src/routes/__root.tsx` via `PWA_DOCUMENT_INSTALL_SURFACE` | Exposing manifest + Apple touch icon + `theme-color` |
+
+**Do not use when:** adding empty service workers “for installability,” in-app Install CTAs, or native/wrapper delivery (see ADR `docs/adr/0002-pwa-first-phone-install.md`).
+
 ### Build & deploy (Boundary)
 
 Vite + TanStack Start; Cloudflare Workers SSR (`wrangler.jsonc`). React Compiler via babel plugin.

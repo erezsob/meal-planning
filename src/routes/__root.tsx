@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { ToastProvider } from "@/lib/components/toast";
+import { PWA_DOCUMENT_INSTALL_SURFACE } from "@/lib/pwaInstallSurface";
 import { Header } from "../components/Header";
 
 import appCss from "../styles.css?url";
@@ -44,13 +45,16 @@ export const Route = createRootRouteWithContext<{
 			},
 			{
 				name: "theme-color",
-				content: "#030712",
+				content: PWA_DOCUMENT_INSTALL_SURFACE.themeColor,
 			},
 		],
 		links: [
 			{ rel: "icon", href: "/favicon.ico" },
-			{ rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
-			{ rel: "manifest", href: "/manifest.json" },
+			{
+				rel: "apple-touch-icon",
+				href: PWA_DOCUMENT_INSTALL_SURFACE.appleTouchIconHref,
+			},
+			{ rel: "manifest", href: PWA_DOCUMENT_INSTALL_SURFACE.manifestHref },
 			{ rel: "stylesheet", href: appCss },
 		],
 	}),
