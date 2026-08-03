@@ -32,7 +32,7 @@
 | --- | --- | --- |
 | Web app manifest | Yes | `public/manifest.json` — `name`, `short_name`, `description`, `start_url: "/"`, `display: "standalone"`, `theme_color` / `background_color`, icons 192/512 (+ maskable) + favicon.ico |
 | Manifest link | Yes | `src/routes/__root.tsx` → `rel="manifest"` → `/manifest.json` |
-| Theme color meta | Yes | `theme-color` `#030712` (differs from manifest `#000000`) |
+| Theme color meta | Yes | `theme-color` `#030712` (matches manifest after [#56](https://github.com/erezsob/meal-planning/issues/56)) |
 | Apple touch icon | Yes | `rel="apple-touch-icon"` → `/apple-touch-icon.png`; file in `public/` |
 | PNG icons 192 / 512 (+ maskable) | Yes | `public/icon-192.png`, `icon-512.png`, `*-maskable.png` |
 | Service worker | **No** | No registration, no Workbox, no `vite-plugin-pwa` |
@@ -148,7 +148,7 @@ WWDC23: web apps have a scope (default = host of the page used to create the web
 | `apple-touch-icon` | Soft/recommended (iOS icon quality) | Present | None |
 | `apple-mobile-web-app-capable` | Soft legacy (pre-manifest path) | Absent | Soft; covered by manifest `display` for modern WebKit |
 | Explicit `scope` | Soft | Absent (host default OK) | Soft |
-| Matching `theme-color` meta vs manifest | Soft consistency | Meta `#030712` vs manifest `#000000` | Soft inconsistency |
+| Matching `theme-color` meta vs manifest | Soft consistency | Aligned `#030712` in repo after [#56](https://github.com/erezsob/meal-planning/issues/56); confirm on production after deploy | Soft inconsistency **resolved in repo** |
 | Browser install prompt / BIP | Soft (iOS never) | N/A on iOS | **Documented platform gap** |
 | Offline / Workbox | Out of floor | None | None for floor |
 
@@ -162,7 +162,7 @@ WWDC23: web apps have a scope (default = host of the page used to create the web
 4. **Richer Android install UI** needs screenshots (+ description already present) ([web.dev](https://web.dev/articles/install-criteria)).
 5. **Online-only** → Chrome default offline page if launched offline; acceptable under this floor ([Chrome default offline](https://developer.chrome.com/blog/default-offline)).
 6. **iOS 26+** reduces installability requirements further (user-controlled “Open as Web App”); keep `display: standalone` + icons for older iOS and better metadata ([WebKit Safari 26](https://webkit.org/blog/17333/webkit-features-in-safari-26-0/)).
-7. **theme-color meta ≠ manifest theme_color** — cosmetic consistency only.
+7. **theme-color meta vs manifest theme_color** — was a soft inconsistency (`#030712` vs `#000000`); aligned in repo via [#56](https://github.com/erezsob/meal-planning/issues/56). Confirm on production after deploy (see `docs/research/pwa-device-verification.md`).
 
 ---
 
