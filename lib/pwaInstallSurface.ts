@@ -16,15 +16,14 @@ export const PWA_ICON_SIZE_192 = 192;
 export const PWA_ICON_SIZE_512 = 512;
 
 /** Display modes Chrome treats as installable (standalone-class). */
-export const PWA_INSTALLABLE_DISPLAY_MODES = [
+const PWA_INSTALLABLE_DISPLAY_MODES = [
 	"fullscreen",
 	"standalone",
 	"minimal-ui",
 	"window-controls-overlay",
 ] as const;
 
-export type PwaInstallableDisplayMode =
-	(typeof PWA_INSTALLABLE_DISPLAY_MODES)[number];
+type PwaInstallableDisplayMode = (typeof PWA_INSTALLABLE_DISPLAY_MODES)[number];
 
 /**
  * Root-document install surface: theme chrome + asset links browsers need for A2HS / Install.
@@ -89,7 +88,7 @@ const invalid = (message: string): PwaInstallSurfaceError => ({
 /**
  * Type guard for Chrome installable (standalone-class) display modes.
  */
-export function isPwaInstallableDisplayMode(
+function isPwaInstallableDisplayMode(
 	value: string,
 ): value is PwaInstallableDisplayMode {
 	return PWA_INSTALLABLE_DISPLAY_MODES.includes(
