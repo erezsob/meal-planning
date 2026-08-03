@@ -32,7 +32,7 @@
 | --- | --- | --- |
 | Web app manifest | Yes | `public/manifest.json` — `name`, `short_name`, `description`, `start_url: "/"`, `display: "standalone"`, `theme_color` / `background_color`, icons 192/512 (+ maskable) + favicon.ico |
 | Manifest link | Yes | `src/routes/__root.tsx` → `rel="manifest"` → `/manifest.json` |
-| Theme color meta | Yes | `theme-color` `#030712` (differs from manifest `#000000`) |
+| Theme color meta | Yes | `theme-color` `#030712` (matches manifest after [#56](https://github.com/erezsob/meal-planning/issues/56)) |
 | Apple touch icon | Yes | `rel="apple-touch-icon"` → `/apple-touch-icon.png`; file in `public/` |
 | PNG icons 192 / 512 (+ maskable) | Yes | `public/icon-192.png`, `icon-512.png`, `*-maskable.png` |
 | Service worker | **No** | No registration, no Workbox, no `vite-plugin-pwa` |
