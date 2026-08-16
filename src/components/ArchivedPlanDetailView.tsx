@@ -5,6 +5,12 @@ import type { CUSTOM_PLANS_SECTION } from "@/lib/constants";
 import { ARCHIVED_PLAN_LABELS, MAIN_PLAN_SECTION } from "@/lib/constants";
 import { formatPlanCreatedAt } from "@/lib/planSectionDisplay";
 import { cn } from "@/lib/utils";
+import {
+	PLAN_TABLE_CLASS_NAME,
+	PLAN_TABLE_HEADER_ROW_CLASS_NAME,
+	planTableBodyCellClassName,
+	planTableHeaderCellClassName,
+} from "./week-plan/planTableStyles";
 import { buildWeekPlanRows } from "./week-plan/WeekPlanTable";
 
 function ReadOnlyMainGrid({
@@ -19,16 +25,12 @@ function ReadOnlyMainGrid({
 
 	return (
 		<div className="overflow-x-auto">
-			<table className="w-full min-w-[640px] table-fixed border-collapse border border-border text-sm">
+			<table className={PLAN_TABLE_CLASS_NAME}>
 				<thead>
-					<tr className="bg-muted/40">
-						<th className="w-36 border border-border px-3 py-2 text-left font-semibold">
-							Date
-						</th>
-						<th className="w-2/5 border border-border px-3 py-2 text-left font-semibold">
-							Dish
-						</th>
-						<th className="w-2/5 border border-border px-3 py-2 text-left font-semibold">
+					<tr className={PLAN_TABLE_HEADER_ROW_CLASS_NAME}>
+						<th className={planTableHeaderCellClassName("w-36")}>Date</th>
+						<th className={planTableHeaderCellClassName("w-2/5")}>Dish</th>
+						<th className={planTableHeaderCellClassName("w-2/5")}>
 							Grocery List
 						</th>
 					</tr>
@@ -36,13 +38,13 @@ function ReadOnlyMainGrid({
 				<tbody>
 					{rows.map((row) => (
 						<tr key={row.id}>
-							<td className="border border-border px-3 py-2 font-medium">
+							<td className={planTableBodyCellClassName("font-medium")}>
 								{row.label}
 							</td>
-							<td className="border border-border px-3 py-2">
+							<td className={planTableBodyCellClassName()}>
 								{row.dish || "—"}
 							</td>
-							<td className="border border-border px-3 py-2">
+							<td className={planTableBodyCellClassName()}>
 								{row.grocery || "—"}
 							</td>
 						</tr>
@@ -63,16 +65,12 @@ function ReadOnlyCustomPlans({
 }) {
 	return (
 		<div className="overflow-x-auto">
-			<table className="w-full min-w-[640px] table-fixed border-collapse border border-border text-sm">
+			<table className={PLAN_TABLE_CLASS_NAME}>
 				<thead>
-					<tr className="bg-muted/40">
-						<th className="w-1/3 border border-border px-3 py-2 text-left font-semibold">
-							Name
-						</th>
-						<th className="w-1/3 border border-border px-3 py-2 text-left font-semibold">
-							Dish
-						</th>
-						<th className="w-1/3 border border-border px-3 py-2 text-left font-semibold">
+					<tr className={PLAN_TABLE_HEADER_ROW_CLASS_NAME}>
+						<th className={planTableHeaderCellClassName("w-1/3")}>Name</th>
+						<th className={planTableHeaderCellClassName("w-1/3")}>Dish</th>
+						<th className={planTableHeaderCellClassName("w-1/3")}>
 							Grocery List
 						</th>
 					</tr>
@@ -80,13 +78,13 @@ function ReadOnlyCustomPlans({
 				<tbody>
 					{content.rows.map((row, index) => (
 						<tr key={`${row.category}-${index}`}>
-							<td className="border border-border px-3 py-2 font-medium">
+							<td className={planTableBodyCellClassName("font-medium")}>
 								{row.category || "—"}
 							</td>
-							<td className="border border-border px-3 py-2">
+							<td className={planTableBodyCellClassName()}>
 								{row.dish || "—"}
 							</td>
-							<td className="border border-border px-3 py-2">
+							<td className={planTableBodyCellClassName()}>
 								{row.grocery || "—"}
 							</td>
 						</tr>

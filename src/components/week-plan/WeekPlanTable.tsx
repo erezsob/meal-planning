@@ -8,6 +8,12 @@ import {
 	type WeekdayKey,
 	type WeekPlan,
 } from "@/lib/weekPlanTypes";
+import {
+	PLAN_TABLE_CELL_BORDER,
+	PLAN_TABLE_CELL_PADDING,
+	PLAN_TABLE_CLASS_NAME,
+	PLAN_TABLE_HEADER_ROW_CLASS_NAME,
+} from "./planTableStyles";
 import { WeekPlanCellEditor } from "./WeekPlanCellEditor";
 
 export interface WeekPlanRowDescriptor {
@@ -72,9 +78,6 @@ interface WeekPlanTableProps {
 	onAddBacklog: () => void;
 }
 
-const cellBorder = "border border-border";
-const cellPadding = "px-3 py-2";
-
 /**
  * Desktop week plan table — Date | Dish | Grocery List
  */
@@ -87,14 +90,14 @@ export function WeekPlanTable({
 	return (
 		<div className="space-y-3">
 			<div className="overflow-x-auto">
-				<table className="w-full min-w-[640px] table-fixed border-collapse border border-border text-sm">
+				<table className={PLAN_TABLE_CLASS_NAME}>
 					<thead>
-						<tr className="bg-muted/40">
+						<tr className={PLAN_TABLE_HEADER_ROW_CLASS_NAME}>
 							<th
 								className={cn(
 									"w-36 text-left font-semibold",
-									cellBorder,
-									cellPadding,
+									PLAN_TABLE_CELL_BORDER,
+									PLAN_TABLE_CELL_PADDING,
 								)}
 							>
 								Date
@@ -102,8 +105,8 @@ export function WeekPlanTable({
 							<th
 								className={cn(
 									"w-2/5 max-w-0 text-left font-semibold",
-									cellBorder,
-									cellPadding,
+									PLAN_TABLE_CELL_BORDER,
+									PLAN_TABLE_CELL_PADDING,
 								)}
 							>
 								Dish
@@ -111,13 +114,19 @@ export function WeekPlanTable({
 							<th
 								className={cn(
 									"w-2/5 max-w-0 text-left font-semibold",
-									cellBorder,
-									cellPadding,
+									PLAN_TABLE_CELL_BORDER,
+									PLAN_TABLE_CELL_PADDING,
 								)}
 							>
 								Grocery List
 							</th>
-							<th className={cn("w-10", cellBorder, cellPadding)}>
+							<th
+								className={cn(
+									"w-10",
+									PLAN_TABLE_CELL_BORDER,
+									PLAN_TABLE_CELL_PADDING,
+								)}
+							>
 								<span className="sr-only">Actions</span>
 							</th>
 						</tr>
@@ -128,8 +137,8 @@ export function WeekPlanTable({
 								<td
 									className={cn(
 										"align-middle font-medium text-foreground whitespace-nowrap",
-										cellBorder,
-										cellPadding,
+										PLAN_TABLE_CELL_BORDER,
+										PLAN_TABLE_CELL_PADDING,
 									)}
 								>
 									{row.label || (
@@ -138,7 +147,12 @@ export function WeekPlanTable({
 										</span>
 									)}
 								</td>
-								<td className={cn("max-w-0 align-top p-0", cellBorder)}>
+								<td
+									className={cn(
+										"max-w-0 align-top p-0",
+										PLAN_TABLE_CELL_BORDER,
+									)}
+								>
 									<WeekPlanCellEditor
 										embedded
 										label={`${row.label || "Backlog"} dish`}
@@ -152,7 +166,12 @@ export function WeekPlanTable({
 										}
 									/>
 								</td>
-								<td className={cn("max-w-0 align-top p-0", cellBorder)}>
+								<td
+									className={cn(
+										"max-w-0 align-top p-0",
+										PLAN_TABLE_CELL_BORDER,
+									)}
+								>
 									<WeekPlanCellEditor
 										embedded
 										label={`${row.label || "Backlog"} grocery list`}
@@ -166,7 +185,13 @@ export function WeekPlanTable({
 										}
 									/>
 								</td>
-								<td className={cn("align-top", cellBorder, cellPadding)}>
+								<td
+									className={cn(
+										"align-top",
+										PLAN_TABLE_CELL_BORDER,
+										PLAN_TABLE_CELL_PADDING,
+									)}
+								>
 									{row.removable && row.backlogIndex !== undefined ? (
 										<Button
 											type="button"

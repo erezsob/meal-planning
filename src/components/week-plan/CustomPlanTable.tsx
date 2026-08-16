@@ -3,6 +3,12 @@ import { Button } from "@/lib/components/button";
 import { cn } from "@/lib/utils";
 import type { CustomPlanField } from "@/lib/weekPlan";
 import type { CustomPlanRow } from "@/lib/weekPlanTypes";
+import {
+	PLAN_TABLE_CELL_BORDER,
+	PLAN_TABLE_CELL_PADDING,
+	PLAN_TABLE_CLASS_NAME,
+	PLAN_TABLE_HEADER_ROW_CLASS_NAME,
+} from "./planTableStyles";
 import { WeekPlanCellEditor } from "./WeekPlanCellEditor";
 
 export interface CustomPlanRowDescriptor {
@@ -37,9 +43,6 @@ interface CustomPlanTableProps {
 	onAddRow: () => void;
 }
 
-const cellBorder = "border border-border";
-const cellPadding = "px-3 py-2";
-
 function rowLabel(row: CustomPlanRowDescriptor): string {
 	return row.category.trim() || "Custom plan";
 }
@@ -56,14 +59,14 @@ export function CustomPlanTable({
 	return (
 		<div className="space-y-3">
 			<div className="overflow-x-auto">
-				<table className="w-full min-w-[640px] table-fixed border-collapse border border-border text-sm">
+				<table className={PLAN_TABLE_CLASS_NAME}>
 					<thead>
-						<tr className="bg-muted/40">
+						<tr className={PLAN_TABLE_HEADER_ROW_CLASS_NAME}>
 							<th
 								className={cn(
 									"w-36 text-left font-semibold",
-									cellBorder,
-									cellPadding,
+									PLAN_TABLE_CELL_BORDER,
+									PLAN_TABLE_CELL_PADDING,
 								)}
 							>
 								Name
@@ -71,8 +74,8 @@ export function CustomPlanTable({
 							<th
 								className={cn(
 									"w-2/5 max-w-0 text-left font-semibold",
-									cellBorder,
-									cellPadding,
+									PLAN_TABLE_CELL_BORDER,
+									PLAN_TABLE_CELL_PADDING,
 								)}
 							>
 								Dish
@@ -80,13 +83,19 @@ export function CustomPlanTable({
 							<th
 								className={cn(
 									"w-2/5 max-w-0 text-left font-semibold",
-									cellBorder,
-									cellPadding,
+									PLAN_TABLE_CELL_BORDER,
+									PLAN_TABLE_CELL_PADDING,
 								)}
 							>
 								Grocery List
 							</th>
-							<th className={cn("w-10", cellBorder, cellPadding)}>
+							<th
+								className={cn(
+									"w-10",
+									PLAN_TABLE_CELL_BORDER,
+									PLAN_TABLE_CELL_PADDING,
+								)}
+							>
 								<span className="sr-only">Actions</span>
 							</th>
 						</tr>
@@ -94,7 +103,12 @@ export function CustomPlanTable({
 					<tbody>
 						{rows.map((row) => (
 							<tr key={row.id}>
-								<td className={cn("max-w-0 align-top p-0", cellBorder)}>
+								<td
+									className={cn(
+										"max-w-0 align-top p-0",
+										PLAN_TABLE_CELL_BORDER,
+									)}
+								>
 									<WeekPlanCellEditor
 										embedded
 										minRows={1}
@@ -109,7 +123,12 @@ export function CustomPlanTable({
 										}
 									/>
 								</td>
-								<td className={cn("max-w-0 align-top p-0", cellBorder)}>
+								<td
+									className={cn(
+										"max-w-0 align-top p-0",
+										PLAN_TABLE_CELL_BORDER,
+									)}
+								>
 									<WeekPlanCellEditor
 										embedded
 										label={`${rowLabel(row)} dish`}
@@ -119,7 +138,12 @@ export function CustomPlanTable({
 										}
 									/>
 								</td>
-								<td className={cn("max-w-0 align-top p-0", cellBorder)}>
+								<td
+									className={cn(
+										"max-w-0 align-top p-0",
+										PLAN_TABLE_CELL_BORDER,
+									)}
+								>
 									<WeekPlanCellEditor
 										embedded
 										label={`${rowLabel(row)} grocery list`}
@@ -133,7 +157,13 @@ export function CustomPlanTable({
 										}
 									/>
 								</td>
-								<td className={cn("align-top", cellBorder, cellPadding)}>
+								<td
+									className={cn(
+										"align-top",
+										PLAN_TABLE_CELL_BORDER,
+										PLAN_TABLE_CELL_PADDING,
+									)}
+								>
 									<Button
 										type="button"
 										variant="ghost"

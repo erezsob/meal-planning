@@ -38,6 +38,8 @@ code {
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
+  --color-table-border: var(--table-border);
+  --color-table-header: var(--table-header);
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-chart-1: var(--chart-1);
@@ -73,6 +75,8 @@ code {
   --accent-foreground: oklch(0.21 0.006 285.885);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.92 0.004 286.32);
+  --table-border: oklch(0.82 0.004 286.32);
+  --table-header: oklch(0.967 0.001 286.375 / 80%);
   --input: oklch(0.92 0.004 286.32);
   --ring: oklch(0.705 0.015 286.067);
   --chart-1: oklch(0.646 0.222 41.116);
@@ -107,6 +111,8 @@ code {
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
+  --table-border: oklch(0.36 0.008 286.033);
+  --table-header: oklch(0.2 0.006 286.033);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.696 0.17 162.48); /* emerald-500 for ring */
   --chart-1: oklch(0.488 0.243 264.376);
