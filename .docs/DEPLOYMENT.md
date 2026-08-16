@@ -17,7 +17,7 @@ Browser → Cloudflare Access (auth) → Cloudflare Workers (frontend) → Conve
 
 | Environment | Convex Deployment                | Frontend                    |
 | ----------- | -------------------------------- | --------------------------- |
-| Development | `CONVEX_DEPLOYMENT` in .env      | localhost:3000              |
+| Development | `CONVEX_DEPLOYMENT` in .env      | localhost:3213              |
 | Production  | `CONVEX_DEPLOYMENT_PROD` in .env | plan.sick-meals.workers.dev |
 
 ## Deploy to production
