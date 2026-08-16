@@ -4,8 +4,8 @@
   "type": "module",
   "packageManager": "pnpm@10.28.0",
   "scripts": {
-    "dev": "concurrently \"vite dev --port 3000\" \"convex dev\"",
-    "dev:vite": "vite dev --port 3000",
+    "dev": "concurrently \"vite dev --port 3213\" \"convex dev\"",
+    "dev:vite": "vite dev --port 3213",
     "dev:convex": "convex dev",
     "build": "vite build",
     "preview": "vite preview",

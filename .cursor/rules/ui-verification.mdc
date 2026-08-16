@@ -15,13 +15,13 @@ Run in order when any step is missing:
 1. **Dependencies** — `pnpm install`
 2. **Environment** — ensure `VITE_CONVEX_URL` is available; `pnpm dev` starts Convex and supplies it during local development
 3. **Seed data** — run `pnpm seed` when the dish library needs sample data; if the script needs its required argument, use `pnpm exec convex run seed:seedDishes '{"householdId":"household-1"}'`
-4. **Dev server** — `pnpm dev` → http://localhost:3000
+4. **Dev server** — `pnpm dev` → http://localhost:3213
 
 ## Browser workflow
 
 Use the `user-chrome-devtools` MCP:
 
-1. Confirm the dev server is reachable at http://localhost:3000
+1. Confirm the dev server is reachable at http://localhost:3213
 2. Open every route affected by the change
 3. Take a browser snapshot (`take_snapshot`) for structure and accessibility
 4. Take a screenshot (`take_screenshot`) for visual confirmation

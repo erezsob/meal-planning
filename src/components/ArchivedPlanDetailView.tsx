@@ -5,6 +5,13 @@ import type { CUSTOM_PLANS_SECTION } from "@/lib/constants";
 import { ARCHIVED_PLAN_LABELS, MAIN_PLAN_SECTION } from "@/lib/constants";
 import { formatPlanCreatedAt } from "@/lib/planSectionDisplay";
 import { cn } from "@/lib/utils";
+import {
+	PlanTable,
+	PlanTableBody,
+	PlanTableCell,
+	PlanTableHead,
+	PlanTableHeadCell,
+} from "./week-plan/PlanTable";
 import { buildWeekPlanRows } from "./week-plan/WeekPlanTable";
 
 function ReadOnlyMainGrid({
@@ -18,38 +25,22 @@ function ReadOnlyMainGrid({
 	const rows = buildWeekPlanRows({ ...content, customPlan: [] });
 
 	return (
-		<div className="overflow-x-auto">
-			<table className="w-full min-w-[640px] table-fixed border-collapse border border-border text-sm">
-				<thead>
-					<tr className="bg-muted/40">
-						<th className="w-36 border border-border px-3 py-2 text-left font-semibold">
-							Date
-						</th>
-						<th className="w-2/5 border border-border px-3 py-2 text-left font-semibold">
-							Dish
-						</th>
-						<th className="w-2/5 border border-border px-3 py-2 text-left font-semibold">
-							Grocery List
-						</th>
+		<PlanTable>
+			<PlanTableHead>
+				<PlanTableHeadCell className="w-36">Date</PlanTableHeadCell>
+				<PlanTableHeadCell className="w-2/5">Dish</PlanTableHeadCell>
+				<PlanTableHeadCell className="w-2/5">Grocery List</PlanTableHeadCell>
+			</PlanTableHead>
+			<PlanTableBody>
+				{rows.map((row) => (
+					<tr key={row.id}>
+						<PlanTableCell className="font-medium">{row.label}</PlanTableCell>
+						<PlanTableCell>{row.dish || "—"}</PlanTableCell>
+						<PlanTableCell>{row.grocery || "—"}</PlanTableCell>
 					</tr>
-				</thead>
-				<tbody>
-					{rows.map((row) => (
-						<tr key={row.id}>
-							<td className="border border-border px-3 py-2 font-medium">
-								{row.label}
-							</td>
-							<td className="border border-border px-3 py-2">
-								{row.dish || "—"}
-							</td>
-							<td className="border border-border px-3 py-2">
-								{row.grocery || "—"}
-							</td>
-						</tr>
-					))}
-				</tbody>
-			</table>
-		</div>
+				))}
+			</PlanTableBody>
+		</PlanTable>
 	);
 }
 
@@ -62,38 +53,24 @@ function ReadOnlyCustomPlans({
 	>["content"];
 }) {
 	return (
-		<div className="overflow-x-auto">
-			<table className="w-full min-w-[640px] table-fixed border-collapse border border-border text-sm">
-				<thead>
-					<tr className="bg-muted/40">
-						<th className="w-1/3 border border-border px-3 py-2 text-left font-semibold">
-							Name
-						</th>
-						<th className="w-1/3 border border-border px-3 py-2 text-left font-semibold">
-							Dish
-						</th>
-						<th className="w-1/3 border border-border px-3 py-2 text-left font-semibold">
-							Grocery List
-						</th>
+		<PlanTable>
+			<PlanTableHead>
+				<PlanTableHeadCell className="w-1/3">Name</PlanTableHeadCell>
+				<PlanTableHeadCell className="w-1/3">Dish</PlanTableHeadCell>
+				<PlanTableHeadCell className="w-1/3">Grocery List</PlanTableHeadCell>
+			</PlanTableHead>
+			<PlanTableBody>
+				{content.rows.map((row, index) => (
+					<tr key={`${row.category}-${index}`}>
+						<PlanTableCell className="font-medium">
+							{row.category || "—"}
+						</PlanTableCell>
+						<PlanTableCell>{row.dish || "—"}</PlanTableCell>
+						<PlanTableCell>{row.grocery || "—"}</PlanTableCell>
 					</tr>
-				</thead>
-				<tbody>
-					{content.rows.map((row, index) => (
-						<tr key={`${row.category}-${index}`}>
-							<td className="border border-border px-3 py-2 font-medium">
-								{row.category || "—"}
-							</td>
-							<td className="border border-border px-3 py-2">
-								{row.dish || "—"}
-							</td>
-							<td className="border border-border px-3 py-2">
-								{row.grocery || "—"}
-							</td>
-						</tr>
-					))}
-				</tbody>
-			</table>
-		</div>
+				))}
+			</PlanTableBody>
+		</PlanTable>
 	);
 }
 
