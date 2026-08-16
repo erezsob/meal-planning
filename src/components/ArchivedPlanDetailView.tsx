@@ -6,11 +6,12 @@ import { ARCHIVED_PLAN_LABELS, MAIN_PLAN_SECTION } from "@/lib/constants";
 import { formatPlanCreatedAt } from "@/lib/planSectionDisplay";
 import { cn } from "@/lib/utils";
 import {
-	PLAN_TABLE_CLASS_NAME,
-	PLAN_TABLE_HEADER_ROW_CLASS_NAME,
-	planTableBodyCellClassName,
-	planTableHeaderCellClassName,
-} from "./week-plan/planTableStyles";
+	PlanTable,
+	PlanTableBody,
+	PlanTableCell,
+	PlanTableHead,
+	PlanTableHeadCell,
+} from "./week-plan/PlanTable";
 import { buildWeekPlanRows } from "./week-plan/WeekPlanTable";
 
 function ReadOnlyMainGrid({
@@ -24,34 +25,22 @@ function ReadOnlyMainGrid({
 	const rows = buildWeekPlanRows({ ...content, customPlan: [] });
 
 	return (
-		<div className="overflow-x-auto">
-			<table className={PLAN_TABLE_CLASS_NAME}>
-				<thead>
-					<tr className={PLAN_TABLE_HEADER_ROW_CLASS_NAME}>
-						<th className={planTableHeaderCellClassName("w-36")}>Date</th>
-						<th className={planTableHeaderCellClassName("w-2/5")}>Dish</th>
-						<th className={planTableHeaderCellClassName("w-2/5")}>
-							Grocery List
-						</th>
+		<PlanTable>
+			<PlanTableHead>
+				<PlanTableHeadCell className="w-36">Date</PlanTableHeadCell>
+				<PlanTableHeadCell className="w-2/5">Dish</PlanTableHeadCell>
+				<PlanTableHeadCell className="w-2/5">Grocery List</PlanTableHeadCell>
+			</PlanTableHead>
+			<PlanTableBody>
+				{rows.map((row) => (
+					<tr key={row.id}>
+						<PlanTableCell className="font-medium">{row.label}</PlanTableCell>
+						<PlanTableCell>{row.dish || "—"}</PlanTableCell>
+						<PlanTableCell>{row.grocery || "—"}</PlanTableCell>
 					</tr>
-				</thead>
-				<tbody>
-					{rows.map((row) => (
-						<tr key={row.id}>
-							<td className={planTableBodyCellClassName("font-medium")}>
-								{row.label}
-							</td>
-							<td className={planTableBodyCellClassName()}>
-								{row.dish || "—"}
-							</td>
-							<td className={planTableBodyCellClassName()}>
-								{row.grocery || "—"}
-							</td>
-						</tr>
-					))}
-				</tbody>
-			</table>
-		</div>
+				))}
+			</PlanTableBody>
+		</PlanTable>
 	);
 }
 
@@ -64,34 +53,24 @@ function ReadOnlyCustomPlans({
 	>["content"];
 }) {
 	return (
-		<div className="overflow-x-auto">
-			<table className={PLAN_TABLE_CLASS_NAME}>
-				<thead>
-					<tr className={PLAN_TABLE_HEADER_ROW_CLASS_NAME}>
-						<th className={planTableHeaderCellClassName("w-1/3")}>Name</th>
-						<th className={planTableHeaderCellClassName("w-1/3")}>Dish</th>
-						<th className={planTableHeaderCellClassName("w-1/3")}>
-							Grocery List
-						</th>
+		<PlanTable>
+			<PlanTableHead>
+				<PlanTableHeadCell className="w-1/3">Name</PlanTableHeadCell>
+				<PlanTableHeadCell className="w-1/3">Dish</PlanTableHeadCell>
+				<PlanTableHeadCell className="w-1/3">Grocery List</PlanTableHeadCell>
+			</PlanTableHead>
+			<PlanTableBody>
+				{content.rows.map((row, index) => (
+					<tr key={`${row.category}-${index}`}>
+						<PlanTableCell className="font-medium">
+							{row.category || "—"}
+						</PlanTableCell>
+						<PlanTableCell>{row.dish || "—"}</PlanTableCell>
+						<PlanTableCell>{row.grocery || "—"}</PlanTableCell>
 					</tr>
-				</thead>
-				<tbody>
-					{content.rows.map((row, index) => (
-						<tr key={`${row.category}-${index}`}>
-							<td className={planTableBodyCellClassName("font-medium")}>
-								{row.category || "—"}
-							</td>
-							<td className={planTableBodyCellClassName()}>
-								{row.dish || "—"}
-							</td>
-							<td className={planTableBodyCellClassName()}>
-								{row.grocery || "—"}
-							</td>
-						</tr>
-					))}
-				</tbody>
-			</table>
-		</div>
+				))}
+			</PlanTableBody>
+		</PlanTable>
 	);
 }
 

@@ -1,6 +1,5 @@
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/lib/components/button";
-import { cn } from "@/lib/utils";
 import type { WeekPlanCellLocation } from "@/lib/weekPlan";
 import {
 	WEEKDAY_KEYS,
@@ -9,11 +8,12 @@ import {
 	type WeekPlan,
 } from "@/lib/weekPlanTypes";
 import {
-	PLAN_TABLE_CELL_BORDER,
-	PLAN_TABLE_CELL_PADDING,
-	PLAN_TABLE_CLASS_NAME,
-	PLAN_TABLE_HEADER_ROW_CLASS_NAME,
-} from "./planTableStyles";
+	PlanTable,
+	PlanTableBody,
+	PlanTableCell,
+	PlanTableHead,
+	PlanTableHeadCell,
+} from "./PlanTable";
 import { WeekPlanCellEditor } from "./WeekPlanCellEditor";
 
 export interface WeekPlanRowDescriptor {
@@ -89,126 +89,72 @@ export function WeekPlanTable({
 }: WeekPlanTableProps) {
 	return (
 		<div className="space-y-3">
-			<div className="overflow-x-auto">
-				<table className={PLAN_TABLE_CLASS_NAME}>
-					<thead>
-						<tr className={PLAN_TABLE_HEADER_ROW_CLASS_NAME}>
-							<th
-								className={cn(
-									"w-36 text-left font-semibold",
-									PLAN_TABLE_CELL_BORDER,
-									PLAN_TABLE_CELL_PADDING,
+			<PlanTable>
+				<PlanTableHead>
+					<PlanTableHeadCell className="w-36">Date</PlanTableHeadCell>
+					<PlanTableHeadCell className="w-2/5 max-w-0">Dish</PlanTableHeadCell>
+					<PlanTableHeadCell className="w-2/5 max-w-0">
+						Grocery List
+					</PlanTableHeadCell>
+					<PlanTableHeadCell className="w-10">
+						<span className="sr-only">Actions</span>
+					</PlanTableHeadCell>
+				</PlanTableHead>
+				<PlanTableBody>
+					{rows.map((row) => (
+						<tr key={row.id}>
+							<PlanTableCell className="align-middle font-medium text-foreground whitespace-nowrap">
+								{row.label || (
+									<span className="text-muted-foreground" aria-hidden="true">
+										&nbsp;
+									</span>
 								)}
-							>
-								Date
-							</th>
-							<th
-								className={cn(
-									"w-2/5 max-w-0 text-left font-semibold",
-									PLAN_TABLE_CELL_BORDER,
-									PLAN_TABLE_CELL_PADDING,
-								)}
-							>
-								Dish
-							</th>
-							<th
-								className={cn(
-									"w-2/5 max-w-0 text-left font-semibold",
-									PLAN_TABLE_CELL_BORDER,
-									PLAN_TABLE_CELL_PADDING,
-								)}
-							>
-								Grocery List
-							</th>
-							<th
-								className={cn(
-									"w-10",
-									PLAN_TABLE_CELL_BORDER,
-									PLAN_TABLE_CELL_PADDING,
-								)}
-							>
-								<span className="sr-only">Actions</span>
-							</th>
+							</PlanTableCell>
+							<PlanTableCell className="max-w-0 align-top p-0">
+								<WeekPlanCellEditor
+									embedded
+									label={`${row.label || "Backlog"} dish`}
+									value={row.dish}
+									onChange={(value) =>
+										onCellChange({
+											location: row.location,
+											field: "dish",
+											value,
+										})
+									}
+								/>
+							</PlanTableCell>
+							<PlanTableCell className="max-w-0 align-top p-0">
+								<WeekPlanCellEditor
+									embedded
+									label={`${row.label || "Backlog"} grocery list`}
+									value={row.grocery}
+									onChange={(value) =>
+										onCellChange({
+											location: row.location,
+											field: "grocery",
+											value,
+										})
+									}
+								/>
+							</PlanTableCell>
+							<PlanTableCell className="align-top">
+								{row.removable && row.backlogIndex !== undefined ? (
+									<Button
+										type="button"
+										variant="ghost"
+										size="icon"
+										aria-label="Remove backlog idea"
+										onClick={() => onRemoveBacklog(row.backlogIndex ?? 0)}
+									>
+										<Trash2 size={16} />
+									</Button>
+								) : null}
+							</PlanTableCell>
 						</tr>
-					</thead>
-					<tbody>
-						{rows.map((row) => (
-							<tr key={row.id}>
-								<td
-									className={cn(
-										"align-middle font-medium text-foreground whitespace-nowrap",
-										PLAN_TABLE_CELL_BORDER,
-										PLAN_TABLE_CELL_PADDING,
-									)}
-								>
-									{row.label || (
-										<span className="text-muted-foreground" aria-hidden="true">
-											&nbsp;
-										</span>
-									)}
-								</td>
-								<td
-									className={cn(
-										"max-w-0 align-top p-0",
-										PLAN_TABLE_CELL_BORDER,
-									)}
-								>
-									<WeekPlanCellEditor
-										embedded
-										label={`${row.label || "Backlog"} dish`}
-										value={row.dish}
-										onChange={(value) =>
-											onCellChange({
-												location: row.location,
-												field: "dish",
-												value,
-											})
-										}
-									/>
-								</td>
-								<td
-									className={cn(
-										"max-w-0 align-top p-0",
-										PLAN_TABLE_CELL_BORDER,
-									)}
-								>
-									<WeekPlanCellEditor
-										embedded
-										label={`${row.label || "Backlog"} grocery list`}
-										value={row.grocery}
-										onChange={(value) =>
-											onCellChange({
-												location: row.location,
-												field: "grocery",
-												value,
-											})
-										}
-									/>
-								</td>
-								<td
-									className={cn(
-										"align-top",
-										PLAN_TABLE_CELL_BORDER,
-										PLAN_TABLE_CELL_PADDING,
-									)}
-								>
-									{row.removable && row.backlogIndex !== undefined ? (
-										<Button
-											type="button"
-											variant="ghost"
-											size="icon"
-											aria-label="Remove backlog idea"
-											onClick={() => onRemoveBacklog(row.backlogIndex ?? 0)}
-										>
-											<Trash2 size={16} />
-										</Button>
-									) : null}
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
-			</div>
+					))}
+				</PlanTableBody>
+			</PlanTable>
 
 			<Button type="button" variant="outline" size="sm" onClick={onAddBacklog}>
 				<Plus size={16} />
