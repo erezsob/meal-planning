@@ -19,6 +19,19 @@ import { WeekPlanLinkTooltip } from "./WeekPlanLinkTooltip";
 
 const WEEK_PLAN_CELL_SELECTOR = "[data-week-plan-cell]";
 
+/** Minimum textarea rows when entering edit mode, based on existing content. */
+const computeEditRowCount = (value: string, minRows: number): number =>
+	Math.max(minRows, value.split("\n").length || 1);
+
+const focusTextareaAtEnd = (
+	textarea: HTMLTextAreaElement,
+	textLength: number,
+) => {
+	requestAnimationFrame(() => {
+		textarea.setSelectionRange(textLength, textLength);
+	});
+};
+
 type LinkSegment = Extract<TextSegment, { type: "link" }>;
 
 interface WeekPlanCellEditorProps {
@@ -48,10 +61,10 @@ const displayClassName = (
 
 const textareaClassName = (embedded: boolean, className?: string) =>
 	cn(
-		"min-h-[3rem] bg-background",
-		embedded ? "resize-none" : "resize-y",
+		"min-h-[3rem] bg-background text-left",
+		embedded ? "resize-none px-2 py-2 text-sm" : "resize-y",
 		embedded &&
-			"field-sizing-fixed min-h-full max-w-full min-w-0 rounded-none border-0 shadow-none focus-visible:ring-0",
+			"min-h-full max-w-full min-w-0 rounded-none border-0 shadow-none focus-visible:ring-0",
 		className,
 	);
 
@@ -226,6 +239,9 @@ export function WeekPlanCellEditor({
 				<Textarea
 					ref={(node) => {
 						textareaRef.current = node;
+						if (node) {
+							focusTextareaAtEnd(node, value.length);
+						}
 					}}
 					data-week-plan-cell
 					aria-label={label}
@@ -238,7 +254,7 @@ export function WeekPlanCellEditor({
 					onPaste={handlePaste}
 					onKeyDown={handleTextareaKeyDown}
 					autoFocus
-					rows={minRows}
+					rows={embedded ? computeEditRowCount(value, minRows) : minRows}
 					className={textareaClassName(embedded, className)}
 				/>
 				{linkSelection && (
