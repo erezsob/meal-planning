@@ -4,6 +4,7 @@
 
 ## 1. Constants & Configuration
 - Extract all magic numbers and strings to constants files
+- Tailwind CSS class names extraction is prohibited. If a UI needs to be reused in multiple places, extract to a custom component.
 - Use named constants instead of hardcoded values
 - Group related constants logically
 
