@@ -11,6 +11,7 @@ import {
 	PlanTable,
 	PlanTableBody,
 	PlanTableCell,
+	PlanTableEditorCell,
 	PlanTableHead,
 	PlanTableHeadCell,
 } from "./PlanTable";
@@ -110,7 +111,7 @@ export function WeekPlanTable({
 									</span>
 								)}
 							</PlanTableCell>
-							<PlanTableCell className="max-w-0 align-top p-0">
+							<PlanTableEditorCell>
 								<WeekPlanCellEditor
 									embedded
 									label={`${row.label || "Backlog"} dish`}
@@ -123,8 +124,8 @@ export function WeekPlanTable({
 										})
 									}
 								/>
-							</PlanTableCell>
-							<PlanTableCell className="max-w-0 align-top p-0">
+							</PlanTableEditorCell>
+							<PlanTableEditorCell>
 								<WeekPlanCellEditor
 									embedded
 									label={`${row.label || "Backlog"} grocery list`}
@@ -137,7 +138,7 @@ export function WeekPlanTable({
 										})
 									}
 								/>
-							</PlanTableCell>
+							</PlanTableEditorCell>
 							<PlanTableCell className="align-top">
 								{row.removable && row.backlogIndex !== undefined ? (
 									<Button

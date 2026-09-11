@@ -76,3 +76,20 @@ export function PlanTableCell({ children, className }: PlanTableCellProps) {
 		</td>
 	);
 }
+
+/** Table cell wrapper for embedded week plan editors — fills row height for click targets. */
+export function PlanTableEditorCell({
+	children,
+	className,
+}: PlanTableCellProps) {
+	return (
+		<td
+			className={cn(
+				"h-px max-w-0 align-top border border-table-border p-0",
+				className,
+			)}
+		>
+			{children}
+		</td>
+	);
+}

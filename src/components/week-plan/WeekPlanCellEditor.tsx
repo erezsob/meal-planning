@@ -51,10 +51,12 @@ const displayClassName = (
 	className?: string,
 ) =>
 	cn(
-		"min-h-[3rem] w-full min-w-0 rounded-md border border-transparent px-3 py-2 text-left text-sm whitespace-pre-wrap break-words",
-		"hover:border-border hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+		"w-full min-w-0 rounded-md border border-transparent text-left text-sm whitespace-pre-wrap break-words",
+		!embedded && "min-h-[3rem] px-3 py-2",
+		!embedded &&
+			"hover:border-border hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
 		embedded &&
-			"min-h-full max-w-full rounded-none border-0 px-2 py-2 hover:border-0 focus-visible:ring-0",
+			"flex h-full min-h-full items-start justify-start max-w-full rounded-none border-0 px-2 py-2 hover:border-0 hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-0",
 		!hasValue && "text-muted-foreground",
 		className,
 	);
@@ -62,9 +64,11 @@ const displayClassName = (
 const textareaClassName = (embedded: boolean, className?: string) =>
 	cn(
 		"min-h-[3rem] bg-background text-left",
-		embedded ? "resize-none px-2 py-2 text-sm" : "resize-y",
+		embedded
+			? "block h-full min-h-full resize-none align-top px-2 py-2 text-sm"
+			: "resize-y",
 		embedded &&
-			"min-h-full max-w-full min-w-0 rounded-none border-0 shadow-none focus-visible:ring-0",
+			"max-w-full min-w-0 rounded-none border-0 shadow-none focus-visible:ring-0",
 		className,
 	);
 
@@ -235,7 +239,7 @@ export function WeekPlanCellEditor({
 
 	if (isEditing) {
 		return (
-			<div className="relative">
+			<div className={cn("relative", embedded && "h-full min-h-full")}>
 				<Textarea
 					ref={(node) => {
 						textareaRef.current = node;
@@ -301,6 +305,65 @@ export function WeekPlanCellEditor({
 		event.stopPropagation();
 	};
 
+	const linkSegments = segments.map((segment, index) =>
+		segment.type === "link" ? (
+			<span
+				key={`link-${segment.start}-${segment.raw}-${index}`}
+				className="relative inline"
+			>
+				<a
+					href={segment.href}
+					target="_blank"
+					rel="noopener noreferrer"
+					className="text-primary underline underline-offset-2"
+					onClick={handleLinkClick}
+					onMouseEnter={() => scheduleTooltip(segment)}
+					onMouseLeave={hideTooltipSoon}
+				>
+					{segment.value}
+				</a>
+				{activeLinkStart === segment.start && (
+					<WeekPlanLinkTooltip
+						segment={segment}
+						cellValue={value}
+						onChange={onChange}
+						onClose={() => setActiveLinkStart(null)}
+						onKeepOpen={clearHoverTimer}
+						onRequestClose={hideTooltipSoon}
+					/>
+				)}
+			</span>
+		) : (
+			<button
+				key={`text-${segment.value}-${index}`}
+				type="button"
+				className="inline border-0 bg-transparent p-0 text-left text-sm whitespace-pre-wrap break-words"
+				onClick={handleTextClick}
+				onKeyDown={(event) => startEditingOnKeyDown(event, startEditing)}
+			>
+				{segment.value}
+			</button>
+		),
+	);
+
+	if (embedded) {
+		return (
+			<div className="relative block h-full min-h-full w-full min-w-0">
+				<button
+					type="button"
+					data-week-plan-cell
+					className="absolute inset-0 z-0 border-0 bg-transparent px-2 py-2 hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-0"
+					aria-label={ariaLabel}
+					onClick={startEditing}
+					onFocus={startEditing}
+				/>
+				<div className="relative z-10 flex min-h-full items-start px-2 py-2 text-left text-sm whitespace-pre-wrap break-words pointer-events-none [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
+					{linkSegments}
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<div
 			className={cn(
@@ -308,52 +371,12 @@ export function WeekPlanCellEditor({
 				"relative",
 			)}
 		>
-			{segments.map((segment, index) =>
-				segment.type === "link" ? (
-					<span
-						key={`link-${segment.start}-${segment.raw}-${index}`}
-						className="relative inline"
-					>
-						<a
-							href={segment.href}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="text-primary underline underline-offset-2"
-							onClick={handleLinkClick}
-							onMouseEnter={() => scheduleTooltip(segment)}
-							onMouseLeave={hideTooltipSoon}
-						>
-							{segment.value}
-						</a>
-						{activeLinkStart === segment.start && (
-							<WeekPlanLinkTooltip
-								segment={segment}
-								cellValue={value}
-								onChange={onChange}
-								onClose={() => setActiveLinkStart(null)}
-								onKeepOpen={clearHoverTimer}
-								onRequestClose={hideTooltipSoon}
-							/>
-						)}
-					</span>
-				) : (
-					<button
-						key={`text-${segment.value}-${index}`}
-						type="button"
-						className="inline border-0 bg-transparent p-0 text-left text-sm whitespace-pre-wrap break-words"
-						onClick={handleTextClick}
-						onKeyDown={(event) => startEditingOnKeyDown(event, startEditing)}
-					>
-						{segment.value}
-					</button>
-				),
-			)}
+			{linkSegments}
 			<button
 				type="button"
 				data-week-plan-cell
 				className="sr-only"
 				onClick={startEditing}
-				onFocus={embedded ? startEditing : undefined}
 			>
 				Edit {label}
 			</button>

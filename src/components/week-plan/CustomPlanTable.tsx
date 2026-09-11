@@ -6,6 +6,7 @@ import {
 	PlanTable,
 	PlanTableBody,
 	PlanTableCell,
+	PlanTableEditorCell,
 	PlanTableHead,
 	PlanTableHeadCell,
 } from "./PlanTable";
@@ -72,7 +73,7 @@ export function CustomPlanTable({
 				<PlanTableBody>
 					{rows.map((row) => (
 						<tr key={row.id}>
-							<PlanTableCell className="max-w-0 align-top p-0">
+							<PlanTableEditorCell>
 								<WeekPlanCellEditor
 									embedded
 									minRows={1}
@@ -86,8 +87,8 @@ export function CustomPlanTable({
 										})
 									}
 								/>
-							</PlanTableCell>
-							<PlanTableCell className="max-w-0 align-top p-0">
+							</PlanTableEditorCell>
+							<PlanTableEditorCell>
 								<WeekPlanCellEditor
 									embedded
 									label={`${rowLabel(row)} dish`}
@@ -96,8 +97,8 @@ export function CustomPlanTable({
 										onCellChange({ index: row.index, field: "dish", value })
 									}
 								/>
-							</PlanTableCell>
-							<PlanTableCell className="max-w-0 align-top p-0">
+							</PlanTableEditorCell>
+							<PlanTableEditorCell>
 								<WeekPlanCellEditor
 									embedded
 									label={`${rowLabel(row)} grocery list`}
@@ -110,7 +111,7 @@ export function CustomPlanTable({
 										})
 									}
 								/>
-							</PlanTableCell>
+							</PlanTableEditorCell>
 							<PlanTableCell className="align-top">
 								<Button
 									type="button"

@@ -8,6 +8,7 @@ import {
 import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { LINK_TOOLTIP_DELAY_MS } from "@/lib/constants";
+import { PlanTableEditorCell } from "./PlanTable";
 import { WeekPlanCellEditor } from "./WeekPlanCellEditor";
 
 afterEach(() => {
@@ -45,6 +46,53 @@ describe("WeekPlanCellEditor", () => {
 		fireEvent.focus(screen.getByRole("button", { name: "Monday dish" }));
 
 		expect(screen.getByLabelText("Monday dish")).toBeInTheDocument();
+	});
+
+	it("stretches embedded display button to fill table cell height", () => {
+		render(
+			<table>
+				<tbody>
+					<tr>
+						<PlanTableEditorCell>
+							<WeekPlanCellEditor
+								embedded
+								label="Monday grocery list"
+								value="butter"
+								onChange={vi.fn()}
+							/>
+						</PlanTableEditorCell>
+					</tr>
+				</tbody>
+			</table>,
+		);
+
+		expect(
+			screen.getByRole("button", { name: "Monday grocery list" }),
+		).toHaveClass("h-full", "items-start");
+	});
+
+	it("uses a full-cell overlay for embedded cells with links", () => {
+		render(
+			<table>
+				<tbody>
+					<tr>
+						<PlanTableEditorCell>
+							<WeekPlanCellEditor
+								embedded
+								label="Monday dish"
+								value="Try [Pasta](https://example.com/recipe)"
+								onChange={vi.fn()}
+							/>
+						</PlanTableEditorCell>
+					</tr>
+				</tbody>
+			</table>,
+		);
+
+		expect(screen.getByRole("button", { name: "Monday dish" })).toHaveClass(
+			"absolute",
+			"inset-0",
+		);
 	});
 
 	it("matches embedded display padding in edit mode", () => {
