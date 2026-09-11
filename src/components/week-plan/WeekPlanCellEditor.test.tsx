@@ -5,6 +5,7 @@ import {
 	render,
 	screen,
 } from "@testing-library/react";
+import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { LINK_TOOLTIP_DELAY_MS } from "@/lib/constants";
 import { WeekPlanCellEditor } from "./WeekPlanCellEditor";
@@ -44,6 +45,120 @@ describe("WeekPlanCellEditor", () => {
 		fireEvent.focus(screen.getByRole("button", { name: "Monday dish" }));
 
 		expect(screen.getByLabelText("Monday dish")).toBeInTheDocument();
+	});
+
+	it("matches embedded display padding in edit mode", () => {
+		render(
+			<WeekPlanCellEditor
+				embedded
+				label="Monday dish"
+				value="Pasta"
+				onChange={vi.fn()}
+			/>,
+		);
+
+		const displayCell = screen.getByRole("button", { name: "Monday dish" });
+		fireEvent.focus(displayCell);
+
+		const textarea = screen.getByLabelText("Monday dish");
+		expect(textarea).toHaveClass("px-2");
+		expect(textarea).not.toHaveClass("px-3");
+	});
+
+	it("places the caret at the end when entering embedded edit mode", async () => {
+		render(
+			<WeekPlanCellEditor
+				embedded
+				label="Monday dish"
+				value="Pasta"
+				onChange={vi.fn()}
+			/>,
+		);
+
+		fireEvent.focus(screen.getByRole("button", { name: "Monday dish" }));
+
+		const textarea = screen.getByLabelText(
+			"Monday dish",
+		) as HTMLTextAreaElement;
+
+		await act(async () => {
+			await new Promise((resolve) => {
+				requestAnimationFrame(resolve);
+			});
+		});
+
+		expect(textarea.selectionStart).toBe(5);
+		expect(textarea.selectionEnd).toBe(5);
+	});
+
+	it("uses the minimum row count for short embedded content in edit mode", () => {
+		render(
+			<WeekPlanCellEditor
+				embedded
+				label="Monday grocery list"
+				value="noodles"
+				onChange={vi.fn()}
+			/>,
+		);
+
+		fireEvent.focus(
+			screen.getByRole("button", { name: "Monday grocery list" }),
+		);
+
+		expect(
+			(screen.getByLabelText("Monday grocery list") as HTMLTextAreaElement)
+				.rows,
+		).toBe(2);
+	});
+
+	it("uses enough rows for multi-line embedded content in edit mode", () => {
+		const groceryList = "eggs\nmilk\nbread\nbutter";
+
+		render(
+			<WeekPlanCellEditor
+				embedded
+				label="Monday grocery list"
+				value={groceryList}
+				onChange={vi.fn()}
+			/>,
+		);
+
+		fireEvent.focus(
+			screen.getByRole("button", { name: "Monday grocery list" }),
+		);
+
+		expect(
+			(screen.getByLabelText("Monday grocery list") as HTMLTextAreaElement)
+				.rows,
+		).toBeGreaterThanOrEqual(4);
+	});
+
+	it("grows embedded edit rows when the user adds lines", () => {
+		const StatefulCell = () => {
+			const [value, setValue] = useState("eggs");
+			return (
+				<WeekPlanCellEditor
+					embedded
+					label="Monday grocery list"
+					value={value}
+					onChange={setValue}
+				/>
+			);
+		};
+
+		render(<StatefulCell />);
+
+		fireEvent.focus(
+			screen.getByRole("button", { name: "Monday grocery list" }),
+		);
+		fireEvent.change(screen.getByLabelText("Monday grocery list"), {
+			target: { value: "eggs\nmilk\nbread" },
+		});
+
+		expect(
+			(screen.getByLabelText("Monday grocery list") as HTMLTextAreaElement)
+				.rows,
+		).toBeGreaterThanOrEqual(3);
 	});
 
 	it("tabs to the next embedded table cell", () => {
