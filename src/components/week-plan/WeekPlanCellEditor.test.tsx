@@ -139,6 +139,47 @@ describe("WeekPlanCellEditor", () => {
 		expect(textarea.selectionEnd).toBe(5);
 	});
 
+	it("keeps the caret position when typing mid-string in embedded multiline edit mode", async () => {
+		const StatefulCell = () => {
+			const [value, setValue] = useState("line1\nline2\nline3");
+			return (
+				<WeekPlanCellEditor
+					embedded
+					label="Monday grocery list"
+					value={value}
+					onChange={setValue}
+				/>
+			);
+		};
+
+		render(<StatefulCell />);
+		fireEvent.focus(
+			screen.getByRole("button", { name: "Monday grocery list" }),
+		);
+
+		const textarea = screen.getByLabelText(
+			"Monday grocery list",
+		) as HTMLTextAreaElement;
+
+		textarea.setSelectionRange(4, 4);
+		fireEvent.change(textarea, {
+			target: {
+				value: "lineX1\nline2\nline3",
+				selectionStart: 5,
+				selectionEnd: 5,
+			},
+		});
+
+		await act(async () => {
+			await new Promise((resolve) => {
+				requestAnimationFrame(resolve);
+			});
+		});
+
+		expect(textarea.selectionStart).toBe(5);
+		expect(textarea.selectionEnd).toBe(5);
+	});
+
 	it("uses the minimum row count for short embedded content in edit mode", () => {
 		render(
 			<WeekPlanCellEditor

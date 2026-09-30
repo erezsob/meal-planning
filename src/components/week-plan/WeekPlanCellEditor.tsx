@@ -1,8 +1,11 @@
 import {
+	type ChangeEvent,
 	type ClipboardEvent,
 	type KeyboardEvent,
 	type MouseEvent,
+	useCallback,
 	useEffect,
+	useLayoutEffect,
 	useRef,
 	useState,
 } from "react";
@@ -22,15 +25,6 @@ const WEEK_PLAN_CELL_SELECTOR = "[data-week-plan-cell]";
 /** Minimum textarea rows when entering edit mode, based on existing content. */
 const computeEditRowCount = (value: string, minRows: number): number =>
 	Math.max(minRows, value.split("\n").length || 1);
-
-const focusTextareaAtEnd = (
-	textarea: HTMLTextAreaElement,
-	textLength: number,
-) => {
-	requestAnimationFrame(() => {
-		textarea.setSelectionRange(textLength, textLength);
-	});
-};
 
 type LinkSegment = Extract<TextSegment, { type: "link" }>;
 
@@ -160,10 +154,43 @@ export function WeekPlanCellEditor({
 	} | null>(null);
 	const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+	const focusCaretAtEndOnMountRef = useRef(false);
+	const pendingSelectionRef = useRef<{ start: number; end: number } | null>(
+		null,
+	);
 
 	const startEditing = () => {
 		setActiveLinkStart(null);
+		focusCaretAtEndOnMountRef.current = true;
 		setIsEditing(true);
+	};
+
+	const setTextareaRef = useCallback((node: HTMLTextAreaElement | null) => {
+		textareaRef.current = node;
+		if (node && focusCaretAtEndOnMountRef.current) {
+			focusCaretAtEndOnMountRef.current = false;
+			const length = node.value.length;
+			node.setSelectionRange(length, length);
+		}
+	}, []);
+
+	// Restore caret after the controlled value updates from parent state.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: run after each committed value sync
+	useLayoutEffect(() => {
+		if (!isEditing) return;
+		const textarea = textareaRef.current;
+		const pending = pendingSelectionRef.current;
+		if (!textarea || !pending) return;
+		pendingSelectionRef.current = null;
+		textarea.setSelectionRange(pending.start, pending.end);
+	}, [isEditing, value]);
+
+	const handleTextareaChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+		pendingSelectionRef.current = {
+			start: event.target.selectionStart,
+			end: event.target.selectionEnd,
+		};
+		onChange(event.target.value);
 	};
 	const stopEditing = () => {
 		setLinkSelection(null);
@@ -241,16 +268,11 @@ export function WeekPlanCellEditor({
 		return (
 			<div className={cn("relative", embedded && "h-full min-h-full")}>
 				<Textarea
-					ref={(node) => {
-						textareaRef.current = node;
-						if (node) {
-							focusTextareaAtEnd(node, value.length);
-						}
-					}}
+					ref={setTextareaRef}
 					data-week-plan-cell
 					aria-label={label}
 					value={value}
-					onChange={(event) => onChange(event.target.value)}
+					onChange={handleTextareaChange}
 					onBlur={() => {
 						if (linkSelection) return;
 						stopEditing();
