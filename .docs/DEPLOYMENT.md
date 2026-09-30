@@ -38,7 +38,22 @@ This runs, in order:
 
 Both deploy steps must succeed; if either fails, the script exits with an error.
 
-### Prerequisites
+### Continuous deployment (GitHub Actions)
+
+On every push to `main`, the CI workflow runs checks and tests, then deploys to production when the push includes changes outside docs and tests only (see `changes` job in `.github/workflows/ci.yml`).
+
+Configure these **repository secrets** (and optional `production` environment):
+
+| Secret | Purpose |
+| ------ | ------- |
+| `VITE_CONVEX_URL` | Prod Convex URL written to `.env.production` for the Vite build |
+| `CONVEX_DEPLOY_KEY` | Convex CLI deploy from CI ([Convex docs](https://docs.convex.dev/production/hosting)) |
+| `CLOUDFLARE_API_TOKEN` | `wrangler deploy` |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account for Workers |
+
+CI sets `SKIP_PREDEPLOY_CHECKS=1` because Biome, TypeScript, Knip, and tests already ran in the same workflow.
+
+### Prerequisites (local deploy)
 
 - Logged into Convex CLI (`pnpm exec convex login`)
 - Logged into Cloudflare (`pnpm exec wrangler login`)

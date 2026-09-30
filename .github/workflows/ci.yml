@@ -11,9 +11,31 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Do not cancel main pushes mid-deploy; PR runs can still cancel superseded work.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  changes:
+    name: Detect deployable changes
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    outputs:
+      deploy: ${{ steps.filter.outputs.deploy }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            deploy:
+              - '**'
+              - '!**/*.md'
+              - '!.docs/**'
+              - '!docs/**'
+              - '!**/*.test.ts'
+              - '!**/*.test.tsx'
+              - '!src/test/**'
+
   checks:
     name: Checks
     runs-on: ubuntu-latest
@@ -31,6 +53,35 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
       - run: pnpm test
+
+  deploy:
+    name: Deploy to production
+    needs: [changes, checks, test]
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.changes.outputs.deploy == 'true' &&
+      needs.checks.result == 'success' &&
+      needs.test.result == 'success'
+    runs-on: ubuntu-latest
+    environment: production
+    concurrency:
+      group: production-deploy
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - name: Configure production env
+        run: |
+          printf '%s\n' "VITE_CONVEX_URL=${VITE_CONVEX_URL}" > .env.production
+        env:
+          VITE_CONVEX_URL: ${{ secrets.VITE_CONVEX_URL }}
+      - name: Deploy Convex and Cloudflare Workers
+        run: SKIP_PREDEPLOY_CHECKS=1 pnpm deploy:prod
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   ci-success:
     name: CI Success
