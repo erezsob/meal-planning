@@ -4,8 +4,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-echo "==> Running pre-deploy checks..."
-pnpm check:full
+if [[ "${SKIP_PREDEPLOY_CHECKS:-}" != "1" ]]; then
+	echo "==> Running pre-deploy checks..."
+	pnpm check:full
+fi
 
 if [[ ! -f .env.production ]]; then
 	echo "ERROR: .env.production is missing (needs VITE_CONVEX_URL for the prod build)."
