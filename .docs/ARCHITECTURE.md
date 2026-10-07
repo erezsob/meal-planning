@@ -62,8 +62,8 @@ Meal Planning App - weekly meal planner with a simple week-plan grid, recipe lib
 ├── convex/               # Backend (Convex functions + schema)
 │   ├── schema.ts         # Database schema definitions
 │   ├── dishes.ts         # Dish CRUD queries/mutations
-│   ├── mealPlans.ts      # Meal planning queries/mutations
-│   ├── planSections.ts   # Plan sections (main grid + custom plans) queries/mutations
+│   ├── mealPlans.ts      # Dated meal slots: log, history, shopping — not the week-plan grid
+│   ├── planSections.ts   # Week-plan grid: this week, previous week, custom plans, past plans
 │   ├── shoppingList.ts   # Shopping list aggregation query
 │   └── _generated/       # Auto-generated types
 ├── lib/                  # Shared code
@@ -73,22 +73,30 @@ Meal Planning App - weekly meal planner with a simple week-plan grid, recipe lib
 │   ├── fp.ts             # Functional programming helpers
 │   └── errors.ts         # Error utilities
 ├── src/
-│   ├── routes/           # TanStack file-based routes
+│   ├── routes/           # TanStack file-based routes (see Routing below)
 │   │   ├── __root.tsx    # Root layout + shell
 │   │   ├── index.tsx     # / → WeekPlanView
 │   │   ├── library.tsx   # /library → LibraryView
-│   │   └── shopping.tsx  # /shopping → ShoppingView
+│   │   ├── shopping.tsx  # /shopping → ShoppingView
+│   │   ├── history.tsx   # /history → HistoryView
+│   │   ├── plans.archive.tsx       # /plans/archive → past plans list
+│   │   └── plans.archive_.$id.tsx  # /plans/archive/$id → one past plan
 │   ├── components/       # Feature components
 │   │   ├── week-plan/    # Week plan grid and toolbar
-│   │   ├── meal/         # Shared meal action modal
 │   │   ├── library/      # Dish list, form modal
-│   │   └── shopping/     # Shopping list view
+│   │   ├── shopping/     # Shopping list view
+│   │   ├── history/      # Eaten-meal history
+│   │   ├── log/          # Log meal modal
+│   │   ├── meal/         # Shared meal action modal
+│   │   └── ArchivedPlansView.tsx  # Past plans list and detail live beside these folders
 │   ├── router.tsx        # TanStack router setup + Convex provider
 │   └── styles.css        # Tailwind CSS entry
 └── .docs/                # Project documentation
 ```
 
 ## Data Model
+
+The week-plan grid (this week, previous week, custom plans, past plans) is stored in `planSections` and served by `convex/planSections.ts`. Dated meal slots — log, history, and the derived shopping list — are stored in `mealPlans` and served by `convex/mealPlans.ts`.
 
 ### Schema (convex/schema.ts)
 
@@ -109,7 +117,7 @@ Meal Planning App - weekly meal planner with a simple week-plan grid, recipe lib
 - unit: string?
 - category: string? (Produce, Dairy, Meat, etc.)
 
-**mealPlans** - Planned/logged meals by day + meal slot
+**mealPlans** - Dated meal slots for log and history (not the week-plan grid)
 | Field         | Type                                                | Description                         |
 | ------------- | --------------------------------------------------- | ----------------------------------- |
 | day           | string (YYYY-MM-DD)                                 | Meal date                           |
@@ -173,10 +181,15 @@ Meal Planning App - weekly meal planner with a simple week-plan grid, recipe lib
 ### Routing (TanStack Start)
 File-based routing in `src/routes/`:
 ```
-/           → WeekPlanView
-/library    → LibraryView (dish management)
-/shopping   → ShoppingView (ingredient list)
+/                      → WeekPlanView
+/library               → LibraryView (dish management)
+/shopping              → ShoppingView (ingredient list)
+/history               → HistoryView (eaten meals)
+/plans/archive         → ArchivedPlansView (past plans list)
+/plans/archive/$id     → ArchivedPlanDetailView (one past plan)
 ```
+
+`plans.archive_.$id.tsx` uses a trailing `_` on the `archive_` segment. TanStack treats that as a pathless layout escape: the detail route is a sibling of `/plans/archive` in the route tree, and the `_` is stripped from the URL. The list route renders the tabbed view with no `<Outlet/>`, so a nested child would match navigation and never mount. The public path stays `/plans/archive/$id`.
 
 ### State Management
 - **Server state**: Convex subscriptions via `@convex-dev/react-query`

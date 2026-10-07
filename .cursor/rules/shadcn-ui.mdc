@@ -5,7 +5,7 @@ alwaysApply: true
 
 # shadcn UI
 
-Use shadcn primitives from `lib/components/` for buttons, inputs, labels, cards, badges, dialogs, and other standard controls. Read `docs/CODE_STANDARDS.md` §11 before editing UI.
+Use shadcn primitives from `lib/components/` for buttons, inputs, labels, cards, badges, dialogs, and other standard controls. Read `.docs/CODE_STANDARDS.md` §11 before editing UI.
 
 - Import from `lib/components/*`; merge classes with `cn()` from `lib/utils`
 - Compose domain components in `src/components/` and routes from these primitives — no raw `<button>` / `<input>` with bespoke Tailwind

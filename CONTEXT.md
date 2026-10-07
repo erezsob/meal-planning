@@ -25,16 +25,16 @@ Move an active plan section into Past plans. Does not delete content. Distinct f
 _Avoid_: Delete, dismiss, remove
 
 **Week plan line**:
-One row in the week plan — a weekday (Saturday through Friday), a backlog entry, a weekly row (weekly lunch, weekly breakfast), or a custom category row.
+One row in the week plan — a weekday (Saturday through Friday), a backlog entry, a weekly row (weekly lunch, weekly breakfast), or a custom plan line.
 _Avoid_: Slot, cell
 
 **Backlog line**:
 A week plan line with no day label — a meal idea not yet assigned to a weekday.
 _Avoid_: Queue item, todo
 
-**Custom category line**:
-A week plan line with a user-defined category name (e.g. "Baking projects") plus dish and grocery columns — lives in the Custom plans section below the main grid.
-_Avoid_: Tag, label row
+**Custom plan line**:
+A row in the Custom plans section below the main grid. The user names it (stored field `category`, e.g. "Baking projects") and fills dish and grocery columns.
+_Avoid_: Custom category, tag, label row
 
 **Plan**:
 Future intent to eat something on a specific day and meal slot. Stored in `mealPlans`; may affect the derived shopping list. Distinct from the week plan grid in v1.

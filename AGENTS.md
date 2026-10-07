@@ -15,3 +15,15 @@ Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-
 ### Domain docs
 
 Single-context: root `CONTEXT.md` + `docs/adr/`. See `docs/agents/domain.md`.
+
+## Product docs
+
+Implementation references live in `.docs/`. `docs/` is agent workflow and domain decisions.
+
+| When | Read |
+| --- | --- |
+| Standards, review checklist | `.docs/CODE_STANDARDS.md` |
+| Where code lives, routes, Convex modules | `.docs/ARCHITECTURE.md` |
+| Week-plan behavior | `.docs/WEEK_PLAN.md` |
+| Production deploy | `.docs/DEPLOYMENT.md` |
+| Tests | `.docs/TESTING.md` |

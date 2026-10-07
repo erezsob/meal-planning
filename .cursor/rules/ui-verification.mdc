@@ -32,10 +32,12 @@ Use the `user-chrome-devtools` MCP:
 
 Verify the relevant pages:
 
-- `/` — week plan grid, backlog, weekly lines, and custom categories
+- `/` — week plan grid, backlog, weekly lines, and custom plans
 - `/library` — dish library, search/filtering, and dish management
 - `/shopping` — derived shopping list and ingredient checkboxes
 - `/history` — logged meals grouped by date
+- `/plans/archive` — past plans list
+- `/plans/archive/$id` — one past plan
 
 Also verify navigation and shared header changes from at least one route.
 
