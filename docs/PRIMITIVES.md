@@ -6,7 +6,7 @@ Primitives shrink the action space: reuse documented capabilities instead of inv
 
 This document is the human/agent composition contract. The machine-readable primitives map lives at [`docs/contributing/architecture/primitives.yaml`](contributing/architecture/primitives.yaml) — use it for PR visual-recap classification and path-to-primitive mapping. **Keep both files in sync** when adding, changing, deprecating, or promoting a primitive.
 
-**Related docs:** [CONTEXT.md](../CONTEXT.md) (domain language), [.docs/CODE_STANDARDS.md](../.docs/CODE_STANDARDS.md) (implementation standards), [.cursor/rules/shadcn-ui.mdc](../.cursor/rules/shadcn-ui.mdc) (UI policy), [.cursor/rules/fp-paradigm.mdc](../.cursor/rules/fp-paradigm.mdc) (error/Result patterns).
+**Related docs:** [GLOSSARY.md](../GLOSSARY.md) (domain language), [.docs/CODE_STANDARDS.md](../.docs/CODE_STANDARDS.md) (implementation standards), [.cursor/rules/shadcn-ui.mdc](../.cursor/rules/shadcn-ui.mdc) (UI policy), [.cursor/rules/fp-paradigm.mdc](../.cursor/rules/fp-paradigm.mdc) (error/Result patterns).
 
 ---
 
@@ -142,7 +142,7 @@ Compact bounded-context map — inspect `convex/*.ts` for full API; do not treat
 | **Calendar meal plans** | Dated slot-based planning, leftovers                                                    | `mealPlans` (status=`planned`/`skipped`) | `mealPlans.planMeal`, `getWeek`, `eatSlot`, …                 | **No active UI** — backend exists                  |
 | **Shopping**            | Derived ingredient aggregation for calendar week                                        | Read-only over `mealPlans` + `dishes`    | `shoppingList.getWeekShoppingList`                            | `ShoppingView`                                     |
 
-**Domain tension:** "Week plan" (scratch pad, no calendar dates) vs "Plan" (dated `mealPlans` records). v1 UI is week-plan-first; calendar `mealPlans` powers log, history, and shopping but not the home grid. See [CONTEXT.md](../CONTEXT.md).
+**Domain tension:** "Week plan" (scratch pad, no calendar dates) vs "Plan" (dated `mealPlans` records). v1 UI is week-plan-first; calendar `mealPlans` powers log, history, and shopping but not the home grid. See [GLOSSARY.md](../GLOSSARY.md).
 
 ### Week plan sync pattern (Canonical)
 

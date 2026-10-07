@@ -16,7 +16,7 @@ The household already plans meals with a naive grid: free-text **Dish** and **Gr
 
 Replace the home screen (`/`) with a **week plan grid**: a timeless Sat → Fri table plus weekly rows, a dynamic backlog, and a separate **Custom plans** section for named custom rows. Persisted in Convex (`planSections`); Log and History stay unchanged on `mealPlans`.
 
-See [CONTEXT.md](../CONTEXT.md) for domain terminology.
+See [GLOSSARY.md](../GLOSSARY.md) for domain terminology.
 
 ---
 

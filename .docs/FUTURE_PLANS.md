@@ -8,7 +8,7 @@ Enhancements and features for future development.
 
 **Status**: Design complete — see [MEAL_LOGGING.md](./MEAL_LOGGING.md)
 
-Quick on-the-go logging of custom or library meals (creates `eaten` records immediately), plus a `/history` view for browsing and analyzing past consumption. Domain terms in [CONTEXT.md](../CONTEXT.md).
+Quick on-the-go logging of custom or library meals (creates `eaten` records immediately), plus a `/history` view for browsing and analyzing past consumption. Domain terms in [GLOSSARY.md](../GLOSSARY.md).
 
 ---
 

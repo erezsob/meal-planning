@@ -17,7 +17,7 @@ Two complementary features sharing the same underlying data (`mealPlans` with `s
 1. **Log** — global quick-action to record consumption in one step
 2. **History** — dedicated view to browse, filter, and analyze past eaten meals
 
-See [CONTEXT.md](../CONTEXT.md) for domain terminology.
+See [GLOSSARY.md](../GLOSSARY.md) for domain terminology.
 
 ---
 
