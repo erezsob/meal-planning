@@ -235,7 +235,7 @@ Exceptions (must be justified in PR):
 1. **Static Analysis** — TypeScript, Oxlint, and Oxfmt via `vp check` (catches bugs at compile time)
 2. **Unit Tests** — Pure functions, utilities, isolated logic
 3. **Integration Tests** — Components with their dependencies, hooks with mocked APIs
-4. **E2E Tests** — Critical user flows (highest confidence, highest cost)
+4. **Browser E2E** — `pnpm test:e2e`, one smoke in `e2e/`. Add a spec only for a new critical journey.
 
 ### Avoid Testing Implementation Details
 

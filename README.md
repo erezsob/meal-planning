@@ -42,6 +42,7 @@ Requires `VITE_CONVEX_URL` env var (set automatically by `convex dev`).
 | `pnpm lint`        | Biome lint check                |
 | `pnpm types:check` | TypeScript check                |
 | `pnpm test`        | Run tests                       |
+| `pnpm test:e2e`    | Playwright smoke (dev server)   |
 | `pnpm seed`        | Seed sample dishes              |
 
 ## Project Structure

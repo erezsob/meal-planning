@@ -48,6 +48,8 @@ release. Add a tool name to select part of the graph. For example, run
 
 <!--VITE PLUS END-->
 
+**UI verification:** after route, component, or style changes, follow `.cursor/rules/ui-verification.mdc`. Run `pnpm test:e2e` (Playwright smoke against the dev server). For layout or motion, also use the Chrome DevTools tools. Do not use the Cursor built-in browser. Do not commit `test-results/` or `.cursor/verification/` screenshots.
+
 ## Product docs
 
 Implementation references live in `.docs/`. `docs/` is agent workflow and domain decisions.
@@ -59,3 +61,4 @@ Implementation references live in `.docs/`. `docs/` is agent workflow and domain
 | Week-plan behavior | `.docs/WEEK_PLAN.md` |
 | Production deploy | `.docs/DEPLOYMENT.md` |
 | Tests | `.docs/TESTING.md` |
+| UI changes | `.cursor/rules/ui-verification.mdc` |

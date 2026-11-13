@@ -219,6 +219,8 @@ Compact bounded-context map — inspect `convex/*.ts` for full API; do not treat
 | Test wrapper | `src/test/utils.tsx` — `QueryClientProvider`      |
 | Mocks        | `src/test/mocks/convex.ts`                        |
 | Co-location  | `*.test.ts(x)` beside source in `src/` and `lib/` |
+| Browser smoke | `pnpm test:e2e` — `e2e/app-smoke.spec.ts`. Add a spec only for a new critical journey. |
+| UI verification | `.cursor/rules/ui-verification.mdc` — smoke is the pass/fail check; Chrome DevTools for layout and motion |
 
 **Candidate:** default `TestWrapper` lacks `ConvexProvider`/`ToastProvider`; some tests wire providers ad hoc.
 

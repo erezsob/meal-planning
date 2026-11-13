@@ -15,5 +15,6 @@ todos.json
 coverage
 test-results/
 playwright-report/
-.cursor/verification/
+.cursor/verification/*
+!.cursor/verification/README.md
 .vitest/

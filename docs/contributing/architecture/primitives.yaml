@@ -123,10 +123,13 @@ primitives:
 
   - id: testing
     group: platform
-    description: Vitest setup, test utils, Convex mocks, co-located tests
+    description: Vitest setup, Playwright smoke, test utils, Convex mocks, co-located tests
     code:
       - src/test/**
       - vitest.config.ts
+      - e2e/**
+      - playwright.config.ts
+      - .cursor/rules/ui-verification.mdc
 
   - id: build-deploy
     group: platform

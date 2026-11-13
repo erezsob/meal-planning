@@ -13,6 +13,7 @@ The project uses **Vitest** as the test runner with **React Testing Library** fo
 - **@testing-library/jest-dom** - Custom DOM matchers
 - **jsdom** - DOM environment for Node.js
 - **@vitest/coverage-v8** - Code coverage reporting
+- **Playwright** - `pnpm test:e2e`, one smoke in `e2e/app-smoke.spec.ts`. Add a spec only for a new critical journey.
 
 ## Test Categories
 
@@ -172,6 +173,7 @@ pnpm test:ui
 
 # Browser smoke. Spec: e2e/app-smoke.spec.ts
 # Reuses pnpm dev on port 3213 when that server is already running.
+# Does not reseed. Keep edge cases in Vitest.
 pnpm test:e2e
 ```
 
