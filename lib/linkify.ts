@@ -15,6 +15,7 @@ export type TextSegment =
 const URL_PATTERN = /https?:\/\/[^\s]+/g;
 const MARKDOWN_LINK_PATTERN = /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g;
 const HTTP_URL_ONLY = /^https?:\/\/[^\s]+$/;
+const HTTPS_PREFIX = "https://";
 
 interface MatchRange {
 	start: number;
@@ -27,6 +28,20 @@ interface MatchRange {
  */
 export function isHttpUrl(value: string): boolean {
 	return HTTP_URL_ONLY.test(value.trim());
+}
+
+/**
+ * Normalize a URL confirmed from the link dialog or hover tooltip.
+ * Trims whitespace, keeps an existing http(s) scheme, and prepends https:// otherwise.
+ * Returns null when the trimmed value is empty.
+ */
+export function normalizeConfirmedLinkUrl(value: string): string | null {
+	const trimmed = value.trim();
+	if (!trimmed) return null;
+	if (trimmed.startsWith("http://") || trimmed.startsWith(HTTPS_PREFIX)) {
+		return trimmed;
+	}
+	return `${HTTPS_PREFIX}${trimmed}`;
 }
 
 /**
@@ -62,7 +77,8 @@ export function replaceLinkRaw({
 
 /**
  * Wrap the current selection as `[selected](url)` when a URL is provided.
- * Returns null when there is no selection or the URL is invalid.
+ * Returns null when there is no selection or the URL is empty.
+ * Callers that only accept an http(s) URL check that before calling.
  */
 export function wrapSelectionAsMarkdownLink({
 	text,
@@ -76,7 +92,7 @@ export function wrapSelectionAsMarkdownLink({
 	url: string;
 }): { text: string; cursor: number } | null {
 	const trimmedUrl = url.trim();
-	if (selectionStart === selectionEnd || !isHttpUrl(trimmedUrl)) {
+	if (selectionStart === selectionEnd || !trimmedUrl) {
 		return null;
 	}
 

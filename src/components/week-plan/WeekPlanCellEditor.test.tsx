@@ -393,6 +393,34 @@ describe("WeekPlanCellEditor", () => {
 		);
 	});
 
+	it("pastes plain text over a selection instead of making a link", () => {
+		const onChange = vi.fn();
+
+		render(
+			<WeekPlanCellEditor
+				label="Monday dish"
+				value="Pasta"
+				onChange={onChange}
+			/>,
+		);
+
+		fireEvent.click(screen.getByRole("button", { name: "Monday dish" }));
+		const textarea = screen.getByLabelText(
+			"Monday dish",
+		) as HTMLTextAreaElement;
+		textarea.setSelectionRange(0, 5);
+
+		const pasteEvent = createEvent.paste(textarea, {
+			clipboardData: {
+				getData: () => "not a url",
+			},
+		});
+		fireEvent(textarea, pasteEvent);
+
+		expect(pasteEvent.defaultPrevented).toBe(false);
+		expect(onChange).not.toHaveBeenCalled();
+	});
+
 	it("pastes normally when nothing is selected", () => {
 		const onChange = vi.fn();
 
@@ -421,6 +449,32 @@ describe("WeekPlanCellEditor", () => {
 		expect(onChange).not.toHaveBeenCalled();
 	});
 
+	it("keeps embedded multi-link text in one inline flow", () => {
+		const value = [
+			"[this is a test](https://a.example) of the emergency broadcast [system.](https://b.example)",
+			"",
+			"please listen [carefully.](https://c.example)",
+		].join("\n");
+
+		render(
+			<WeekPlanCellEditor
+				embedded
+				label="Monday dish"
+				value={value}
+				onChange={vi.fn()}
+			/>,
+		);
+
+		const carefully = screen.getByRole("link", { name: "carefully." });
+		expect(carefully.closest("div")?.textContent).toContain(
+			"\n\nplease listen",
+		);
+		expect(
+			screen.getByRole("link", { name: "this is a test" }),
+		).toBeInTheDocument();
+		expect(screen.getByRole("link", { name: "system." })).toBeInTheDocument();
+	});
+
 	it("wraps selected text as a markdown link on Cmd/Ctrl+K", () => {
 		const onChange = vi.fn();
 
@@ -447,6 +501,85 @@ describe("WeekPlanCellEditor", () => {
 
 		expect(onChange).toHaveBeenCalledWith(
 			"[Pasta](https://example.com/recipe)",
+		);
+	});
+
+	it("prepends https:// when Ctrl+K confirms a URL without a scheme", () => {
+		const onChange = vi.fn();
+
+		render(
+			<WeekPlanCellEditor
+				label="Monday dish"
+				value="Pasta"
+				onChange={onChange}
+			/>,
+		);
+
+		fireEvent.click(screen.getByRole("button", { name: "Monday dish" }));
+		const textarea = screen.getByLabelText(
+			"Monday dish",
+		) as HTMLTextAreaElement;
+		textarea.setSelectionRange(0, 5);
+
+		fireEvent.keyDown(textarea, { key: "k", metaKey: true });
+		fireEvent.change(screen.getByLabelText("Link URL"), {
+			target: { value: "example.com/recipe" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Add link" }));
+
+		expect(onChange).toHaveBeenCalledWith(
+			"[Pasta](https://example.com/recipe)",
+		);
+	});
+
+	it("does not add a link when Ctrl+K confirms an empty URL", () => {
+		const onChange = vi.fn();
+
+		render(
+			<WeekPlanCellEditor
+				label="Monday dish"
+				value="Pasta"
+				onChange={onChange}
+			/>,
+		);
+
+		fireEvent.click(screen.getByRole("button", { name: "Monday dish" }));
+		const textarea = screen.getByLabelText(
+			"Monday dish",
+		) as HTMLTextAreaElement;
+		textarea.setSelectionRange(0, 5);
+
+		fireEvent.keyDown(textarea, { key: "k", metaKey: true });
+		fireEvent.click(screen.getByRole("button", { name: "Add link" }));
+
+		expect(onChange).not.toHaveBeenCalled();
+	});
+
+	it("saves a link URL from the hover tooltip in an embedded cell", () => {
+		vi.useFakeTimers();
+		const onChange = vi.fn();
+
+		render(
+			<WeekPlanCellEditor
+				embedded
+				label="Monday dish"
+				value="Try [Pasta](https://example.com/recipe) tonight"
+				onChange={onChange}
+			/>,
+		);
+
+		fireEvent.mouseEnter(screen.getByRole("link", { name: "Pasta" }));
+		act(() => {
+			vi.advanceTimersByTime(LINK_TOOLTIP_DELAY_MS);
+		});
+
+		fireEvent.change(screen.getByDisplayValue("https://example.com/recipe"), {
+			target: { value: "example.com/new" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Save link" }));
+
+		expect(onChange).toHaveBeenCalledWith(
+			"Try [Pasta](https://example.com/new) tonight",
 		);
 	});
 
@@ -482,6 +615,85 @@ describe("WeekPlanCellEditor", () => {
 		expect(onChange).toHaveBeenCalledWith(
 			"Try [Pasta](https://example.com/new)",
 		);
+	});
+
+	it("prepends https:// when the hover tooltip saves a URL without a scheme", () => {
+		vi.useFakeTimers();
+		const onChange = vi.fn();
+
+		render(
+			<WeekPlanCellEditor
+				label="Monday dish"
+				value="Try [Pasta](https://example.com/recipe)"
+				onChange={onChange}
+			/>,
+		);
+
+		fireEvent.mouseEnter(screen.getByRole("link", { name: "Pasta" }));
+		act(() => {
+			vi.advanceTimersByTime(LINK_TOOLTIP_DELAY_MS);
+		});
+
+		fireEvent.change(screen.getByDisplayValue("https://example.com/recipe"), {
+			target: { value: "example.com/new" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Save link" }));
+
+		expect(onChange).toHaveBeenCalledWith(
+			"Try [Pasta](https://example.com/new)",
+		);
+	});
+
+	it("keeps an http scheme entered in the hover tooltip", () => {
+		vi.useFakeTimers();
+		const onChange = vi.fn();
+
+		render(
+			<WeekPlanCellEditor
+				label="Monday dish"
+				value="Try [Pasta](https://example.com/recipe)"
+				onChange={onChange}
+			/>,
+		);
+
+		fireEvent.mouseEnter(screen.getByRole("link", { name: "Pasta" }));
+		act(() => {
+			vi.advanceTimersByTime(LINK_TOOLTIP_DELAY_MS);
+		});
+
+		fireEvent.change(screen.getByDisplayValue("https://example.com/recipe"), {
+			target: { value: "http://example.com/new" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Save link" }));
+
+		expect(onChange).toHaveBeenCalledWith(
+			"Try [Pasta](http://example.com/new)",
+		);
+	});
+
+	it("does not replace a link when the hover tooltip URL is empty", () => {
+		vi.useFakeTimers();
+		const onChange = vi.fn();
+
+		render(
+			<WeekPlanCellEditor
+				label="Monday dish"
+				value="Try [Pasta](https://example.com/recipe)"
+				onChange={onChange}
+			/>,
+		);
+
+		fireEvent.mouseEnter(screen.getByRole("link", { name: "Pasta" }));
+		act(() => {
+			vi.advanceTimersByTime(LINK_TOOLTIP_DELAY_MS);
+		});
+
+		fireEvent.change(screen.getByDisplayValue("https://example.com/recipe"), {
+			target: { value: "   " },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Save link" }));
+
+		expect(onChange).not.toHaveBeenCalled();
 	});
 
 	it("unlinks from the hover tooltip while keeping the label", () => {

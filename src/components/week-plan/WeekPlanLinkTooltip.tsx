@@ -3,7 +3,7 @@ import { Button } from "@/lib/components/button";
 import { Input } from "@/lib/components/input";
 import {
 	formatMarkdownLink,
-	isHttpUrl,
+	normalizeConfirmedLinkUrl,
 	replaceLinkRaw,
 	type TextSegment,
 } from "@/lib/linkify";
@@ -35,8 +35,8 @@ export function WeekPlanLinkTooltip({
 	const canUnlink = segment.raw !== segment.href;
 
 	const saveUrl = () => {
-		const nextHref = draftUrl.trim();
-		if (!isHttpUrl(nextHref)) {
+		const nextHref = normalizeConfirmedLinkUrl(draftUrl);
+		if (!nextHref) {
 			onClose();
 			return;
 		}
@@ -73,7 +73,7 @@ export function WeekPlanLinkTooltip({
 		<div
 			role="dialog"
 			aria-label="Link options"
-			className="absolute z-20 mt-1 w-72 rounded-md border border-border bg-background p-2 shadow-md"
+			className="pointer-events-auto absolute z-20 mt-1 w-72 rounded-md border border-border bg-background p-2 shadow-md"
 			onMouseEnter={onKeepOpen}
 			onMouseLeave={onRequestClose}
 		>

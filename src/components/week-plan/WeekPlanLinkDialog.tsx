@@ -1,7 +1,7 @@
 import { useId, useState } from "react";
 import { Button } from "@/lib/components/button";
 import { Input } from "@/lib/components/input";
-import { isHttpUrl } from "@/lib/linkify";
+import { normalizeConfirmedLinkUrl } from "@/lib/linkify";
 
 interface WeekPlanLinkDialogProps {
 	onSubmit: (url: string) => void;
@@ -19,8 +19,8 @@ export function WeekPlanLinkDialog({
 	const [draftUrl, setDraftUrl] = useState("");
 
 	const submit = () => {
-		const url = draftUrl.trim();
-		if (!isHttpUrl(url)) return;
+		const url = normalizeConfirmedLinkUrl(draftUrl);
+		if (!url) return;
 		onSubmit(url);
 	};
 

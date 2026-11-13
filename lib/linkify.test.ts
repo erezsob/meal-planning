@@ -2,6 +2,7 @@ import { describe, expect, it } from "vite-plus/test";
 import {
 	formatMarkdownLink,
 	isHttpUrl,
+	normalizeConfirmedLinkUrl,
 	parseLinkifiedSegments,
 	replaceLinkRaw,
 	wrapSelectionAsMarkdownLink,
@@ -107,6 +108,42 @@ describe("parseLinkifiedSegments", () => {
 	});
 });
 
+describe("normalizeConfirmedLinkUrl", () => {
+	it("prepends https:// when the scheme is missing", () => {
+		expect(normalizeConfirmedLinkUrl("example.com/recipe")).toBe(
+			"https://example.com/recipe",
+		);
+		expect(normalizeConfirmedLinkUrl("  example.com/new  ")).toBe(
+			"https://example.com/new",
+		);
+	});
+
+	it("keeps an existing http or https scheme", () => {
+		expect(normalizeConfirmedLinkUrl("https://example.com/recipe")).toBe(
+			"https://example.com/recipe",
+		);
+		expect(normalizeConfirmedLinkUrl("http://example.com/new")).toBe(
+			"http://example.com/new",
+		);
+	});
+
+	it("returns null for an empty value", () => {
+		expect(normalizeConfirmedLinkUrl("")).toBeNull();
+		expect(normalizeConfirmedLinkUrl("   ")).toBeNull();
+	});
+
+	it("keeps a value that already starts with http:// or https://", () => {
+		expect(normalizeConfirmedLinkUrl("https://example.com/my recipe")).toBe(
+			"https://example.com/my recipe",
+		);
+		expect(normalizeConfirmedLinkUrl("https://")).toBe("https://");
+	});
+
+	it("prepends https:// to other non-empty text", () => {
+		expect(normalizeConfirmedLinkUrl("not a url")).toBe("https://not a url");
+	});
+});
+
 describe("isHttpUrl", () => {
 	it("accepts http and https URLs", () => {
 		expect(isHttpUrl("https://example.com/recipe")).toBe(true);
@@ -145,13 +182,13 @@ describe("wrapSelectionAsMarkdownLink", () => {
 		).toBeNull();
 	});
 
-	it("returns null when the pasted text is not a URL", () => {
+	it("returns null when the URL is empty", () => {
 		expect(
 			wrapSelectionAsMarkdownLink({
 				text: "Pasta",
 				selectionStart: 0,
 				selectionEnd: 5,
-				url: "not a url",
+				url: "   ",
 			}),
 		).toBeNull();
 	});

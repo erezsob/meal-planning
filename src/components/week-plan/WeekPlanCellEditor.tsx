@@ -12,6 +12,7 @@ import {
 import { Textarea } from "@/lib/components/textarea";
 import { LINK_TOOLTIP_DELAY_MS } from "@/lib/constants";
 import {
+	isHttpUrl,
 	parseLinkifiedSegments,
 	type TextSegment,
 	wrapSelectionAsMarkdownLink,
@@ -226,6 +227,7 @@ export function WeekPlanCellEditor({
 
 	const handlePaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
 		const pasted = event.clipboardData.getData("text");
+		if (!isHttpUrl(pasted)) return;
 		const applied = applyLinkWrap({
 			text: value,
 			selectionStart: event.currentTarget.selectionStart,
@@ -318,7 +320,7 @@ export function WeekPlanCellEditor({
 		);
 	}
 
-	const handleTextClick = (event: MouseEvent<HTMLButtonElement>) => {
+	const handleTextClick = (event: MouseEvent<HTMLSpanElement>) => {
 		event.stopPropagation();
 		startEditing();
 	};
@@ -356,15 +358,17 @@ export function WeekPlanCellEditor({
 				)}
 			</span>
 		) : (
-			<button
+			// A button's used display is inline-block, which traps newlines inside the segment.
+			<span
 				key={`text-${segment.value}-${index}`}
-				type="button"
-				className="inline border-0 bg-transparent p-0 text-left text-sm whitespace-pre-wrap break-words"
+				role="button"
+				tabIndex={0}
+				className="pointer-events-auto whitespace-pre-wrap wrap-break-word"
 				onClick={handleTextClick}
 				onKeyDown={(event) => startEditingOnKeyDown(event, startEditing)}
 			>
 				{segment.value}
-			</button>
+			</span>
 		),
 	);
 
@@ -379,7 +383,7 @@ export function WeekPlanCellEditor({
 					onClick={startEditing}
 					onFocus={startEditing}
 				/>
-				<div className="relative z-10 flex min-h-full items-start px-2 py-2 text-left text-sm whitespace-pre-wrap break-words pointer-events-none [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
+				<div className="relative z-10 min-h-full px-2 py-2 text-left text-sm whitespace-pre-wrap wrap-break-word pointer-events-none [&_a]:pointer-events-auto">
 					{linkSegments}
 				</div>
 			</div>
