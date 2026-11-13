@@ -9,6 +9,8 @@
 		"src/vite-env.d.ts",
 		"lib/fp.ts",
 		"lib/errors.ts",
-		"lib/components/**/*"
+		"lib/components/**/*",
+		".cursor/hooks/check-e2e-stamp.mjs",
+		".cursor/hooks/drop-stale-playwright-browsers.mjs"
 	]
 }

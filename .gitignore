@@ -13,3 +13,6 @@ count.txt
 .vinxi
 todos.json
 coverage
+test-results/
+playwright-report/
+.cursor/verification/

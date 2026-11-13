@@ -6,47 +6,37 @@ alwaysApply: false
 
 # UI verification
 
-After changing routes, components, or global styles, verify the result in the browser yourself. Do not ask the user to manually check unless you are blocked.
+After changing routes, components, or global styles, run the browser smoke yourself. Do not ask the user to click unless you are blocked.
 
-## Prerequisites
+`pnpm test:e2e` is the pass/fail check for behavior. A screenshot is not a pass.
 
-Run in order when any step is missing:
+## Behavior
 
-1. **Dependencies** — `pnpm install`
-2. **Environment** — ensure `VITE_CONVEX_URL` is available; `pnpm dev` starts Convex and supplies it during local development
-3. **Seed data** — run `pnpm seed` when the dish library needs sample data; if the script needs its required argument, use `pnpm exec convex run seed:seedDishes '{"householdId":"household-1"}'`
-4. **Dev server** — `pnpm dev` → http://localhost:3213
+1. Convex is up. `pnpm dev` starts Vite on http://localhost:3213 and `convex dev` when that server is not already running.
+2. The dev deployment may already have dishes. Run `pnpm exec convex run seed:seedDishes '{"householdId":"household-1"}'` only when `/library` has no dishes. Do not reseed on every UI change.
+3. `pnpm test:e2e`
 
-## Browser workflow
+The command reuses `pnpm dev` on http://localhost:3213 when that server is already running. Otherwise it starts one. The spec is `e2e/app-smoke.spec.ts`. It opens the week plan, past plans (and one archived plan when a link is there), the recipe library, the shopping list, and history.
 
-Use the `user-chrome-devtools` MCP:
+The stop hook allows you to finish only when this command passed for the current UI diff. Passing, then editing a UI file, means you run it again.
 
-1. Confirm the dev server is reachable at http://localhost:3213
-2. Open every route affected by the change
-3. Take a browser snapshot (`take_snapshot`) for structure and accessibility
-4. Take a screenshot (`take_screenshot`) for visual confirmation
-5. If layout or spacing changed, check a narrow viewport (~390px width)
-6. The app currently uses a dark theme; if theming changed, verify the dark root/document styling and re-screenshot
+Add or extend a spec only when the task adds a new critical journey. Keep edge cases in Vitest.
 
-## Routes
+## Layout and motion
 
-Verify the relevant pages:
+For spacing, overflow, or motion, also drive real Chrome with the `user-chrome-devtools` tools:
 
-- `/` — week plan grid, backlog, weekly lines, and custom plans
-- `/library` — dish library, search/filtering, and dish management
-- `/shopping` — derived shopping list and ingredient checkboxes
-- `/history` — logged meals grouped by date
-- `/plans/archive` — past plans list
-- `/plans/archive/$id` — one past plan
+1. Open the affected route.
+2. Read console messages and fix errors.
+3. Run `evaluate_script` for one fact (the text is present, the list has the expected count, or a panel is not clipped).
+4. Save a screenshot under `.cursor/verification/<yyyy-mm-dd>-<slug>/` when the judgment is visual.
 
-Also verify navigation and shared header changes from at least one route.
+Do not use the Cursor built-in browser.
+
+## Git
+
+Do not `git add` or commit `test-results/`, `playwright-report/`, or `.cursor/verification/`.
 
 ## Completion report
 
-Before finishing UI work, state:
-
-- Routes checked
-- Pass or fail against the task intent
-- Any visual issues found (with a screenshot if useful)
-
-If verification fails, fix and re-run the loop. Only escalate to the user when blocked, such as a server startup failure or missing environment/household configuration.
+State that `pnpm test:e2e` passed. For a visual change, also give the screenshot path and any console errors. If the server or Convex will not start, say what blocked you.

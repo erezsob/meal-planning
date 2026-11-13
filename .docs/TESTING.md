@@ -169,6 +169,10 @@ pnpm test:coverage
 
 # Run tests with Vitest UI (optional)
 pnpm test:ui
+
+# Browser smoke. Spec: e2e/app-smoke.spec.ts
+# Reuses pnpm dev on port 3213 when that server is already running.
+pnpm test:e2e
 ```
 
 ## Coverage
@@ -225,7 +229,6 @@ afterEach(() => {
 
 ## Future Improvements
 
-1. **E2E Tests** - Add Playwright for end-to-end testing
-2. **Visual Regression** - Screenshot testing for UI components
-3. **CI Integration** - Add tests to GitHub Actions workflow
-4. **Mutation Testing** - Verify test quality with Stryker
+1. **Visual Regression** - Screenshot testing for UI components
+2. **CI Integration** - Add tests to GitHub Actions workflow
+3. **Mutation Testing** - Verify test quality with Stryker

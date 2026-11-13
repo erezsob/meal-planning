@@ -20,10 +20,13 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@/lib/*": ["./lib/*"]
+      "@/lib/*": ["./lib/*"],
+      "lib/*": ["./lib/*"],
+      "convex/_generated/*": ["./convex/_generated/*"],
+      "convex/planSections": ["./convex/planSections"],
+      "convex/shoppingList": ["./convex/shoppingList"]
     }
   }
 }

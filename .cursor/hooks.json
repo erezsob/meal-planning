@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "command": ".cursor/hooks/drop-stale-playwright-browsers.mjs",
+        "matcher": "Shell"
+      }
+    ],
+    "stop": [
+      {
+        "command": "bash .cursor/hooks/quality-check.sh",
+        "timeout": 300,
+        "loop_limit": 5
+      }
+    ]
+  }
+}
