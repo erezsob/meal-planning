@@ -1,8 +1,8 @@
 echo "Running pre-push checks..."
 
-# Run Biome checks and fix linting, sorting and formatting
-echo "Checking code with Biome..."
-pnpm biome check --write
+# Format and lint, then fix what can be fixed automatically
+echo "Checking code with Vite+..."
+pnpm exec vp check --fix
 
 # Check if there are any changes to commit
 if ! git diff --quiet; then

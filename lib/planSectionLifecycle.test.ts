@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { mockPlanSectionId } from "@/test/mocks/convex";
 import { MAIN_STACK_RANK_PREVIOUS_WEEK } from "./constants";
 import {

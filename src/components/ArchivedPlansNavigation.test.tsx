@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-router";
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { ArchivedPlanSection } from "convex/planSections";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 import {
 	createDefaultCustomPlansContent,
 	createDefaultMainGridContent,

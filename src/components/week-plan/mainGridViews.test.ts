@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { MAIN_PLAN_LABELS } from "@/lib/constants";
 import { createDefaultMainGridContent } from "@/lib/weekPlanTypes";
 import { mockPlanSectionId } from "@/test/mocks/convex";

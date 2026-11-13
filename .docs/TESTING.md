@@ -29,7 +29,7 @@ Pure function tests that run in isolation without React components.
 
 **Key patterns**:
 ```typescript
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 
 describe("functionName", () => {
   it("describes expected behavior", () => {
@@ -54,7 +54,7 @@ Tests for React components using React Testing Library.
 **Key patterns**:
 ```typescript
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 import { Component } from "./Component";
 
 describe("Component", () => {
@@ -88,7 +88,7 @@ Tests for React hooks with Convex queries and TanStack Query.
 import { QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import { ConvexProvider } from "convex/react";
-import { vi } from "vitest";
+import { vi } from "vite-plus/test";
 
 // Mock Convex hooks
 vi.mock("convex/react", async () => {
@@ -122,7 +122,7 @@ Mock Convex queries and mutations for isolated testing:
 
 ```typescript
 import { useQuery, useMutation } from "convex/react";
-import { vi } from "vitest";
+import { vi } from "vite-plus/test";
 
 vi.mock("convex/react", async () => {
   const actual = await vi.importActual("convex/react");

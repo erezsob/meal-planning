@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { Doc, Id } from "convex/_generated/dataModel";
 import { Suspense } from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { createMockDish } from "@/test/mocks/convex";
 import { TestWrapper } from "@/test/utils";
 import { LogMealForm } from "./LogMealForm";

@@ -30,7 +30,7 @@ pnpm deploy:prod
 
 This runs, in order:
 
-1. **Pre-deploy checks** — Biome, TypeScript, Knip (`pnpm check:full`)
+1. **Pre-deploy checks** — Vite+ check, TypeScript, Knip (`pnpm check:full`)
 2. **Frontend build** — `pnpm build` (loads `.env.production`)
 3. **Parallel deploy** — Convex and Cloudflare Workers at the same time
    - `convex deploy --yes` — schema and server functions (skips prod confirmation prompt)

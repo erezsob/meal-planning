@@ -175,7 +175,7 @@ export function WeekPlanCellEditor({
 	}, []);
 
 	// Restore caret after the controlled value updates from parent state.
-	// biome-ignore lint/correctness/useExhaustiveDependencies: run after each committed value sync
+	// Run after each committed value sync. Refs are read inside the effect.
 	useLayoutEffect(() => {
 		if (!isEditing) return;
 		const textarea = textareaRef.current;

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { Doc } from "convex/_generated/dataModel";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 import { DishCard, DishCardSkeleton } from "./DishCard";
 
 type Dish = Doc<"dishes">;

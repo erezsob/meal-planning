@@ -232,7 +232,7 @@ Exceptions (must be justified in PR):
 
 ### The Testing Trophy (Priority Order)
 
-1. **Static Analysis** — TypeScript, ESLint, Biome (catches bugs at compile time)
+1. **Static Analysis** — TypeScript, Oxlint, and Oxfmt via `vp check` (catches bugs at compile time)
 2. **Unit Tests** — Pure functions, utilities, isolated logic
 3. **Integration Tests** — Components with their dependencies, hooks with mocked APIs
 4. **E2E Tests** — Critical user flows (highest confidence, highest cost)

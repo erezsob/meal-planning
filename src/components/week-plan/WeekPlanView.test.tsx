@@ -6,8 +6,15 @@ import {
 	within,
 } from "@testing-library/react";
 import { Suspense } from "react";
-import type { Mock } from "vitest";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { Mock } from "vite-plus/test";
+import {
+	afterEach,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+} from "vite-plus/test";
 import {
 	ARCHIVE_PREVIOUS_WEEK_DIALOG,
 	CUSTOM_PLANS_SECTION_HEADING,
@@ -444,7 +451,9 @@ describe("WeekPlanView", () => {
 		);
 		fireEvent.change(
 			within(previousWeekSection).getAllByLabelText("Saturday dish")[0],
-			{ target: { value: "Flushed ribs" } },
+			{
+				target: { value: "Flushed ribs" },
+			},
 		);
 
 		fireEvent.click(
@@ -629,13 +638,17 @@ describe("WeekPlanView", () => {
 
 		const addButtons = within(previousWeekSection as HTMLElement).getAllByRole(
 			"button",
-			{ name: /^Add row$/i },
+			{
+				name: /^Add row$/i,
+			},
 		);
 		fireEvent.click(addButtons[0]);
 
 		const backlogEditors = within(
 			previousWeekSection as HTMLElement,
-		).getAllByRole("button", { name: /Backlog dish/i });
+		).getAllByRole("button", {
+			name: /Backlog dish/i,
+		});
 		expect(backlogEditors.length).toBeGreaterThanOrEqual(
 			DEFAULT_BACKLOG_ROW_COUNT + 1,
 		);
@@ -658,13 +671,17 @@ describe("WeekPlanView", () => {
 
 		const topSaturdayButton = within(
 			thisWeekSection as HTMLElement,
-		).getAllByRole("button", { name: /Saturday dish/i })[0];
+		).getAllByRole("button", {
+			name: /Saturday dish/i,
+		})[0];
 		fireEvent.click(topSaturdayButton);
 		fireEvent.change(
 			within(thisWeekSection as HTMLElement).getAllByLabelText(
 				"Saturday dish",
 			)[0],
-			{ target: { value: "New ribs" } },
+			{
+				target: { value: "New ribs" },
+			},
 		);
 
 		await vi.advanceTimersByTimeAsync(WEEK_PLAN_SAVE_DEBOUNCE_MS);

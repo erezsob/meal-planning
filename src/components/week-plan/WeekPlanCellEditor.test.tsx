@@ -6,7 +6,7 @@ import {
 	screen,
 } from "@testing-library/react";
 import { useState } from "react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 import { LINK_TOOLTIP_DELAY_MS } from "@/lib/constants";
 import { PlanTableEditorCell } from "./PlanTable";
 import { WeekPlanCellEditor } from "./WeekPlanCellEditor";
