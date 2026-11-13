@@ -355,7 +355,7 @@ export async function pipeAsync<A, B, C, D, E, F>(
 ): Promise<F>;
 export async function pipeAsync(
 	value: unknown,
-	...fns: Array<(arg: unknown) => unknown | Promise<unknown>>
+	...fns: Array<(arg: unknown) => unknown>
 ): Promise<unknown> {
 	let result = value;
 	for (const fn of fns) {

@@ -113,9 +113,7 @@ export function joinWeekPlan(
  * @param content - Remote main grid, null, or unknown value from Convex
  * @returns Main grid with guaranteed backlog rows
  */
-export function normalizeMainGridContent(
-	content: MainGridContent | null | unknown,
-): MainGridContent {
+export function normalizeMainGridContent(content: unknown): MainGridContent {
 	if (!isMainGridContent(content)) {
 		return createDefaultMainGridContent();
 	}
@@ -129,7 +127,7 @@ export function normalizeMainGridContent(
  * @returns Custom plans with guaranteed row count
  */
 export function normalizeCustomPlansContent(
-	content: CustomPlansContent | null | unknown,
+	content: unknown,
 ): CustomPlansContent {
 	if (!isCustomPlansContent(content)) {
 		return createDefaultCustomPlansContent();

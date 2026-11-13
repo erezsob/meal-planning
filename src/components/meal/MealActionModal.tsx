@@ -45,17 +45,17 @@ export function MealActionModal({
 	const title = eatenOnly ? displayName : `${roleLabel}: ${displayName}`;
 
 	const handleEat = () => {
-		eatMeal({ id: meal._id });
+		void eatMeal({ id: meal._id });
 		onClose();
 	};
 
 	const handleSkip = () => {
-		skipMeal({ id: meal._id });
+		void skipMeal({ id: meal._id });
 		onClose();
 	};
 
 	const handleDelete = () => {
-		removeMeal({ id: meal._id });
+		void removeMeal({ id: meal._id });
 		onClose();
 	};
 

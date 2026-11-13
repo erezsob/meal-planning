@@ -186,6 +186,10 @@ describe("Error utilities", () => {
 		it("converts other types to string", () => {
 			expect(getErrorMessage(42)).toBe("42");
 		});
+
+		it("returns 'Unknown error' for a plain object", () => {
+			expect(getErrorMessage({ foo: "bar" })).toBe("Unknown error");
+		});
 	});
 
 	describe("isDbError", () => {

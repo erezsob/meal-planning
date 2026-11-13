@@ -165,9 +165,9 @@ export function DishFormModal({
 			),
 		};
 		if (isEdit && dish) {
-			updateDish({ id: dish._id, ...payload });
+			void updateDish({ id: dish._id, ...payload });
 		} else {
-			createDish({ householdId: HOUSEHOLD_ID, ...payload });
+			void createDish({ householdId: HOUSEHOLD_ID, ...payload });
 		}
 		onSuccess?.();
 		onClose();
@@ -176,7 +176,7 @@ export function DishFormModal({
 	const handleDelete = () => {
 		if (!isEdit || !dish) return;
 		if (window?.confirm?.("Delete this dish?")) {
-			removeDish({ id: dish._id });
+			void removeDish({ id: dish._id });
 			onSuccess?.();
 			onClose();
 		}

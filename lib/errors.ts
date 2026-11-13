@@ -188,7 +188,15 @@ export const getErrorMessage = (error: unknown): string => {
 		return error;
 	}
 
-	return String(error);
+	if (
+		typeof error === "number" ||
+		typeof error === "boolean" ||
+		typeof error === "bigint"
+	) {
+		return error.toString();
+	}
+
+	return "Unknown error";
 };
 
 /**

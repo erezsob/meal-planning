@@ -93,16 +93,16 @@ describe("Result type", () => {
 	describe("matchResult", () => {
 		it("calls ok handler for success", () => {
 			const result = matchResult(ok(10), {
-				ok: (v) => `success: ${v}`,
-				err: (e) => `error: ${e}`,
+				ok: (v) => `success: ${String(v)}`,
+				err: (e) => `error: ${String(e)}`,
 			});
 			expect(result).toBe("success: 10");
 		});
 
 		it("calls err handler for failure", () => {
 			const result = matchResult(err("failed"), {
-				ok: (v) => `success: ${v}`,
-				err: (e) => `error: ${e}`,
+				ok: (v) => `success: ${String(v)}`,
+				err: (e) => `error: ${String(e)}`,
 			});
 			expect(result).toBe("error: failed");
 		});
@@ -145,7 +145,7 @@ describe("Result type", () => {
 		it("returns err for throwing function", () => {
 			const result = tryCatch(
 				() => JSON.parse("invalid json"),
-				(e) => `Parse error: ${e}`,
+				(e) => `Parse error: ${String(e)}`,
 			);
 			expect(result.ok).toBe(false);
 			if (!result.ok) {
@@ -166,7 +166,7 @@ describe("Result type", () => {
 		it("returns err for rejecting async function", async () => {
 			const result = await tryCatchAsync(
 				async () => Promise.reject(new Error("async fail")),
-				(e) => `Async error: ${e}`,
+				(e) => `Async error: ${String(e)}`,
 			);
 			expect(result.ok).toBe(false);
 			if (!result.ok) {
@@ -276,7 +276,7 @@ describe("Option type", () => {
 	describe("matchOption", () => {
 		it("calls some handler when present", () => {
 			const result = matchOption(some(10), {
-				some: (v) => `got: ${v}`,
+				some: (v) => `got: ${String(v)}`,
 				none: () => "nothing",
 			});
 			expect(result).toBe("got: 10");
@@ -284,7 +284,7 @@ describe("Option type", () => {
 
 		it("calls none handler when absent", () => {
 			const result = matchOption(none, {
-				some: (v) => `got: ${v}`,
+				some: (v) => `got: ${String(v)}`,
 				none: () => "nothing",
 			});
 			expect(result).toBe("nothing");
