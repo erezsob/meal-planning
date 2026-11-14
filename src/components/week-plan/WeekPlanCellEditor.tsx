@@ -18,10 +18,28 @@ import {
 	wrapSelectionAsMarkdownLink,
 } from "@/lib/linkify";
 import { cn } from "@/lib/utils";
+import {
+	applyWeekPlanListKey,
+	type WeekPlanListEdit,
+} from "@/lib/weekPlanList";
 import { WeekPlanLinkDialog } from "./WeekPlanLinkDialog";
 import { WeekPlanLinkTooltip } from "./WeekPlanLinkTooltip";
 
 const WEEK_PLAN_CELL_SELECTOR = "[data-week-plan-cell]";
+
+/** Replace the selection with the browser's own edit command so Cmd+Z can undo it. */
+const writeUndoableListEdit = (
+	textarea: HTMLTextAreaElement,
+	edit: WeekPlanListEdit,
+): string => {
+	textarea.setSelectionRange(edit.replaceStart, edit.replaceEnd);
+	if (typeof document.execCommand !== "function") return edit.text;
+	const wrote =
+		edit.insert === ""
+			? document.execCommand("delete")
+			: document.execCommand("insertText", false, edit.insert);
+	return wrote && textarea.value === edit.text ? textarea.value : edit.text;
+};
 
 /** Minimum textarea rows when entering edit mode, based on existing content. */
 const computeEditRowCount = (value: string, minRows: number): number =>
@@ -246,6 +264,25 @@ export function WeekPlanCellEditor({
 			if (selectionStart === selectionEnd) return;
 			setLinkSelection({ start: selectionStart, end: selectionEnd });
 			return;
+		}
+
+		if (
+			(event.key === "Enter" || event.key === "Backspace") &&
+			!event.nativeEvent.isComposing
+		) {
+			const edit = applyWeekPlanListKey({
+				text: value,
+				selectionStart: event.currentTarget.selectionStart,
+				selectionEnd: event.currentTarget.selectionEnd,
+				key: event.key,
+			});
+			if (edit) {
+				event.preventDefault();
+				const next = writeUndoableListEdit(event.currentTarget, edit);
+				pendingSelectionRef.current = { start: edit.cursor, end: edit.cursor };
+				onChange(next);
+				return;
+			}
 		}
 
 		if (event.key === "Tab" && embedded && !linkSelection) {

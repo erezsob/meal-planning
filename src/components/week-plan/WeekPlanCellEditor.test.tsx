@@ -718,6 +718,54 @@ describe("WeekPlanCellEditor", () => {
 		expect(onChange).toHaveBeenCalledWith("Try Pasta");
 	});
 
+	it("continues a hyphen list on Enter", () => {
+		const onChange = vi.fn();
+
+		render(
+			<WeekPlanCellEditor
+				label="Monday dish"
+				value="- apples"
+				onChange={onChange}
+			/>,
+		);
+
+		fireEvent.click(screen.getByRole("button", { name: "Monday dish" }));
+		const textarea = screen.getByLabelText(
+			"Monday dish",
+		) as HTMLTextAreaElement;
+		textarea.setSelectionRange("- apples".length, "- apples".length);
+
+		const event = createEvent.keyDown(textarea, { key: "Enter" });
+		fireEvent(textarea, event);
+
+		expect(event.defaultPrevented).toBe(true);
+		expect(onChange).toHaveBeenCalledWith("- apples\n- ");
+	});
+
+	it("inserts a plain newline when the line is not a list", () => {
+		const onChange = vi.fn();
+
+		render(
+			<WeekPlanCellEditor
+				label="Monday dish"
+				value="Pasta"
+				onChange={onChange}
+			/>,
+		);
+
+		fireEvent.click(screen.getByRole("button", { name: "Monday dish" }));
+		const textarea = screen.getByLabelText(
+			"Monday dish",
+		) as HTMLTextAreaElement;
+		textarea.setSelectionRange("Pasta".length, "Pasta".length);
+
+		const event = createEvent.keyDown(textarea, { key: "Enter" });
+		fireEvent(textarea, event);
+
+		expect(event.defaultPrevented).toBe(false);
+		expect(onChange).not.toHaveBeenCalled();
+	});
+
 	it("calls onChange while editing", () => {
 		const onChange = vi.fn();
 
