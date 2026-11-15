@@ -173,7 +173,8 @@ pnpm test:ui
 
 # Browser smoke. Spec: e2e/app-smoke.spec.ts
 # Reuses pnpm dev on port 3213 when that server is already running.
-# Does not reseed. Keep edge cases in Vitest.
+# Wipes that dev deployment first (dishes, meal plans, tasks, plan sections).
+# Keep edge cases in Vitest.
 pnpm test:e2e
 ```
 

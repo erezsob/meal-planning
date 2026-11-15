@@ -22,6 +22,7 @@
 		"check:full": "vp check && pnpm types:check && pnpm knip",
 		"seed": "convex run seed:seedDishes",
 		"seed:clear": "convex run seed:clearDishes",
+		"seed:clear-all": "convex run seed:clearAll",
 		"prepare": "husky"
 	},
 	"dependencies": {

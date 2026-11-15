@@ -1,5 +1,16 @@
 import { v } from "convex/values";
+import { HOUSEHOLD_ID } from "../lib/constants";
+import type { TableNames } from "./_generated/dataModel";
 import { mutation } from "./_generated/server";
+import { ensureDefaultHomeRows } from "./planSections";
+
+/** shortcut: hand-listed tables, add one when schema.ts gains a table */
+const ALL_TABLES = [
+	"dishes",
+	"mealPlans",
+	"planSections",
+	"tasks",
+] as const satisfies readonly TableNames[];
 
 const SAMPLE_DISHES = [
 	{
@@ -241,17 +252,18 @@ const SAMPLE_DISHES = [
 
 /**
  * Seed the dishes table with sample data.
- * Run from Convex dashboard or via: pnpm convex run seed:seedDishes '{"householdId": "your-household-id"}'
+ * `householdId` defaults to the app household. Pass one to seed a different household.
  */
 export const seedDishes = mutation({
-	args: { householdId: v.string() },
+	args: { householdId: v.optional(v.string()) },
 	handler: async (ctx, args) => {
+		const householdId = args.householdId ?? HOUSEHOLD_ID;
 		const insertedIds = [];
 
 		for (const dish of SAMPLE_DISHES) {
 			const id = await ctx.db.insert("dishes", {
 				...dish,
-				householdId: args.householdId,
+				householdId,
 			});
 			insertedIds.push(id);
 		}
@@ -267,11 +279,12 @@ export const seedDishes = mutation({
  * Clear all dishes for a household (use with caution!)
  */
 export const clearDishes = mutation({
-	args: { householdId: v.string() },
+	args: { householdId: v.optional(v.string()) },
 	handler: async (ctx, args) => {
+		const householdId = args.householdId ?? HOUSEHOLD_ID;
 		const dishes = await ctx.db
 			.query("dishes")
-			.withIndex("by_householdId", (q) => q.eq("householdId", args.householdId))
+			.withIndex("by_householdId", (q) => q.eq("householdId", householdId))
 			.collect();
 
 		for (const dish of dishes) {
@@ -279,5 +292,28 @@ export const clearDishes = mutation({
 		}
 
 		return { message: `Deleted ${dishes.length} dishes` };
+	},
+});
+
+/**
+ * Delete every row in the dev deployment, then insert the empty default home plan.
+ * Playwright runs this before `pnpm test:e2e`. It wipes the database `pnpm dev` is using.
+ */
+export const clearAll = mutation({
+	args: {},
+	handler: async (ctx) => {
+		const deleted: { table: TableNames; count: number }[] = [];
+
+		for (const table of ALL_TABLES) {
+			const rows = await ctx.db.query(table).collect();
+			for (const row of rows) {
+				await ctx.db.delete(row._id);
+			}
+			deleted.push({ table, count: rows.length });
+		}
+
+		await ensureDefaultHomeRows(ctx, HOUSEHOLD_ID);
+
+		return { deleted };
 	},
 });

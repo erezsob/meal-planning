@@ -137,7 +137,7 @@ function toArchivedPlanSection(row: {
 	};
 }
 
-async function ensureDefaultHomeRows(
+export async function ensureDefaultHomeRows(
 	ctx: MutationCtx,
 	householdId: string,
 ): Promise<void> {

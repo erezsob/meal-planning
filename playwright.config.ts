@@ -4,10 +4,12 @@ import { defineConfig, devices } from "@playwright/test";
 const DEV_SERVER_ORIGIN = "http://localhost:3213";
 
 /**
- * Smoke reuses `pnpm dev` on port 3213 and does not seed.
+ * Smoke reuses `pnpm dev` on port 3213.
+ * globalSetup wipes that dev deployment before the suite.
  */
 export default defineConfig({
 	testDir: "e2e",
+	globalSetup: "./e2e/global-setup.ts",
 	fullyParallel: false,
 	workers: 1,
 	timeout: 60_000,
