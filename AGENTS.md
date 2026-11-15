@@ -48,7 +48,7 @@ release. Add a tool name to select part of the graph. For example, run
 
 <!--VITE PLUS END-->
 
-**UI verification:** after route, component, or style changes, follow `.cursor/rules/ui-verification.mdc`. Run `pnpm test:e2e` (Playwright smoke against the dev server). For layout or motion, also use the Chrome DevTools tools. Do not use the Cursor built-in browser. Do not commit `test-results/` or `.cursor/verification/` screenshots.
+**UI verification:** after route, component, or style changes, follow `.cursor/rules/ui-verification.mdc`. Verify with Playwright first (`pnpm test:e2e`, or a spec that covers the change). Use Chrome DevTools only after that, and only for spacing, overflow, or motion that a Playwright assertion cannot judge. Do not use the Cursor built-in browser. Do not commit `test-results/` or `.cursor/verification/` screenshots.
 
 ## Product docs
 

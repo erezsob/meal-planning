@@ -1,37 +1,36 @@
 ---
-description: Verify UI changes in the browser before marking work complete
+description: Verify UI changes with Playwright before any other browser
 globs: src/routes/**,src/components/**,lib/components/**,src/styles.css
 alwaysApply: false
 ---
 
 # UI verification
 
-After changing routes, components, or global styles, run the browser smoke yourself. Do not ask the user to click unless you are blocked.
+After changing routes, components, or global styles, verify with Playwright before any other browser. Do not ask the user to click unless you are blocked. Do not open Chrome DevTools, and do not use the Cursor built-in browser, until the Playwright run for this change is done.
 
-`pnpm test:e2e` is the pass/fail check for behavior. A screenshot is not a pass.
+`pnpm test:e2e` is the pass/fail check. A screenshot is not a pass.
 
-## Behavior
+## Playwright first
 
 1. Convex is up. `pnpm dev` starts Vite on http://localhost:3213 and `convex dev` when that server is not already running.
-2. The dev deployment may already have dishes. Run `pnpm exec convex run seed:seedDishes '{"householdId":"household-1"}'` only when `/library` has no dishes. Do not reseed on every UI change.
-3. `pnpm test:e2e`
+2. `pnpm test:e2e`. This wipes the dev deployment, then runs the suite. Run `pnpm seed` afterward only when a later check needs dishes.
 
-The command reuses `pnpm dev` on http://localhost:3213 when that server is already running. Otherwise it starts one. The spec is `e2e/app-smoke.spec.ts`. It opens the week plan, past plans (and one archived plan when a link is there), the recipe library, the shopping list, and history.
+The command reuses `pnpm dev` on http://localhost:3213 when that server is already running. Otherwise it starts one. The smoke spec is `e2e/app-smoke.spec.ts`. It opens the week plan, past plans (and one archived plan when a link is there), the recipe library, the shopping list, and history.
 
-The stop hook allows you to finish only when this command passed for the current UI diff. Passing, then editing a UI file, means you run it again.
+When the smoke does not exercise the change, add or extend a Playwright spec for that flow and run it. That spec is the verification. Keep edge cases that are not a user journey in Vitest.
 
-Add or extend a spec only when the task adds a new critical journey. Keep edge cases in Vitest.
+The stop hook allows you to finish only when `pnpm test:e2e` passed for the current UI diff. Passing, then editing a UI file, means you run it again.
 
 ## Layout and motion
 
-For spacing, overflow, or motion, also drive real Chrome with the `user-chrome-devtools` tools:
+Playwright still runs first. Assert what a user would check: the control is visible, the text is present, the count is right, the panel is in view.
+
+Use the `user-chrome-devtools` tools only after that, and only for a visual judgment a Playwright assertion cannot make: spacing, overflow, or motion.
 
 1. Open the affected route.
 2. Read console messages and fix errors.
-3. Run `evaluate_script` for one fact (the text is present, the list has the expected count, or a panel is not clipped).
-4. Save a screenshot under `.cursor/verification/<yyyy-mm-dd>-<slug>/` when the judgment is visual.
-
-Do not use the Cursor built-in browser.
+3. Check the one visual fact the spec could not assert: spacing, overflow, or whether the motion ran.
+4. Save a screenshot under `.cursor/verification/<yyyy-mm-dd>-<slug>/` when that judgment is visual.
 
 ## Git
 
@@ -39,4 +38,4 @@ Do not `git add` or commit `test-results/`, `playwright-report/`, or `.cursor/ve
 
 ## Completion report
 
-State that `pnpm test:e2e` passed. For a visual change, also give the screenshot path and any console errors. If the server or Convex will not start, say what blocked you.
+State that `pnpm test:e2e` passed, and name any spec you added. Give a screenshot path only when Chrome was needed for spacing, overflow, or motion. If the server or Convex will not start, say what blocked you.
