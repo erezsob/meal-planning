@@ -1,10 +1,9 @@
 import { defineConfig } from "vite-plus";
 import viteReact from "@vitejs/plugin-react";
-import viteTsConfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
+	resolve: { tsconfigPaths: true },
 	plugins: [
-		viteTsConfigPaths({ projects: ["./tsconfig.json"] }),
 		viteReact({
 			babel: { plugins: ["babel-plugin-react-compiler"] },
 		}),

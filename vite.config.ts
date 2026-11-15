@@ -2,11 +2,11 @@ import { defineConfig, lazyPlugins } from "vite-plus";
 import { devtools } from "@tanstack/devtools-vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
-import viteTsConfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "@tailwindcss/vite";
 import { cloudflare } from "@cloudflare/vite-plugin";
 
 export default defineConfig({
+	resolve: { tsconfigPaths: true },
 	fmt: {
 		// Match the previous Biome formatter: tabs and an 80-column width.
 		useTabs: true,
@@ -40,7 +40,6 @@ export default defineConfig({
 	plugins: lazyPlugins(() => [
 		devtools(),
 		cloudflare({ viteEnvironment: { name: "ssr" } }),
-		viteTsConfigPaths({ projects: ["./tsconfig.json"] }),
 		tailwindcss(),
 		tanstackStart(),
 		viteReact({
