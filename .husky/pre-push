@@ -2,7 +2,7 @@ echo "Running pre-push checks..."
 
 # Format and lint, then fix what can be fixed automatically
 echo "Checking code with Vite+..."
-pnpm exec vp check --fix
+pnpm check:fix
 
 # Check if there are any changes to commit
 if ! git diff --quiet; then

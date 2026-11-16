@@ -42,7 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - run: pnpm exec vp check
+      - run: pnpm check
       - run: pnpm types:check
       - run: pnpm knip
 
